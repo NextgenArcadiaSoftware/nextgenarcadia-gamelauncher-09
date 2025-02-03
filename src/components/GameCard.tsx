@@ -32,7 +32,7 @@ export function GameCard({
       <img
         src={thumbnail}
         alt={title}
-        className="w-full h-48 object-cover rounded-t-2xl"
+        className="w-full h-48 object-cover rounded-t-lg"
       />
       <div className="p-4 space-y-4">
         <h3 className="text-xl font-bold">{title}</h3>
@@ -45,12 +45,16 @@ export function GameCard({
           {trailer && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full bg-gray-800 hover:bg-gray-700 border-gray-700"
+                >
                   <Video className="w-4 h-4 mr-2" />
                   Trailer
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[800px]">
+              <DialogContent className="sm:max-w-[800px] bg-gray-900 border-gray-800">
                 <DialogHeader>
                   <DialogTitle>{title} - Trailer</DialogTitle>
                 </DialogHeader>
@@ -62,12 +66,16 @@ export function GameCard({
           )}
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="default" size="sm" className="w-full">
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="w-full bg-blue-600 hover:bg-blue-700"
+              >
                 <Play className="w-4 h-4 mr-2" />
                 Play
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-gray-900 border-gray-800">
               <DialogHeader>
                 <DialogTitle>Select Play Duration</DialogTitle>
               </DialogHeader>
@@ -76,7 +84,7 @@ export function GameCard({
                   <Button
                     key={duration}
                     onClick={() => onPlay(duration)}
-                    className="h-20 text-lg"
+                    className="h-20 text-lg bg-blue-600 hover:bg-blue-700"
                   >
                     <Clock className="w-6 h-6 mr-2" />
                     {duration} mins

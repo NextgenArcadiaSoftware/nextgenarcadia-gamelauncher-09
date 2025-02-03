@@ -2,7 +2,7 @@ import { useState } from "react";
 import { GameCard } from "@/components/GameCard";
 import { AddGameDialog } from "@/components/AddGameDialog";
 import { Button } from "@/components/ui/button";
-import { LogOut, Search } from "lucide-react";
+import { LogOut, Search, X, Home } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 
@@ -20,22 +20,58 @@ const Index = () => {
   const [games, setGames] = useState<Game[]>([
     {
       id: 1,
-      title: "Cyber Nexus",
-      description: "A futuristic cyberpunk adventure with stunning visuals",
-      genre: "Action RPG",
-      releaseDate: "2024-03-15",
-      thumbnail: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5",
-      trailer: "https://example.com/trailer.mp4",
+      title: "Beat Saber",
+      description: "The ultimate VR rhythm game with lightsabers",
+      genre: "Rhythm",
+      releaseDate: "2024",
+      thumbnail: "/lovable-uploads/09374846-fe58-4998-868a-5691a68042c5.png",
     },
     {
       id: 2,
-      title: "Robot Warriors",
-      description: "Battle against mechanical foes in this intense action game",
-      genre: "Action",
-      releaseDate: "2024-02-20",
-      thumbnail: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e",
+      title: "Pavlov VR",
+      description: "Multiplayer shooter with realistic combat",
+      genre: "FPS",
+      releaseDate: "2024",
+      thumbnail: "/lovable-uploads/a6a527be-670f-4238-9b4e-4cd389187b90.png",
     },
+    {
+      id: 3,
+      title: "Ghosts of Tabor",
+      description: "Tactical survival in a post-apocalyptic world",
+      genre: "Survival",
+      releaseDate: "2024",
+      thumbnail: "/lovable-uploads/2f7ba916-4fc9-4136-b3cc-9f1e2ba0be94.png",
+    },
+    {
+      id: 4,
+      title: "Hard Bullet",
+      description: "Action-packed VR combat simulator",
+      genre: "Action",
+      releaseDate: "2024",
+      thumbnail: "/lovable-uploads/cac2759b-8463-4e08-b1ea-aeb608ac84a9.png",
+    },
+    {
+      id: 5,
+      title: "Arizona Sunshine",
+      description: "Zombie apocalypse survival in VR",
+      genre: "Horror",
+      releaseDate: "2024",
+      thumbnail: "/lovable-uploads/cf7a9406-76de-470d-971d-ebb18c291622.png",
+    },
+    {
+      id: 6,
+      title: "Blade & Sorcery",
+      description: "Medieval fantasy combat simulator",
+      genre: "Action",
+      releaseDate: "2024",
+      thumbnail: "/lovable-uploads/d38b1a33-5653-43f5-802b-51546fe7fefb.png",
+    }
   ]);
+
+  const [activeGame, setActiveGame] = useState<{
+    title: string;
+    timeLeft: number;
+  } | null>(null);
 
   const { toast } = useToast();
 
@@ -43,10 +79,26 @@ const Index = () => {
     setGames([...games, { ...newGame, id: games.length + 1 }]);
   };
 
-  const handlePlayGame = (duration: number) => {
+  const handlePlayGame = (title: string, duration: number) => {
+    setActiveGame({ title, timeLeft: duration * 60 });
+    const interval = setInterval(() => {
+      setActiveGame((prev) => {
+        if (!prev) return null;
+        const newTime = prev.timeLeft - 1;
+        if (newTime <= 0) {
+          clearInterval(interval);
+          return null;
+        }
+        return { ...prev, timeLeft: newTime };
+      });
+    }, 1000);
+  };
+
+  const handleExitGame = () => {
+    setActiveGame(null);
     toast({
-      title: "Game Started",
-      description: `Timer set for ${duration} minutes`,
+      title: "Game Exited",
+      description: "Returning to menu...",
     });
   };
 
@@ -56,8 +108,8 @@ const Index = () => {
         <div className="flex flex-col space-y-8">
           {/* Header */}
           <div className="flex justify-between items-center">
-            <h1 className="text-5xl font-bold next-gen-title">
-              Next Gen Arcadia
+            <h1 className="text-5xl font-bold next-gen-title tracking-tighter">
+              NEXT GEN ARCADIA
             </h1>
             <div className="flex items-center gap-6">
               <div className="relative w-64">
@@ -72,6 +124,7 @@ const Index = () => {
               <Button
                 variant="destructive"
                 size="icon"
+                className="bg-red-600 hover:bg-red-700"
                 onClick={() => {
                   toast({
                     title: "Exiting",
@@ -86,14 +139,14 @@ const Index = () => {
 
           {/* Featured Game */}
           <div className="glass p-8 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent" />
+            <div className="absolute inset-0 bg-black/60" />
             <div className="relative z-10 max-w-xl">
               <h2 className="text-4xl font-bold mb-4">Featured Game</h2>
               <p className="text-lg text-gray-300 mb-6">
-                Discover the latest and most exciting games in our collection
+                Experience the thrill of Beat Saber - The #1 VR Rhythm Game
               </p>
-              <Button className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
-                Explore Now
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                Play Now
               </Button>
             </div>
           </div>
@@ -104,12 +157,41 @@ const Index = () => {
               <GameCard
                 key={game.id}
                 {...game}
-                onPlay={handlePlayGame}
+                onPlay={(duration) => handlePlayGame(game.title, duration)}
               />
             ))}
           </div>
         </div>
       </div>
+
+      {/* Countdown Overlay */}
+      {activeGame && (
+        <div className="countdown-overlay">
+          <h2 className="text-6xl font-bold mb-4">{activeGame.title}</h2>
+          <div className="text-8xl font-mono mb-8">
+            {Math.floor(activeGame.timeLeft / 60)}:
+            {(activeGame.timeLeft % 60).toString().padStart(2, "0")}
+          </div>
+          <div className="flex gap-4">
+            <Button
+              size="lg"
+              variant="destructive"
+              className="bg-red-600 hover:bg-red-700"
+              onClick={handleExitGame}
+            >
+              <X className="mr-2" /> Exit Game
+            </Button>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="bg-gray-800 hover:bg-gray-700"
+              onClick={handleExitGame}
+            >
+              <Home className="mr-2" /> Back to Menu
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
