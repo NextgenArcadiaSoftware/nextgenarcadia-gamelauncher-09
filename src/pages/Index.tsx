@@ -2,7 +2,7 @@ import { useState } from "react";
 import { GameCard } from "@/components/GameCard";
 import { AddGameDialog } from "@/components/AddGameDialog";
 import { Button } from "@/components/ui/button";
-import { LogOut, Search, Gamepad2 } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 
@@ -114,10 +114,14 @@ const Index = () => {
         <div className="flex flex-col space-y-8">
           {/* Header */}
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Gamepad2 className="w-12 h-12 text-blue-500" />
-              <h1 className="text-5xl font-bold next-gen-title tracking-tighter">
-                NEXT GEN ARCADIA
+            <div className="flex items-center gap-6">
+              <img 
+                src="/lovable-uploads/82c15066-5851-4a30-a1f4-c8fc42e685bd.png" 
+                alt="Next Gen Arcadia Logo" 
+                className="w-16 h-16"
+              />
+              <h1 className="text-4xl font-normal tracking-wide">
+                Next Gen Arcadia
               </h1>
             </div>
             <div className="flex items-center gap-6">
