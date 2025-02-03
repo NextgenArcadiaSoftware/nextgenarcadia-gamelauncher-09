@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 222 47% 11%;
+    --background: 220 20% 4%;
     --foreground: 0 0% 98%;
-    --card: 217 32% 17%;
+    --card: 220 20% 8%;
     --card-foreground: 0 0% 98%;
-    --popover: 222 47% 11%;
+    --popover: 220 20% 4%;
     --popover-foreground: 0 0% 98%;
-    --primary: 263 85% 75%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 217 32% 17%;
+    --primary: 142 72% 48%;
+    --primary-foreground: 220 20% 4%;
+    --secondary: 220 20% 8%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 217 32% 17%;
+    --muted: 220 20% 8%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217 32% 17%;
+    --accent: 220 20% 8%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 224 76.3% 48%;
+    --border: 220 20% 8%;
+    --input: 220 20% 8%;
+    --ring: 142 72% 48%;
     --radius: 0.75rem;
   }
 }
@@ -33,24 +33,55 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    background-image: linear-gradient(to bottom right, hsl(222 47% 11%), hsl(222 47% 5%));
+    background: linear-gradient(225deg, hsl(220 20% 4%), hsl(220 20% 2%));
     min-height: 100vh;
+    animation: gradientShift 15s ease infinite alternate;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl;
+    @apply bg-black/20 backdrop-blur-lg border border-white/10 rounded-2xl;
   }
   
   .card-gradient {
-    @apply bg-gradient-to-br from-card to-secondary/80 backdrop-blur-sm;
+    @apply bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm;
   }
 
   .game-card {
     @apply relative overflow-hidden rounded-2xl transition-all duration-300 hover:scale-105;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .next-gen-title {
+    @apply font-bold text-transparent bg-clip-text;
+    background-image: linear-gradient(to right, #00f260, #0575e6);
+    animation: titleGradient 8s ease infinite;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background: linear-gradient(225deg, hsl(220 20% 4%), hsl(220 20% 2%));
+  }
+  50% {
+    background: linear-gradient(225deg, hsl(220 20% 2%), hsl(200 20% 4%));
+  }
+  100% {
+    background: linear-gradient(225deg, hsl(200 20% 4%), hsl(220 20% 4%));
+  }
+}
+
+@keyframes titleGradient {
+  0% {
+    background-image: linear-gradient(to right, #00f260, #0575e6);
+  }
+  50% {
+    background-image: linear-gradient(to right, #0575e6, #00f260);
+  }
+  100% {
+    background-image: linear-gradient(to right, #00f260, #0575e6);
   }
 }
