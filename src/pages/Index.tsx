@@ -14,6 +14,7 @@ interface Game {
   releaseDate: string;
   thumbnail: string;
   trailer?: string;
+  executablePath?: string;
 }
 
 const Index = () => {
@@ -79,7 +80,15 @@ const Index = () => {
     timeLeft: number;
   } | null>(null);
 
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
   const { toast } = useToast();
+
+  const categories = ["All", "Action", "FPS", "Horror", "Rhythm", "Survival"];
+
+  const filteredGames = selectedCategory === "All" 
+    ? games 
+    : games.filter(game => game.genre === selectedCategory);
 
   const handleAddGame = (newGame: Omit<Game, "id">) => {
     setGames([...games, { ...newGame, id: games.length + 1 }]);
@@ -118,9 +127,9 @@ const Index = () => {
               <img 
                 src="/lovable-uploads/82c15066-5851-4a30-a1f4-c8fc42e685bd.png" 
                 alt="Next Gen Arcadia Logo" 
-                className="w-16 h-16"
+                className="w-12 h-12"
               />
-              <h1 className="text-2xl font-bold tracking-wide">
+              <h1 className="text-xl font-bold tracking-wide">
                 Next Gen Arcadia
               </h1>
             </div>
@@ -150,9 +159,27 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Category Bar */}
+          <div className="flex gap-4 overflow-x-auto pb-2 glass p-4 rounded-lg">
+            {categories.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "secondary"}
+                onClick={() => setSelectedCategory(category)}
+                className={`glass whitespace-nowrap ${
+                  selectedCategory === category 
+                    ? "bg-primary/20 hover:bg-primary/30" 
+                    : "hover:bg-gray-800/50"
+                }`}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+
           {/* Game Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {games.map((game) => (
+            {filteredGames.map((game) => (
               <GameCard
                 key={game.id}
                 {...game}
