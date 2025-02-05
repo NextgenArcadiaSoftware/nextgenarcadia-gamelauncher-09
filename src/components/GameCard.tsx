@@ -6,7 +6,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "./ui/dialog";
+import { useToast } from "./ui/use-toast";
 
 interface GameCardProps {
   title: string;
@@ -15,6 +17,7 @@ interface GameCardProps {
   genre: string;
   releaseDate: string;
   trailer?: string;
+  executablePath?: string;
   onPlay: (duration: number) => void;
 }
 
@@ -25,8 +28,50 @@ export function GameCard({
   genre,
   releaseDate,
   trailer,
+  executablePath,
   onPlay,
 }: GameCardProps) {
+  const { toast } = useToast();
+
+  const handleStartGame = async (duration: number) => {
+    if (!executablePath) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No executable path specified for this game",
+      });
+      return;
+    }
+
+    try {
+      // In a real implementation, this would use electron/node APIs to launch the executable
+      console.log(`Launching game at: ${executablePath}`);
+      
+      // Start the timer and notify parent component
+      onPlay(duration);
+      
+      // Close the dialog
+      const dialog = document.querySelector('[role="dialog"]');
+      if (dialog) {
+        const closeButton = dialog.querySelector('[data-state="closed"]');
+        if (closeButton instanceof HTMLElement) {
+          closeButton.click();
+        }
+      }
+
+      toast({
+        title: "Game Started",
+        description: `${title} launched with ${duration} minute timer`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to launch game",
+      });
+    }
+  };
+
   return (
     <div className="game-card group">
       <img
@@ -81,21 +126,15 @@ export function GameCard({
             <DialogContent className="bg-gray-900 border-gray-800">
               <DialogHeader>
                 <DialogTitle>Select Play Duration</DialogTitle>
+                <DialogDescription>
+                  Choose how long you want to play. The game will launch and a timer will start.
+                </DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-4 p-4">
                 {[5, 10, 15, 20].map((duration) => (
                   <Button
                     key={duration}
-                    onClick={() => {
-                      onPlay(duration);
-                      const dialog = document.querySelector('[role="dialog"]');
-                      if (dialog) {
-                        const closeButton = dialog.querySelector('[data-state="closed"]');
-                        if (closeButton instanceof HTMLElement) {
-                          closeButton.click();
-                        }
-                      }
-                    }}
+                    onClick={() => handleStartGame(duration)}
                     className="h-20 text-lg glass"
                   >
                     <Clock className="w-6 h-6 mr-2" />
