@@ -21,6 +21,7 @@ interface AddGameDialogProps {
     releaseDate: string;
     thumbnail: string;
     trailer?: string;
+    executablePath?: string;
   }) => void;
 }
 
@@ -34,6 +35,7 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
     releaseDate: "",
     thumbnail: "",
     trailer: "",
+    executablePath: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -51,6 +53,7 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
       releaseDate: "",
       thumbnail: "",
       trailer: "",
+      executablePath: "",
     });
   };
 
@@ -135,6 +138,19 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
               onChange={(e) =>
                 setFormData({ ...formData, trailer: e.target.value })
               }
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="executablePath">Executable Path</Label>
+            <Input
+              id="executablePath"
+              type="text"
+              placeholder="C:\Games\YourGame\game.exe"
+              value={formData.executablePath}
+              onChange={(e) =>
+                setFormData({ ...formData, executablePath: e.target.value })
+              }
+              required
             />
           </div>
           <Button type="submit" className="w-full">
