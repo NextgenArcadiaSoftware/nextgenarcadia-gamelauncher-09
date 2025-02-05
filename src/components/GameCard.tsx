@@ -1,5 +1,5 @@
 
-import { Clock } from "lucide-react";
+import { Play, Clock, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -66,10 +66,7 @@ export function GameCard({
   };
 
   return (
-    <div 
-      className="game-card group cursor-pointer transform transition-all duration-200 hover:scale-105"
-      onClick={handleStartGame}
-    >
+    <div className="game-card group transform transition-all duration-200 hover:scale-105">
       <img
         src={thumbnail}
         alt={title}
@@ -82,9 +79,48 @@ export function GameCard({
           <span>{genre}</span>
           <span>{releaseDate}</span>
         </div>
-        <div className="flex items-center justify-center gap-2 text-green-500">
+        <div className="flex gap-2">
+          {trailer && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full glass"
+                >
+                  <Video className="w-4 h-4 mr-2" />
+                  Watch Trailer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[800px] bg-gray-900 border-gray-800">
+                <DialogHeader>
+                  <DialogTitle>{title} - Trailer</DialogTitle>
+                </DialogHeader>
+                <iframe
+                  className="w-full aspect-video rounded-lg"
+                  src={trailer.replace('watch?v=', 'embed/')}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </DialogContent>
+            </Dialog>
+          )}
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="w-full glass"
+            onClick={handleStartGame}
+          >
+            <Play className="w-4 h-4 mr-2" />
+            Play Game
+          </Button>
+        </div>
+        <div 
+          className="flex items-center justify-center gap-2 text-green-500 cursor-pointer"
+          onClick={handleStartGame}
+        >
           <Clock className="w-5 h-5" />
-          <span>Tap to play (8 mins)</span>
+          <span>Tap card to start (8 mins)</span>
         </div>
       </div>
     </div>
