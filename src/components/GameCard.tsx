@@ -44,8 +44,9 @@ export function GameCard({
     }
 
     try {
-      // In a real implementation, this would use electron/node APIs to launch the executable
-      console.log(`Launching game at: ${executablePath}`);
+      // Use electron's IPC to launch the game
+      // @ts-ignore - electron is available in desktop environment
+      window.electron.ipcRenderer.send('launch-game', executablePath);
       
       // Start the timer and notify parent component
       onPlay(duration);
