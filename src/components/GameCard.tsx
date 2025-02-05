@@ -47,9 +47,14 @@ export function GameCard({
     }
 
     try {
-      // Use electron's IPC to launch the game
-      // @ts-ignore - electron is available in desktop environment
-      window.electron.ipcRenderer.send('launch-game', executablePath);
+      const isElectron = window.electron !== undefined;
+      
+      if (isElectron) {
+        // @ts-ignore - electron is available in desktop environment
+        window.electron.ipcRenderer.send('launch-game', executablePath);
+      } else {
+        console.log('Game launch attempted in non-Electron environment');
+      }
       
       // Start the timer and notify parent component with 8 minutes duration
       onPlay(8);

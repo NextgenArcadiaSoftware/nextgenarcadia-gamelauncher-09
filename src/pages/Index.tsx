@@ -5,6 +5,7 @@ import { RFIDCountdown } from "@/components/RFIDCountdown";
 import { Header } from "@/components/Header";
 import { CategoryBar } from "@/components/CategoryBar";
 import { GameGrid } from "@/components/GameGrid";
+import { Button } from "./ui/button";
 
 interface Game {
   id: number;
@@ -111,21 +112,25 @@ const Index = () => {
   };
 
   useEffect(() => {
-    // Listen for RFID detection from Electron main process
-    // @ts-ignore - electron is available in desktop environment
-    window.electron.ipcRenderer.on('rfid-detected', (_, rfidData) => {
-      console.log('RFID Detected:', rfidData);
-      setShowRFIDCountdown(true);
-      toast({
-        title: "RFID Card Detected",
-        description: "Starting 8 minute session...",
-      });
-    });
-
-    return () => {
+    // Only set up electron listeners if we're in an electron environment
+    const isElectron = window.electron !== undefined;
+    
+    if (isElectron) {
       // @ts-ignore - electron is available in desktop environment
-      window.electron.ipcRenderer.removeAllListeners('rfid-detected');
-    };
+      window.electron.ipcRenderer.on('rfid-detected', (_, rfidData) => {
+        console.log('RFID Detected:', rfidData);
+        setShowRFIDCountdown(true);
+        toast({
+          title: "RFID Card Detected",
+          description: "Starting 8 minute session...",
+        });
+      });
+
+      return () => {
+        // @ts-ignore - electron is available in desktop environment
+        window.electron.ipcRenderer.removeAllListeners('rfid-detected');
+      };
+    }
   }, []);
 
   return (
