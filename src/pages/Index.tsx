@@ -2,9 +2,10 @@ import { useState } from "react";
 import { GameCard } from "@/components/GameCard";
 import { AddGameDialog } from "@/components/AddGameDialog";
 import { Button } from "@/components/ui/button";
-import { LogOut, Search } from "lucide-react";
+import { LogOut, Search, Library } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
+import { Link } from "react-router-dom";
 
 interface Game {
   id: number;
@@ -142,6 +143,11 @@ const Index = () => {
                 />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               </div>
+              <Link to="/library">
+                <Button variant="secondary" size="icon" className="glass">
+                  <Library className="w-5 h-5" />
+                </Button>
+              </Link>
               <AddGameDialog onAddGame={handleAddGame} />
               <Button
                 variant="destructive"
