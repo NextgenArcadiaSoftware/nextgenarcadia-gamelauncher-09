@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
 import { Header } from "@/components/Header";
 import { CategoryBar } from "@/components/CategoryBar";
 import { GameGrid } from "@/components/GameGrid";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 interface Game {
   id: number;
@@ -187,3 +186,4 @@ const Index = () => {
 };
 
 export default Index;
+
