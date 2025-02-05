@@ -1,4 +1,5 @@
-import { Play, Clock, Video } from "lucide-react";
+
+import { Clock } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -33,7 +34,7 @@ export function GameCard({
 }: GameCardProps) {
   const { toast } = useToast();
 
-  const handleStartGame = async (duration: number) => {
+  const handleStartGame = async () => {
     if (!executablePath) {
       toast({
         variant: "destructive",
@@ -48,21 +49,12 @@ export function GameCard({
       // @ts-ignore - electron is available in desktop environment
       window.electron.ipcRenderer.send('launch-game', executablePath);
       
-      // Start the timer and notify parent component
-      onPlay(duration);
-      
-      // Close the dialog
-      const dialog = document.querySelector('[role="dialog"]');
-      if (dialog) {
-        const closeButton = dialog.querySelector('[data-state="closed"]');
-        if (closeButton instanceof HTMLElement) {
-          closeButton.click();
-        }
-      }
+      // Start the timer and notify parent component with 8 minutes duration
+      onPlay(8);
 
       toast({
         title: "Game Started",
-        description: `${title} launched with ${duration} minute timer`,
+        description: `${title} launched with 8 minute timer`,
       });
     } catch (error) {
       toast({
@@ -74,7 +66,10 @@ export function GameCard({
   };
 
   return (
-    <div className="game-card group">
+    <div 
+      className="game-card group cursor-pointer transform transition-all duration-200 hover:scale-105"
+      onClick={handleStartGame}
+    >
       <img
         src={thumbnail}
         alt={title}
@@ -87,64 +82,9 @@ export function GameCard({
           <span>{genre}</span>
           <span>{releaseDate}</span>
         </div>
-        <div className="flex gap-2">
-          {trailer && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full glass"
-                >
-                  <Video className="w-4 h-4 mr-2" />
-                  Trailer
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[800px] bg-gray-900 border-gray-800">
-                <DialogHeader>
-                  <DialogTitle>{title} - Trailer</DialogTitle>
-                </DialogHeader>
-                <iframe
-                  className="w-full aspect-video rounded-lg"
-                  src={trailer.replace('watch?v=', 'embed/')}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              </DialogContent>
-            </Dialog>
-          )}
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button 
-                variant="default" 
-                size="sm" 
-                className="w-full glass"
-              >
-                <Play className="w-4 h-4 mr-2" />
-                Start Game
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-gray-900 border-gray-800">
-              <DialogHeader>
-                <DialogTitle>Select Play Duration</DialogTitle>
-                <DialogDescription>
-                  Choose how long you want to play. The game will launch and a timer will start.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid grid-cols-2 gap-4 p-4">
-                {[5, 10, 15, 20].map((duration) => (
-                  <Button
-                    key={duration}
-                    onClick={() => handleStartGame(duration)}
-                    className="h-20 text-lg glass"
-                  >
-                    <Clock className="w-6 h-6 mr-2" />
-                    {duration} mins
-                  </Button>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
+        <div className="flex items-center justify-center gap-2 text-green-500">
+          <Clock className="w-5 h-5" />
+          <span>Tap to play (8 mins)</span>
         </div>
       </div>
     </div>
