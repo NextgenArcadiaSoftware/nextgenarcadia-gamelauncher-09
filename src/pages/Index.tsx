@@ -120,7 +120,7 @@ const Index = () => {
                 alt="Next Gen Arcadia Logo" 
                 className="w-16 h-16"
               />
-              <h1 className="text-4xl font-normal tracking-wide">
+              <h1 className="text-2xl font-bold tracking-wide">
                 Next Gen Arcadia
               </h1>
             </div>

@@ -48,7 +48,7 @@ export function GameCard({
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full bg-gray-800 hover:bg-gray-700 border-gray-700"
+                  className="w-full glass"
                 >
                   <Video className="w-4 h-4 mr-2" />
                   Trailer
@@ -58,9 +58,12 @@ export function GameCard({
                 <DialogHeader>
                   <DialogTitle>{title} - Trailer</DialogTitle>
                 </DialogHeader>
-                <video controls className="w-full rounded-lg">
-                  <source src={trailer} type="video/mp4" />
-                </video>
+                <iframe
+                  className="w-full aspect-video rounded-lg"
+                  src={trailer.replace('watch?v=', 'embed/')}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
               </DialogContent>
             </Dialog>
           )}
@@ -69,10 +72,10 @@ export function GameCard({
               <Button 
                 variant="default" 
                 size="sm" 
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full glass"
               >
                 <Play className="w-4 h-4 mr-2" />
-                Play
+                Start Game
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-gray-900 border-gray-800">
@@ -83,8 +86,17 @@ export function GameCard({
                 {[5, 10, 15, 20].map((duration) => (
                   <Button
                     key={duration}
-                    onClick={() => onPlay(duration)}
-                    className="h-20 text-lg bg-blue-600 hover:bg-blue-700"
+                    onClick={() => {
+                      onPlay(duration);
+                      const dialog = document.querySelector('[role="dialog"]');
+                      if (dialog) {
+                        const closeButton = dialog.querySelector('[data-state="closed"]');
+                        if (closeButton instanceof HTMLElement) {
+                          closeButton.click();
+                        }
+                      }
+                    }}
+                    className="h-20 text-lg glass"
                   >
                     <Clock className="w-6 h-6 mr-2" />
                     {duration} mins
