@@ -81,8 +81,8 @@ const Index = () => {
   } | null>(null);
 
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [showRFIDCountdown, setShowRFIDCountdown] = useState(false);
 
+  const [showRFIDCountdown, setShowRFIDCountdown] = useState(false);
   const { toast } = useToast();
 
   const categories = ["All", "Action", "FPS", "Horror", "Rhythm", "Survival"];
@@ -99,8 +99,10 @@ const Index = () => {
     setActiveGame({ title, timeLeft: duration * 60 });
   };
 
-  // RFID detection simulation
+  // RFID detection simulation with improved logging
   useEffect(() => {
+    console.log('Setting up RFID key press listener');
+
     const handleRFIDSimulation = () => {
       console.log('RFID simulation triggered');
       setShowRFIDCountdown(true);
@@ -110,19 +112,23 @@ const Index = () => {
       });
     };
 
-    // For testing purposes, you can trigger the RFID simulation with a keypress
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key === 'r') {
+      console.log('Key pressed:', event.key);
+      if (event.key.toLowerCase() === 'r') {
+        console.log('R key detected, triggering RFID simulation');
         handleRFIDSimulation();
       }
     };
 
+    // Add the event listener to the window object
     window.addEventListener('keypress', handleKeyPress);
 
+    // Cleanup function
     return () => {
+      console.log('Removing RFID key press listener');
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, [toast]);
+  }, [toast]); // Added toast to dependencies
 
   return (
     <div className="min-h-screen">
