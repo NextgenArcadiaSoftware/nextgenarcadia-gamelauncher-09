@@ -10,6 +10,7 @@ import {
   DialogDescription,
 } from "./ui/dialog";
 import { useToast } from "./ui/use-toast";
+import { useState } from "react";
 
 interface GameCardProps {
   title: string;
@@ -33,6 +34,7 @@ export function GameCard({
   onPlay,
 }: GameCardProps) {
   const { toast } = useToast();
+  const [showTapToStart, setShowTapToStart] = useState(false);
 
   const handleStartGame = async () => {
     if (!executablePath) {
@@ -65,8 +67,27 @@ export function GameCard({
     }
   };
 
+  const handlePlayButtonClick = () => {
+    setShowTapToStart(true);
+  };
+
   return (
     <div className="game-card group transform transition-all duration-200 hover:scale-105">
+      {showTapToStart ? (
+        <div 
+          className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 cursor-pointer"
+          onClick={handleStartGame}
+        >
+          <div className="animate-[pulse_1s_ease-in-out_infinite] text-green-500 text-2xl font-bold next-gen-title">
+            TAP TO START
+          </div>
+          <div className="flex items-center gap-2 text-green-500">
+            <Clock className="w-5 h-5" />
+            <span>Session time: 8 mins</span>
+          </div>
+        </div>
+      ) : null}
+      
       <img
         src={thumbnail}
         alt={title}
@@ -109,18 +130,11 @@ export function GameCard({
             variant="default" 
             size="sm" 
             className="w-full glass"
-            onClick={handleStartGame}
+            onClick={handlePlayButtonClick}
           >
             <Play className="w-4 h-4 mr-2" />
             Play Game
           </Button>
-        </div>
-        <div 
-          className="flex items-center justify-center gap-2 text-green-500 cursor-pointer"
-          onClick={handleStartGame}
-        >
-          <Clock className="w-5 h-5" />
-          <span>Tap card to start (8 mins)</span>
         </div>
       </div>
     </div>
