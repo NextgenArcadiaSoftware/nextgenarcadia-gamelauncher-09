@@ -97,40 +97,46 @@ const Index = () => {
 
   const handlePlayGame = (title: string, duration: number) => {
     setActiveGame({ title, timeLeft: duration * 60 });
-    const interval = setInterval(() => {
-      setActiveGame((prev) => {
-        if (!prev) return null;
-        const newTime = prev.timeLeft - 1;
-        if (newTime <= 0) {
-          clearInterval(interval);
-          return null;
-        }
-        return { ...prev, timeLeft: newTime };
-      });
-    }, 1000);
   };
 
+  // New webhook endpoint for RFID signals
   useEffect(() => {
-    // Only set up electron listeners if we're in an electron environment
-    const isElectron = window.electron !== undefined;
-    
-    if (isElectron) {
-      // @ts-ignore - electron is available in desktop environment
-      window.electron.ipcRenderer.on('rfid-detected', (_, rfidData) => {
-        console.log('RFID Detected:', rfidData);
-        setShowRFIDCountdown(true);
-        toast({
-          title: "RFID Card Detected",
-          description: "Starting 8 minute session...",
+    const handleRFIDWebhook = async () => {
+      try {
+        const response = await fetch('/api/rfid-webhook', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ timestamp: new Date().toISOString() }),
         });
-      });
 
-      return () => {
-        // @ts-ignore - electron is available in desktop environment
-        window.electron.ipcRenderer.removeAllListeners('rfid-detected');
-      };
-    }
-  }, []);
+        if (response.ok) {
+          console.log('RFID Webhook received');
+          setShowRFIDCountdown(true);
+          toast({
+            title: "RFID Card Detected",
+            description: "Starting 8 minute session...",
+          });
+        }
+      } catch (error) {
+        console.error('Error handling RFID webhook:', error);
+      }
+    };
+
+    // For testing purposes, you can trigger the webhook with a keypress
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'r') {
+        handleRFIDWebhook();
+      }
+    };
+
+    window.addEventListener('keypress', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keypress', handleKeyPress);
+    };
+  }, [toast]);
 
   return (
     <div className="min-h-screen">
@@ -186,4 +192,3 @@ const Index = () => {
 };
 
 export default Index;
-
