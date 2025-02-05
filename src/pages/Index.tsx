@@ -99,35 +99,21 @@ const Index = () => {
     setActiveGame({ title, timeLeft: duration * 60 });
   };
 
-  // New webhook endpoint for RFID signals
+  // RFID detection simulation
   useEffect(() => {
-    const handleRFIDWebhook = async () => {
-      try {
-        const response = await fetch('/api/rfid-webhook', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ timestamp: new Date().toISOString() }),
-        });
-
-        if (response.ok) {
-          console.log('RFID Webhook received');
-          setShowRFIDCountdown(true);
-          toast({
-            title: "RFID Card Detected",
-            description: "Starting 8 minute session...",
-          });
-        }
-      } catch (error) {
-        console.error('Error handling RFID webhook:', error);
-      }
+    const handleRFIDSimulation = () => {
+      console.log('RFID simulation triggered');
+      setShowRFIDCountdown(true);
+      toast({
+        title: "RFID Card Detected",
+        description: "Starting 8 minute session...",
+      });
     };
 
-    // For testing purposes, you can trigger the webhook with a keypress
+    // For testing purposes, you can trigger the RFID simulation with a keypress
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.key === 'r') {
-        handleRFIDWebhook();
+        handleRFIDSimulation();
       }
     };
 
