@@ -1,12 +1,10 @@
+
 import { useState, useEffect } from "react";
-import { GameCard } from "@/components/GameCard";
-import { AddGameDialog } from "@/components/AddGameDialog";
-import { Button } from "@/components/ui/button";
-import { LogOut, Search, Library } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
+import { Header } from "@/components/Header";
+import { CategoryBar } from "@/components/CategoryBar";
+import { GameGrid } from "@/components/GameGrid";
 
 interface Game {
   id: number;
@@ -112,14 +110,6 @@ const Index = () => {
     }, 1000);
   };
 
-  const handleExitGame = () => {
-    setActiveGame(null);
-    toast({
-      title: "Game Exited",
-      description: "Returning to menu...",
-    });
-  };
-
   useEffect(() => {
     // Listen for RFID detection from Electron main process
     // @ts-ignore - electron is available in desktop environment
@@ -145,77 +135,16 @@ const Index = () => {
       ) : (
         <div className="max-w-7xl mx-auto p-8">
           <div className="flex flex-col space-y-8">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-6">
-                <img 
-                  src="/lovable-uploads/82c15066-5851-4a30-a1f4-c8fc42e685bd.png" 
-                  alt="Next Gen Arcadia Logo" 
-                  className="w-12 h-12"
-                />
-                <h1 className="text-xl font-bold tracking-wide">
-                  Next Gen Arcadia
-                </h1>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="relative w-64">
-                  <Input
-                    type="search"
-                    placeholder="Search games..."
-                    className="glass pl-10"
-                  />
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                </div>
-                <Link to="/library">
-                  <Button variant="secondary" size="icon" className="glass">
-                    <Library className="w-5 h-5" />
-                  </Button>
-                </Link>
-                <AddGameDialog onAddGame={handleAddGame} />
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="bg-red-600 hover:bg-red-700"
-                  onClick={() => {
-                    toast({
-                      title: "Exiting",
-                      description: "Closing the launcher...",
-                    });
-                  }}
-                >
-                  <LogOut className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Category Bar */}
-            <div className="flex gap-4 overflow-x-auto pb-2 glass p-4 rounded-lg">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "secondary"}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`glass whitespace-nowrap ${
-                    selectedCategory === category 
-                      ? "bg-primary/20 hover:bg-primary/30" 
-                      : "hover:bg-gray-800/50"
-                  }`}
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
-
-            {/* Game Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredGames.map((game) => (
-                <GameCard
-                  key={game.id}
-                  {...game}
-                  onPlay={(duration) => handlePlayGame(game.title, duration)}
-                />
-              ))}
-            </div>
+            <Header />
+            <CategoryBar 
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onCategorySelect={setSelectedCategory}
+            />
+            <GameGrid 
+              games={filteredGames}
+              onPlayGame={handlePlayGame}
+            />
           </div>
         </div>
       )}
@@ -233,7 +162,7 @@ const Index = () => {
               size="lg"
               variant="destructive"
               className="bg-red-600 hover:bg-red-700"
-              onClick={handleExitGame}
+              onClick={() => setActiveGame(null)}
             >
               Exit Game
             </Button>
@@ -241,7 +170,7 @@ const Index = () => {
               size="lg"
               variant="secondary"
               className="bg-gray-800 hover:bg-gray-700"
-              onClick={handleExitGame}
+              onClick={() => setActiveGame(null)}
             >
               Back to Menu
             </Button>
