@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -84,18 +85,20 @@ const Library = () => {
   const { toast } = useToast();
 
   const handleToggleGame = (gameId: number) => {
+    const game = games.find(g => g.id === gameId);
+    const newEnabledState = !game?.enabled;
+    
     setGames(prevGames =>
       prevGames.map(game =>
         game.id === gameId
-          ? { ...game, enabled: !game.enabled }
+          ? { ...game, enabled: newEnabledState }
           : game
       )
     );
 
-    const game = games.find(g => g.id === gameId);
     toast({
-      title: `Game ${game?.enabled ? 'Disabled' : 'Enabled'}`,
-      description: `${game?.title} has been ${game?.enabled ? 'disabled' : 'enabled'}.`,
+      title: `Game ${newEnabledState ? 'Enabled' : 'Disabled'}`,
+      description: `${game?.title} has been ${newEnabledState ? 'enabled' : 'disabled'}.`,
     });
   };
 
