@@ -1,4 +1,3 @@
-
 import { Play, Clock, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -10,7 +9,7 @@ import {
   DialogDescription,
 } from "./ui/dialog";
 import { useToast } from "./ui/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface GameCardProps {
   title: string;
@@ -35,6 +34,34 @@ export function GameCard({
 }: GameCardProps) {
   const { toast } = useToast();
   const [showTapToStart, setShowTapToStart] = useState(false);
+  const [isRFIDAuthorized, setIsRFIDAuthorized] = useState(false);
+
+  useEffect(() => {
+    const handleRFIDDetection = (_event: any, data: { uid: string, isAuthorized: boolean }) => {
+      setIsRFIDAuthorized(data.isAuthorized);
+      toast({
+        title: data.isAuthorized ? "Access Granted" : "Access Denied",
+        description: data.isAuthorized 
+          ? "RFID card authorized. You can now launch games." 
+          : "Unauthorized RFID card detected.",
+        variant: data.isAuthorized ? "default" : "destructive"
+      });
+    };
+
+    // @ts-ignore - electron is available in desktop environment
+    if (window.electron) {
+      // @ts-ignore
+      window.electron.ipcRenderer.on('rfid-detected', handleRFIDDetection);
+    }
+
+    return () => {
+      // @ts-ignore
+      if (window.electron) {
+        // @ts-ignore
+        window.electron.ipcRenderer.removeListener('rfid-detected', handleRFIDDetection);
+      }
+    };
+  }, [toast]);
 
   const handleStartGame = async () => {
     if (!executablePath) {
@@ -42,6 +69,15 @@ export function GameCard({
         variant: "destructive",
         title: "Error",
         description: "No executable path specified for this game",
+      });
+      return;
+    }
+
+    if (!isRFIDAuthorized) {
+      toast({
+        variant: "destructive",
+        title: "Access Denied",
+        description: "Please scan an authorized RFID card first",
       });
       return;
     }
@@ -56,7 +92,6 @@ export function GameCard({
         console.log('Game launch attempted in non-Electron environment');
       }
       
-      // Start the timer and notify parent component with 8 minutes duration
       onPlay(8);
 
       toast({
@@ -73,6 +108,14 @@ export function GameCard({
   };
 
   const handlePlayButtonClick = () => {
+    if (!isRFIDAuthorized) {
+      toast({
+        variant: "destructive",
+        title: "Access Denied",
+        description: "Please scan an authorized RFID card first",
+      });
+      return;
+    }
     setShowTapToStart(true);
   };
 
@@ -134,8 +177,9 @@ export function GameCard({
           <Button 
             variant="default" 
             size="sm" 
-            className="w-full glass"
+            className={`w-full glass ${!isRFIDAuthorized ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={handlePlayButtonClick}
+            disabled={!isRFIDAuthorized}
           >
             <Play className="w-4 h-4 mr-2" />
             Play Game

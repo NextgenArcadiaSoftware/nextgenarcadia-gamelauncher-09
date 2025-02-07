@@ -1,9 +1,9 @@
-
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
 
 let mainWindow: BrowserWindow;
+const AUTHORIZED_RFID = "0012176139"; // The authorized RFID number
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -22,7 +22,6 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
-  // Initialize RFID reader if possible
   try {
     initRFIDReader();
   } catch (err) {
@@ -36,8 +35,8 @@ async function initRFIDReader() {
     const { ReadlineParser } = await import('@serialport/parser-readline');
 
     const port = new SerialPort({
-      path: '/dev/tty.usbmodem1101', // For MacOS - Arduino port
-      baudRate: 115200, // Match Arduino baud rate
+      path: '/dev/tty.usbmodem1101',
+      baudRate: 115200,
     });
 
     const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
@@ -47,11 +46,11 @@ async function initRFIDReader() {
     });
 
     parser.on('data', (data: string) => {
-      // When RFID tag is detected, send to renderer
       if (data.includes('UID Value:')) {
         const uid = data.split(':')[1]?.trim();
         if (uid) {
-          mainWindow.webContents.send('rfid-detected', uid);
+          const isAuthorized = uid === AUTHORIZED_RFID;
+          mainWindow.webContents.send('rfid-detected', { uid, isAuthorized });
         }
       }
     });
@@ -76,7 +75,6 @@ app.on('activate', () => {
   }
 });
 
-// Handle game launch requests
 ipcMain.on('launch-game', (event, executablePath) => {
   exec(executablePath, (error, stdout, stderr) => {
     if (error) {
