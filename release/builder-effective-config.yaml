@@ -1,0 +1,32 @@
+directories:
+  output: release/
+  buildResources: build
+appId: com.nextgenarcadia.app
+productName: Next Gen Arcadia
+files:
+  - filter:
+      - dist/**/*
+      - electron/**/*
+extraResources:
+  - from: public
+    to: public
+    filter:
+      - '**/*'
+win:
+  target:
+    - nsis
+  icon: public/favicon.ico
+mac:
+  target:
+    - dmg
+  icon: public/favicon.ico
+linux:
+  target:
+    - AppImage
+  icon: public/favicon.ico
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+electronVersion: 34.0.2
