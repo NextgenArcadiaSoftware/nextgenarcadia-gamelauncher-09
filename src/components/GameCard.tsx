@@ -98,6 +98,8 @@ export function GameCard({
         title: "Game Started",
         description: `${title} launched with 8 minute timer`,
       });
+
+      setShowTapToStart(false);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -123,8 +125,7 @@ export function GameCard({
     <div className="game-card group transform transition-all duration-200 hover:scale-105">
       {showTapToStart ? (
         <div 
-          className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 cursor-pointer"
-          onClick={handleStartGame}
+          className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50"
         >
           <div className="animate-[pulse_1s_ease-in-out_infinite] text-green-500 text-2xl font-bold next-gen-title">
             TAP TO START
@@ -133,6 +134,15 @@ export function GameCard({
             <Clock className="w-5 h-5" />
             <span>Session time: 8 mins</span>
           </div>
+          <Button
+            variant="default"
+            size="lg"
+            className="mt-4 bg-green-600 hover:bg-green-700"
+            onClick={handleStartGame}
+          >
+            <Play className="w-6 h-6 mr-2" />
+            Launch Game
+          </Button>
         </div>
       ) : null}
       
