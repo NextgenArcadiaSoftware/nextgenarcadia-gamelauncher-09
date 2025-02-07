@@ -2,8 +2,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
-import { SerialPort } from 'serialport';
-import { ReadlineParser } from '@serialport/parser-readline';
 
 let mainWindow: BrowserWindow;
 
@@ -24,29 +22,39 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
-  // Initialize RFID reader
-  initRFIDReader();
+  // Initialize RFID reader if possible
+  try {
+    initRFIDReader();
+  } catch (err) {
+    console.log('RFID reader initialization skipped - not available on this system');
+  }
 }
 
-function initRFIDReader() {
-  // Note: You'll need to update the port based on your Arduino's connection
-  const port = new SerialPort({
-    path: 'COM3', // Windows example - adjust for your system
-    baudRate: 9600,
-  });
+async function initRFIDReader() {
+  try {
+    const { SerialPort } = await import('serialport');
+    const { ReadlineParser } = await import('@serialport/parser-readline');
 
-  const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+    const port = new SerialPort({
+      path: 'COM3', // Windows example - adjust for your system
+      baudRate: 9600,
+    });
 
-  port.on('error', (err) => {
-    console.error('Serial Port Error:', err);
-  });
+    const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
-  parser.on('data', (data: string) => {
-    // When RFID tag is detected, send to renderer
-    if (data.trim()) {
-      mainWindow.webContents.send('rfid-detected', data.trim());
-    }
-  });
+    port.on('error', (err) => {
+      console.error('Serial Port Error:', err);
+    });
+
+    parser.on('data', (data: string) => {
+      // When RFID tag is detected, send to renderer
+      if (data.trim()) {
+        mainWindow.webContents.send('rfid-detected', data.trim());
+      }
+    });
+  } catch (err) {
+    console.log('RFID reader initialization failed:', err);
+  }
 }
 
 app.whenReady().then(createWindow);
