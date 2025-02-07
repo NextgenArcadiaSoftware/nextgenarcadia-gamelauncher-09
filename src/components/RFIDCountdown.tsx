@@ -1,13 +1,15 @@
+
 import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { useToast } from './ui/use-toast';
 
 interface RFIDCountdownProps {
   onExit: () => void;
+  duration?: number;
 }
 
-export function RFIDCountdown({ onExit }: RFIDCountdownProps) {
-  const [timeLeft, setTimeLeft] = useState(8 * 60); // 8 minutes in seconds
+export function RFIDCountdown({ onExit, duration = 8 }: RFIDCountdownProps) {
+  const [timeLeft, setTimeLeft] = useState(duration * 60); // Convert minutes to seconds
   const { toast } = useToast();
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export function RFIDCountdown({ onExit }: RFIDCountdownProps) {
           clearInterval(interval);
           toast({
             title: "Session Ended",
-            description: "Your 8-minute session has ended.",
+            description: `Your ${duration}-minute session has ended.`,
           });
           onExit();
           return 0;
@@ -27,7 +29,7 @@ export function RFIDCountdown({ onExit }: RFIDCountdownProps) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [onExit, toast]);
+  }, [onExit, toast, duration]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;

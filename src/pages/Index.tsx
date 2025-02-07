@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -5,6 +6,8 @@ import { Header } from "@/components/Header";
 import { CategoryBar } from "@/components/CategoryBar";
 import { GameGrid } from "@/components/GameGrid";
 import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
+import { OwnerDashboard } from "@/components/OwnerDashboard";
 
 interface Game {
   id: number;
@@ -81,8 +84,9 @@ const Index = () => {
   } | null>(null);
 
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-
   const [showRFIDCountdown, setShowRFIDCountdown] = useState(false);
+  const [showOwnerDashboard, setShowOwnerDashboard] = useState(false);
+  const [sessionDuration, setSessionDuration] = useState(8); // Default 8 minutes
   const { toast } = useToast();
 
   const categories = ["All", "Action", "FPS", "Horror", "Rhythm", "Survival"];
@@ -99,16 +103,28 @@ const Index = () => {
     setActiveGame({ title, timeLeft: duration * 60 });
   };
 
-  // RFID detection simulation with improved logging
+  // RFID detection simulation with improved logging and session tracking
   useEffect(() => {
     console.log('Setting up RFID key press listener');
 
     const handleRFIDSimulation = () => {
       console.log('RFID simulation triggered');
       setShowRFIDCountdown(true);
+      
+      // Record the session
+      const newSession = {
+        startTime: new Date().toISOString(),
+        duration: sessionDuration
+      };
+      
+      const savedSessions = localStorage.getItem("rfid_sessions");
+      const sessions = savedSessions ? JSON.parse(savedSessions) : [];
+      sessions.push(newSession);
+      localStorage.setItem("rfid_sessions", JSON.stringify(sessions));
+
       toast({
         title: "RFID Card Detected",
-        description: "Starting 8 minute session...",
+        description: `Starting ${sessionDuration} minute session...`,
       });
     };
 
@@ -120,24 +136,35 @@ const Index = () => {
       }
     };
 
-    // Add the event listener to the window object
     window.addEventListener('keypress', handleKeyPress);
 
-    // Cleanup function
     return () => {
       console.log('Removing RFID key press listener');
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, [toast]); // Added toast to dependencies
+  }, [toast, sessionDuration]);
 
   return (
     <div className="min-h-screen">
       {showRFIDCountdown ? (
-        <RFIDCountdown onExit={() => setShowRFIDCountdown(false)} />
+        <RFIDCountdown 
+          onExit={() => setShowRFIDCountdown(false)}
+          duration={sessionDuration}
+        />
       ) : (
         <div className="max-w-7xl mx-auto p-8">
           <div className="flex flex-col space-y-8">
-            <Header />
+            <div className="flex justify-between items-center">
+              <Header />
+              <Button
+                variant="outline"
+                className="flex gap-2"
+                onClick={() => setShowOwnerDashboard(true)}
+              >
+                <Settings className="w-4 h-4" />
+                Owner Dashboard
+              </Button>
+            </div>
             <CategoryBar 
               categories={categories}
               selectedCategory={selectedCategory}
@@ -149,6 +176,13 @@ const Index = () => {
             />
           </div>
         </div>
+      )}
+
+      {showOwnerDashboard && (
+        <OwnerDashboard
+          onClose={() => setShowOwnerDashboard(false)}
+          onTimerDurationChange={setSessionDuration}
+        />
       )}
 
       {/* Countdown Overlay */}
