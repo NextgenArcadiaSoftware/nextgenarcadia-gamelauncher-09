@@ -13,12 +13,12 @@ export function Header() {
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-6">
         <img 
-          src="/lovable-uploads/82c15066-5851-4a30-a1f4-c8fc42e685bd.png" 
-          alt="Next Gen Arcadia Logo" 
+          src="/lovable-uploads/f12eb427-db97-42db-975b-2ccadfb41224.png" 
+          alt="NextGen Arcadia Logo" 
           className="w-12 h-12"
         />
         <h1 className="text-xl font-bold tracking-wide">
-          Next Gen Arcadia
+          NextGen Arcadia
         </h1>
       </div>
       <div className="flex items-center gap-6">
