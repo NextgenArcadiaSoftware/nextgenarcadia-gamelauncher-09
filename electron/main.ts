@@ -36,11 +36,11 @@ async function initRFIDReader() {
     const { ReadlineParser } = await import('@serialport/parser-readline');
 
     const port = new SerialPort({
-      path: 'COM3', // Windows example - adjust for your system
-      baudRate: 9600,
+      path: '/dev/tty.usbmodem1101', // For MacOS - Arduino port
+      baudRate: 115200, // Match Arduino baud rate
     });
 
-    const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+    const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
 
     port.on('error', (err) => {
       console.error('Serial Port Error:', err);
@@ -48,10 +48,15 @@ async function initRFIDReader() {
 
     parser.on('data', (data: string) => {
       // When RFID tag is detected, send to renderer
-      if (data.trim()) {
-        mainWindow.webContents.send('rfid-detected', data.trim());
+      if (data.includes('UID Value:')) {
+        const uid = data.split(':')[1]?.trim();
+        if (uid) {
+          mainWindow.webContents.send('rfid-detected', uid);
+        }
       }
     });
+
+    console.log('RFID reader initialized successfully');
   } catch (err) {
     console.log('RFID reader initialization failed:', err);
   }
