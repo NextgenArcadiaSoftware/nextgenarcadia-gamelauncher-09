@@ -7,6 +7,13 @@ import { Link } from "react-router-dom";
 import { Library, Timer, ActivitySquare } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useToast } from "./ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 
 interface Session {
   startTime: string;
@@ -26,7 +33,6 @@ export function OwnerDashboard({ onClose, onTimerDurationChange }: {
   const OWNER_PIN = "123456"; // This should be stored securely in a real application
 
   useEffect(() => {
-    // Load sessions from localStorage
     const savedSessions = localStorage.getItem("rfid_sessions");
     if (savedSessions) {
       setSessions(JSON.parse(savedSessions));
@@ -60,9 +66,14 @@ export function OwnerDashboard({ onClose, onTimerDurationChange }: {
 
   if (!isAuthorized) {
     return (
-      <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50">
-        <div className="bg-card p-8 rounded-lg shadow-lg w-96">
-          <h2 className="text-2xl font-bold mb-4">Owner Access</h2>
+      <Dialog open={true} onOpenChange={() => onClose()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Owner Access</DialogTitle>
+            <DialogDescription>
+              Enter your 6-digit PIN to access the owner dashboard.
+            </DialogDescription>
+          </DialogHeader>
           <form onSubmit={handlePinSubmit} className="space-y-4">
             <Input
               type="password"
@@ -82,20 +93,20 @@ export function OwnerDashboard({ onClose, onTimerDurationChange }: {
               </Button>
             </div>
           </form>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50">
-      <div className="bg-card p-8 rounded-lg shadow-lg w-[800px] max-h-[80vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Owner Dashboard</h2>
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-        </div>
+    <Dialog open={true} onOpenChange={() => onClose()}>
+      <DialogContent className="max-w-[800px] max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Owner Dashboard</DialogTitle>
+          <DialogDescription>
+            Manage your arcade settings and view session history.
+          </DialogDescription>
+        </DialogHeader>
 
         <Tabs defaultValue="sessions">
           <TabsList className="w-full">
@@ -159,7 +170,7 @@ export function OwnerDashboard({ onClose, onTimerDurationChange }: {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
