@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -96,7 +95,7 @@ const Index = () => {
   const { toast } = useToast();
 
   const categories = ["All", "Action", "FPS", "Horror", "Rhythm", "Survival"];
-  const CORRECT_RFID = "0121853223";
+  const CORRECT_RFID = "12185323";
 
   const filteredGames = selectedCategory === "All" 
     ? games 
@@ -137,11 +136,10 @@ const Index = () => {
     };
 
     const handleKeyPress = (event: KeyboardEvent) => {
-      console.log('Key pressed:', event.key);
-      
       // Only accept numeric inputs
       if (/^\d$/.test(event.key)) {
         const newSequence = rfidSequence + event.key;
+        console.log('Current sequence:', newSequence);
         setRfidSequence(newSequence);
         
         // Check if the sequence matches
