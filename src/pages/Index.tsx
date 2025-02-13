@@ -91,7 +91,6 @@ const Index = () => {
   const [showRFIDCountdown, setShowRFIDCountdown] = useState(false);
   const [showOwnerDashboard, setShowOwnerDashboard] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(8); // Default 8 minutes
-  const [rfidSequence, setRfidSequence] = useState<string>("");
   const { toast } = useToast();
 
   const categories = ["All", "Action", "FPS", "Horror", "Rhythm", "Survival"];
@@ -109,14 +108,13 @@ const Index = () => {
     setActiveGame({ title, timeLeft: duration * 60 });
   };
 
-  // RFID detection with sequence matching
+  // RFID detection - now triggers for any numeric input
   useEffect(() => {
     console.log('Setting up RFID key press listener');
 
     const handleRFIDSimulation = () => {
       console.log('RFID simulation triggered');
       setShowRFIDCountdown(true);
-      setRfidSequence(""); // Reset the sequence
       
       // Record the session
       const newSession = {
@@ -136,21 +134,9 @@ const Index = () => {
     };
 
     const handleKeyPress = (event: KeyboardEvent) => {
-      // Only accept numeric inputs
+      // Only accept numeric inputs and trigger immediately
       if (/^\d$/.test(event.key)) {
-        const newSequence = rfidSequence + event.key;
-        console.log('Current sequence:', newSequence);
-        setRfidSequence(newSequence);
-        
-        // Check if the sequence matches
-        if (newSequence === CORRECT_RFID) {
-          handleRFIDSimulation();
-        }
-        
-        // Reset if sequence is too long
-        if (newSequence.length > CORRECT_RFID.length) {
-          setRfidSequence("");
-        }
+        handleRFIDSimulation();
       }
     };
 
@@ -160,7 +146,7 @@ const Index = () => {
       console.log('Removing RFID key press listener');
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, [toast, sessionDuration, rfidSequence]);
+  }, [toast, sessionDuration]);
 
   return (
     <div className="min-h-screen">
