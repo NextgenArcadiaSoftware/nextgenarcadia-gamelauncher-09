@@ -1,5 +1,5 @@
 
-import { Play, Clock, Video } from "lucide-react";
+import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { useToast } from "./ui/use-toast";
 import { useState } from "react";
 
 interface GameCardProps {
@@ -19,7 +18,8 @@ interface GameCardProps {
   releaseDate: string;
   trailer?: string;
   executablePath?: string;
-  onPlay: (duration: number) => void;
+  onPlay: () => void;
+  canPlayGames: boolean;
 }
 
 export function GameCard({
@@ -29,71 +29,17 @@ export function GameCard({
   genre,
   releaseDate,
   trailer,
-  executablePath,
   onPlay,
+  canPlayGames
 }: GameCardProps) {
-  const { toast } = useToast();
   const [showTapToStart, setShowTapToStart] = useState(false);
 
-  const handleStartGame = async () => {
-    if (!executablePath) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "No executable path specified for this game",
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:8080/api/launch', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ path: executablePath })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      // Try to parse JSON, but don't fail if it's not JSON
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        // If response is not JSON, assume success if status was ok
-        data = { status: "Launched" };
-      }
-      
-      if (data.status === "Launched" || response.ok) {
-        // Start the timer and notify parent component
-        onPlay(8);
-        
-        toast({
-          title: "Game Started",
-          description: `${title} launched with 8 minute timer`,
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to launch game. Make sure the launcher app is running.",
-        });
-      }
-    } catch (error) {
-      console.error('Launch error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Cannot connect to game launcher. Please make sure it's running.",
-      });
-    }
-  };
-
   const handlePlayButtonClick = () => {
-    setShowTapToStart(true);
+    if (canPlayGames) {
+      setShowTapToStart(true);
+    } else {
+      onPlay();
+    }
   };
 
   return (
@@ -101,14 +47,13 @@ export function GameCard({
       {showTapToStart ? (
         <div 
           className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 cursor-pointer"
-          onClick={handleStartGame}
+          onClick={() => {
+            onPlay();
+            setShowTapToStart(false);
+          }}
         >
           <div className="animate-[pulse_1s_ease-in-out_infinite] text-green-500 text-2xl font-bold next-gen-title">
             TAP TO START
-          </div>
-          <div className="flex items-center gap-2 text-green-500">
-            <Clock className="w-5 h-5" />
-            <span>Session time: 8 mins</span>
           </div>
         </div>
       ) : null}

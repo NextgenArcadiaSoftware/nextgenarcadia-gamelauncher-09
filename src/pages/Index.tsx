@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -90,11 +91,11 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [showRFIDCountdown, setShowRFIDCountdown] = useState(false);
   const [showOwnerDashboard, setShowOwnerDashboard] = useState(false);
-  const [sessionDuration, setSessionDuration] = useState(8); // Default 8 minutes
+  const [sessionDuration, setSessionDuration] = useState(8);
+  const [canPlayGames, setCanPlayGames] = useState(false);
   const { toast } = useToast();
 
   const categories = ["All", "Action", "FPS", "Horror", "Rhythm", "Survival"];
-  const CORRECT_RFID = "12185323";
 
   const filteredGames = selectedCategory === "All" 
     ? games 
@@ -104,19 +105,52 @@ const Index = () => {
     setGames([...games, { ...newGame, id: games.length + 1 }]);
   };
 
-  const handlePlayGame = (title: string, duration: number) => {
-    setActiveGame({ title, timeLeft: duration * 60 });
+  const handlePlayGame = async (title: string, executablePath: string) => {
+    if (!canPlayGames) {
+      toast({
+        variant: "destructive",
+        title: "Session Required",
+        description: "Please scan an RFID card to start a gaming session.",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8080/api/launch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path: executablePath })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      toast({
+        title: "Game Started",
+        description: `${title} has been launched`,
+      });
+    } catch (error) {
+      console.error('Launch error:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to launch game. Please make sure the game launcher is running.",
+      });
+    }
   };
 
-  // RFID detection - now triggers for any numeric input
+  // RFID detection
   useEffect(() => {
     console.log('Setting up RFID key press listener');
 
     const handleRFIDSimulation = () => {
       console.log('RFID simulation triggered');
       setShowRFIDCountdown(true);
+      setCanPlayGames(true);
       
-      // Record the session
       const newSession = {
         startTime: new Date().toISOString(),
         duration: sessionDuration
@@ -134,7 +168,6 @@ const Index = () => {
     };
 
     const handleKeyPress = (event: KeyboardEvent) => {
-      // Only accept numeric inputs and trigger immediately
       if (/^\d$/.test(event.key)) {
         handleRFIDSimulation();
       }
@@ -148,11 +181,16 @@ const Index = () => {
     };
   }, [toast, sessionDuration]);
 
+  const handleExitSession = () => {
+    setShowRFIDCountdown(false);
+    setCanPlayGames(false);
+  };
+
   return (
     <div className="min-h-screen">
       {showRFIDCountdown ? (
         <RFIDCountdown 
-          onExit={() => setShowRFIDCountdown(false)}
+          onExit={handleExitSession}
           duration={sessionDuration}
         />
       ) : (
@@ -177,6 +215,7 @@ const Index = () => {
             <GameGrid 
               games={filteredGames}
               onPlayGame={handlePlayGame}
+              canPlayGames={canPlayGames}
             />
           </div>
         </div>
@@ -187,34 +226,6 @@ const Index = () => {
           onClose={() => setShowOwnerDashboard(false)}
           onTimerDurationChange={setSessionDuration}
         />
-      )}
-
-      {activeGame && (
-        <div className="countdown-overlay">
-          <h2 className="text-6xl font-bold mb-4">{activeGame.title}</h2>
-          <div className="text-8xl font-mono mb-8">
-            {Math.floor(activeGame.timeLeft / 60)}:
-            {(activeGame.timeLeft % 60).toString().padStart(2, "0")}
-          </div>
-          <div className="flex gap-4">
-            <Button
-              size="lg"
-              variant="destructive"
-              className="bg-red-600 hover:bg-red-700"
-              onClick={() => setActiveGame(null)}
-            >
-              Exit Game
-            </Button>
-            <Button
-              size="lg"
-              variant="secondary"
-              className="bg-gray-800 hover:bg-gray-700"
-              onClick={() => setActiveGame(null)}
-            >
-              Back to Menu
-            </Button>
-          </div>
-        </div>
       )}
     </div>
   );
