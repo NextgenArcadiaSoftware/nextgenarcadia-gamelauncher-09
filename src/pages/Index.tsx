@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -91,9 +92,11 @@ const Index = () => {
   const [showRFIDCountdown, setShowRFIDCountdown] = useState(false);
   const [showOwnerDashboard, setShowOwnerDashboard] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(8); // Default 8 minutes
+  const [rfidSequence, setRfidSequence] = useState<string>("");
   const { toast } = useToast();
 
   const categories = ["All", "Action", "FPS", "Horror", "Rhythm", "Survival"];
+  const CORRECT_RFID = "0121853223";
 
   const filteredGames = selectedCategory === "All" 
     ? games 
@@ -107,13 +110,14 @@ const Index = () => {
     setActiveGame({ title, timeLeft: duration * 60 });
   };
 
-  // RFID detection simulation with improved logging and session tracking
+  // RFID detection with sequence matching
   useEffect(() => {
     console.log('Setting up RFID key press listener');
 
     const handleRFIDSimulation = () => {
       console.log('RFID simulation triggered');
       setShowRFIDCountdown(true);
+      setRfidSequence(""); // Reset the sequence
       
       // Record the session
       const newSession = {
@@ -134,9 +138,21 @@ const Index = () => {
 
     const handleKeyPress = (event: KeyboardEvent) => {
       console.log('Key pressed:', event.key);
-      if (event.key.toLowerCase() === 'r') {
-        console.log('R key detected, triggering RFID simulation');
-        handleRFIDSimulation();
+      
+      // Only accept numeric inputs
+      if (/^\d$/.test(event.key)) {
+        const newSequence = rfidSequence + event.key;
+        setRfidSequence(newSequence);
+        
+        // Check if the sequence matches
+        if (newSequence === CORRECT_RFID) {
+          handleRFIDSimulation();
+        }
+        
+        // Reset if sequence is too long
+        if (newSequence.length > CORRECT_RFID.length) {
+          setRfidSequence("");
+        }
       }
     };
 
@@ -146,7 +162,7 @@ const Index = () => {
       console.log('Removing RFID key press listener');
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, [toast, sessionDuration]);
+  }, [toast, sessionDuration, rfidSequence]);
 
   return (
     <div className="min-h-screen">
@@ -189,7 +205,6 @@ const Index = () => {
         />
       )}
 
-      {/* Countdown Overlay */}
       {activeGame && (
         <div className="countdown-overlay">
           <h2 className="text-6xl font-bold mb-4">{activeGame.title}</h2>
