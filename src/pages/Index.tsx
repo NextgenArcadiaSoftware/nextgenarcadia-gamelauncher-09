@@ -30,6 +30,7 @@ const Index = () => {
       releaseDate: "2024",
       thumbnail: "/lovable-uploads/09374846-fe58-4998-868a-5691a68042c5.png",
       trailer: "https://www.youtube.com/watch?v=vL39Sg2AqWg",
+      executablePath: "C:\\Program Files\\Oculus\\Software\\Software\\hyperbolic-magnetism-beat-saber\\Beat Saber.exe",
     },
     {
       id: 2,
@@ -39,6 +40,7 @@ const Index = () => {
       releaseDate: "2024",
       thumbnail: "/lovable-uploads/a6a527be-670f-4238-9b4e-4cd389187b90.png",
       trailer: "https://www.youtube.com/watch?v=wBzw9ZJ5r9A",
+      executablePath: "C:\\Program Files\\Steam\\steamapps\\common\\PavlovVR\\Pavlov\\Binaries\\Win64\\Pavlov-Win64-Shipping.exe",
     },
     {
       id: 3,
@@ -48,6 +50,7 @@ const Index = () => {
       releaseDate: "2024",
       thumbnail: "/lovable-uploads/2f7ba916-4fc9-4136-b3cc-9f1e2ba0be94.png",
       trailer: "https://www.youtube.com/watch?v=3vZG5oH8M0Y",
+      executablePath: "C:\\Program Files\\Steam\\steamapps\\common\\Ghosts of Tabor\\GhostsOfTabor.exe",
     },
     {
       id: 4,
@@ -57,6 +60,7 @@ const Index = () => {
       releaseDate: "2024",
       thumbnail: "/lovable-uploads/cac2759b-8463-4e08-b1ea-aeb608ac84a9.png",
       trailer: "https://www.youtube.com/watch?v=K2NxwJZb0i0",
+      executablePath: "C:\\Program Files\\Steam\\steamapps\\common\\Hard Bullet\\Hard Bullet.exe",
     },
     {
       id: 5,
@@ -66,6 +70,7 @@ const Index = () => {
       releaseDate: "2024",
       thumbnail: "/lovable-uploads/cf7a9406-76de-470d-971d-ebb18c291622.png",
       trailer: "https://www.youtube.com/watch?v=l_gWDl_f6V8",
+      executablePath: "C:\\Program Files\\Steam\\steamapps\\common\\Arizona Sunshine\\ArizonaSunshine.exe",
     },
     {
       id: 6,
@@ -75,6 +80,7 @@ const Index = () => {
       releaseDate: "2024",
       thumbnail: "/lovable-uploads/d38b1a33-5653-43f5-802b-51546fe7fefb.png",
       trailer: "https://www.youtube.com/watch?v=BNxFA0qmOqY",
+      executablePath: "C:\\Program Files\\Steam\\steamapps\\common\\Blade & Sorcery\\BladeAndSorcery.exe",
     }
   ]);
 
