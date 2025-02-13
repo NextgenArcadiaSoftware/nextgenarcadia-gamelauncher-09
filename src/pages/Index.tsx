@@ -38,7 +38,7 @@ const Index = () => {
       releaseDate: "2024",
       thumbnail: "/lovable-uploads/a6a527be-670f-4238-9b4e-4cd389187b90.png",
       trailer: "https://www.youtube.com/watch?v=wBzw9ZJ5r9A",
-      executablePath: "C:\\Program Files\\Steam\\steamapps\\common\\PavlovVR\\Pavlov\\Binaries\\Win64\\Pavlov-Win64-Shipping.exe",
+      executablePath: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\All-In-One Sports VR\\AllInOneSports.exe",
     },
     {
       id: 3,
