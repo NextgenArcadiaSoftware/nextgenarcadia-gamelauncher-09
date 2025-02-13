@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogDescription,
 } from "./ui/dialog";
 import { useToast } from "./ui/use-toast";
 import { useState } from "react";
@@ -47,27 +46,37 @@ export function GameCard({
     }
 
     try {
-      const isElectron = window.electron !== undefined;
-      
-      if (isElectron) {
-        // @ts-ignore - electron is available in desktop environment
-        window.electron.ipcRenderer.send('launch-game', executablePath);
-      } else {
-        console.log('Game launch attempted in non-Electron environment');
-      }
-      
-      // Start the timer and notify parent component with 8 minutes duration
-      onPlay(8);
-
-      toast({
-        title: "Game Started",
-        description: `${title} launched with 8 minute timer`,
+      const response = await fetch('http://localhost:5000/launch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path: executablePath })
       });
+
+      const data = await response.json();
+      
+      if (data.status === "Launched") {
+        // Start the timer and notify parent component
+        onPlay(8);
+        
+        toast({
+          title: "Game Started",
+          description: `${title} launched with 8 minute timer`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to launch game. Make sure the launcher app is running.",
+        });
+      }
     } catch (error) {
+      console.error('Launch error:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to launch game",
+        description: "Cannot connect to game launcher. Please make sure it's running.",
       });
     }
   };
