@@ -1,3 +1,4 @@
+
 import { Play, Clock, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -9,7 +10,7 @@ import {
   DialogDescription,
 } from "./ui/dialog";
 import { useToast } from "./ui/use-toast";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface GameCardProps {
   title: string;
@@ -34,34 +35,6 @@ export function GameCard({
 }: GameCardProps) {
   const { toast } = useToast();
   const [showTapToStart, setShowTapToStart] = useState(false);
-  const [isRFIDAuthorized, setIsRFIDAuthorized] = useState(false);
-
-  useEffect(() => {
-    const handleRFIDDetection = (_event: any, data: { uid: string, isAuthorized: boolean }) => {
-      setIsRFIDAuthorized(data.isAuthorized);
-      toast({
-        title: data.isAuthorized ? "Access Granted" : "Access Denied",
-        description: data.isAuthorized 
-          ? "RFID card authorized. You can now launch games." 
-          : "Unauthorized RFID card detected.",
-        variant: data.isAuthorized ? "default" : "destructive"
-      });
-    };
-
-    // @ts-ignore - electron is available in desktop environment
-    if (window.electron) {
-      // @ts-ignore
-      window.electron.ipcRenderer.on('rfid-detected', handleRFIDDetection);
-    }
-
-    return () => {
-      // @ts-ignore
-      if (window.electron) {
-        // @ts-ignore
-        window.electron.ipcRenderer.removeListener('rfid-detected', handleRFIDDetection);
-      }
-    };
-  }, [toast]);
 
   const handleStartGame = async () => {
     if (!executablePath) {
@@ -69,15 +42,6 @@ export function GameCard({
         variant: "destructive",
         title: "Error",
         description: "No executable path specified for this game",
-      });
-      return;
-    }
-
-    if (!isRFIDAuthorized) {
-      toast({
-        variant: "destructive",
-        title: "Access Denied",
-        description: "Please scan an authorized RFID card first",
       });
       return;
     }
@@ -92,14 +56,13 @@ export function GameCard({
         console.log('Game launch attempted in non-Electron environment');
       }
       
+      // Start the timer and notify parent component with 8 minutes duration
       onPlay(8);
 
       toast({
         title: "Game Started",
         description: `${title} launched with 8 minute timer`,
       });
-
-      setShowTapToStart(false);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -110,14 +73,6 @@ export function GameCard({
   };
 
   const handlePlayButtonClick = () => {
-    if (!isRFIDAuthorized) {
-      toast({
-        variant: "destructive",
-        title: "Access Denied",
-        description: "Please scan an authorized RFID card first",
-      });
-      return;
-    }
     setShowTapToStart(true);
   };
 
@@ -125,7 +80,8 @@ export function GameCard({
     <div className="game-card group transform transition-all duration-200 hover:scale-105">
       {showTapToStart ? (
         <div 
-          className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50"
+          className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 cursor-pointer"
+          onClick={handleStartGame}
         >
           <div className="animate-[pulse_1s_ease-in-out_infinite] text-green-500 text-2xl font-bold next-gen-title">
             TAP TO START
@@ -134,15 +90,6 @@ export function GameCard({
             <Clock className="w-5 h-5" />
             <span>Session time: 8 mins</span>
           </div>
-          <Button
-            variant="default"
-            size="lg"
-            className="mt-4 bg-green-600 hover:bg-green-700"
-            onClick={handleStartGame}
-          >
-            <Play className="w-6 h-6 mr-2" />
-            Launch Game
-          </Button>
         </div>
       ) : null}
       
@@ -187,9 +134,8 @@ export function GameCard({
           <Button 
             variant="default" 
             size="sm" 
-            className={`w-full glass ${!isRFIDAuthorized ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className="w-full glass"
             onClick={handlePlayButtonClick}
-            disabled={!isRFIDAuthorized}
           >
             <Play className="w-4 h-4 mr-2" />
             Play Game

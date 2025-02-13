@@ -1,9 +1,11 @@
+
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
+import { SerialPort } from 'serialport';
+import { ReadlineParser } from '@serialport/parser-readline';
 
 let mainWindow: BrowserWindow;
-const AUTHORIZED_RFID = "0012176139"; // The authorized RFID number
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -22,43 +24,29 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
-  try {
-    initRFIDReader();
-  } catch (err) {
-    console.log('RFID reader initialization skipped - not available on this system');
-  }
+  // Initialize RFID reader
+  initRFIDReader();
 }
 
-async function initRFIDReader() {
-  try {
-    const { SerialPort } = await import('serialport');
-    const { ReadlineParser } = await import('@serialport/parser-readline');
+function initRFIDReader() {
+  // Note: You'll need to update the port based on your Arduino's connection
+  const port = new SerialPort({
+    path: 'COM3', // Windows example - adjust for your system
+    baudRate: 9600,
+  });
 
-    const port = new SerialPort({
-      path: '/dev/tty.usbmodem1101',
-      baudRate: 115200,
-    });
+  const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
-    const parser = port.pipe(new ReadlineParser({ delimiter: '\n' }));
+  port.on('error', (err) => {
+    console.error('Serial Port Error:', err);
+  });
 
-    port.on('error', (err) => {
-      console.error('Serial Port Error:', err);
-    });
-
-    parser.on('data', (data: string) => {
-      if (data.includes('UID Value:')) {
-        const uid = data.split(':')[1]?.trim();
-        if (uid) {
-          const isAuthorized = uid === AUTHORIZED_RFID;
-          mainWindow.webContents.send('rfid-detected', { uid, isAuthorized });
-        }
-      }
-    });
-
-    console.log('RFID reader initialized successfully');
-  } catch (err) {
-    console.log('RFID reader initialization failed:', err);
-  }
+  parser.on('data', (data: string) => {
+    // When RFID tag is detected, send to renderer
+    if (data.trim()) {
+      mainWindow.webContents.send('rfid-detected', data.trim());
+    }
+  });
 }
 
 app.whenReady().then(createWindow);
@@ -75,6 +63,7 @@ app.on('activate', () => {
   }
 });
 
+// Handle game launch requests
 ipcMain.on('launch-game', (event, executablePath) => {
   exec(executablePath, (error, stdout, stderr) => {
     if (error) {
