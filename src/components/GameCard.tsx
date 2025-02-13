@@ -1,3 +1,4 @@
+
 import { Play, Clock, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -45,7 +46,7 @@ export function GameCard({
     }
 
     try {
-      const response = await fetch('http://localhost:8080/launch', {
+      const response = await fetch('http://localhost:8080/api/launch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
