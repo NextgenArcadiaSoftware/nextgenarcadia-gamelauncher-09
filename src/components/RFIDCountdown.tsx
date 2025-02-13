@@ -13,6 +13,7 @@ export function RFIDCountdown({ onExit, duration = 8 }: RFIDCountdownProps) {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Start the timer immediately
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -35,17 +36,17 @@ export function RFIDCountdown({ onExit, duration = 8 }: RFIDCountdownProps) {
   const seconds = timeLeft % 60;
 
   return (
-    <div className="fixed inset-0 bg-black/95 flex flex-col items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/95 flex flex-col items-center justify-center z-50 animate-fade-in">
       <div className="text-9xl font-mono mb-8 text-green-500 animate-pulse tracking-widest">
         {minutes}:{seconds.toString().padStart(2, '0')}
       </div>
-      <div className="text-2xl text-green-400 mb-8">
+      <div className="text-2xl text-green-400 mb-8 animate-fade-in">
         Time Remaining
       </div>
       <Button
         size="lg"
         variant="destructive"
-        className="bg-red-600 hover:bg-red-700 text-xl px-8 py-6"
+        className="bg-red-600 hover:bg-red-700 text-xl px-8 py-6 animate-fade-in"
         onClick={onExit}
       >
         Exit Session
