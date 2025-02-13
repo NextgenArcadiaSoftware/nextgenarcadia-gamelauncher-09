@@ -46,7 +46,7 @@ export function GameCard({
     }
 
     try {
-      const response = await fetch('http://localhost:5000/launch', {
+      const response = await fetch('http://localhost:8082/launch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
