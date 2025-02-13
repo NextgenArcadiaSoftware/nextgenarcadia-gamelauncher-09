@@ -1,4 +1,3 @@
-
 import { Play, Clock, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -46,7 +45,7 @@ export function GameCard({
     }
 
     try {
-      const response = await fetch('http://localhost:8082/launch', {
+      const response = await fetch('http://localhost:8080/launch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,9 +53,20 @@ export function GameCard({
         body: JSON.stringify({ path: executablePath })
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
-      if (data.status === "Launched") {
+      // Try to parse JSON, but don't fail if it's not JSON
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        // If response is not JSON, assume success if status was ok
+        data = { status: "Launched" };
+      }
+      
+      if (data.status === "Launched" || response.ok) {
         // Start the timer and notify parent component
         onPlay(8);
         
