@@ -7,6 +7,7 @@ import os
 import time
 import logging
 from typing import List, Dict
+import webbrowser
 
 app = Flask(__name__)
 CORS(app)
@@ -23,15 +24,14 @@ logger = logging.getLogger(__name__)
 RATE_LIMIT_SECONDS = 10  # Minimum seconds between game launches
 last_launch_time = 0
 
-# Whitelist of allowed games with their paths
-# Add your actual game paths here
+# Whitelist of allowed games with their paths or Steam URLs
 ALLOWED_GAMES: Dict[str, str] = {
-    "Undead Citadel Demo": "C:\\Users\\User\\Desktop\\Undead Citadel Demo.url",
-    "Pavlov VR": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\All-In-One Sports VR\\AllInOneSports.exe",
-    "Ghosts of Tabor": "C:\\Program Files\\Steam\\steamapps\\common\\Ghosts of Tabor\\GhostsOfTabor.exe",
-    "Hard Bullet": "C:\\Program Files\\Steam\\steamapps\\common\\Hard Bullet\\Hard Bullet.exe",
-    "Arizona Sunshine": "C:\\Program Files\\Steam\\steamapps\\common\\Arizona Sunshine\\ArizonaSunshine.exe",
-    "Blade & Sorcery": "C:\\Program Files\\Steam\\steamapps\\common\\Blade & Sorcery\\BladeAndSorcery.exe"
+    "Undead Citadel Demo": "steam://rungameid/1322530",  # Using Steam protocol
+    "Pavlov VR": "steam://rungameid/555160",  # Using Steam protocol
+    "Ghosts of Tabor": "steam://rungameid/2688310",  # Using Steam protocol
+    "Hard Bullet": "steam://rungameid/1294760",  # Using Steam protocol
+    "Arizona Sunshine": "steam://rungameid/342180",  # Using Steam protocol
+    "Blade & Sorcery": "steam://rungameid/629730"  # Using Steam protocol
 }
 
 def rate_limit(f):
@@ -54,6 +54,14 @@ def validate_game_path(path: str) -> bool:
     """Validate if the game path is in our whitelist"""
     return path in ALLOWED_GAMES.values()
 
+def launch_steam_game(url: str) -> None:
+    """Launch a game using Steam protocol"""
+    webbrowser.open(url)
+
+def launch_executable(path: str) -> None:
+    """Launch a game using direct executable path"""
+    subprocess.Popen([path], shell=True)
+
 @app.route('/api/launch', methods=['POST'])
 @rate_limit
 def launch_game():
@@ -71,14 +79,17 @@ def launch_game():
             logger.warning(f"Attempted to launch unauthorized game: {path}")
             return jsonify({'error': 'Unauthorized game path'}), 403
             
-        # Check if file exists
-        if not os.path.exists(path):
-            logger.error(f"Game executable not found: {path}")
-            return jsonify({'error': 'Game executable not found'}), 404
-            
-        # Launch the game
-        logger.info(f"Launching game: {path}")
-        subprocess.Popen([path], shell=True)
+        # Check if it's a Steam URL or executable path
+        if path.startswith('steam://'):
+            logger.info(f"Launching Steam game: {path}")
+            launch_steam_game(path)
+        else:
+            # Check if file exists for regular executables
+            if not os.path.exists(path):
+                logger.error(f"Game executable not found: {path}")
+                return jsonify({'error': 'Game executable not found'}), 404
+            logger.info(f"Launching executable: {path}")
+            launch_executable(path)
         
         return jsonify({'status': 'Game launched successfully'}), 200
         
