@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -24,13 +23,12 @@ const Index = () => {
   const [games, setGames] = useState<Game[]>([
     {
       id: 1,
-      title: "Beat Saber",
-      description: "The ultimate VR rhythm game with lightsabers",
-      genre: "Rhythm",
+      title: "Undead Citadel Demo",
+      description: "Medieval action combat with hordes of undead",
+      genre: "Action",
       releaseDate: "2024",
       thumbnail: "/lovable-uploads/09374846-fe58-4998-868a-5691a68042c5.png",
-      trailer: "https://www.youtube.com/watch?v=vL39Sg2AqWg",
-      executablePath: "C:\\Program Files\\Oculus\\Software\\Software\\hyperbolic-magnetism-beat-saber\\Beat Saber.exe",
+      executablePath: "C:\\Users\\User\\Desktop\\Undead Citadel Demo.url",
     },
     {
       id: 2,
