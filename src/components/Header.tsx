@@ -9,9 +9,9 @@ export function Header() {
   const { toast } = useToast();
 
   return (
-    <div className="flex justify-between items-center w-full bg-black/40 backdrop-blur-xl px-6 py-4 rounded-full">
+    <div className="flex justify-between items-center w-full">
       <div className="flex items-center gap-6">
-        <h1 className="text-xl font-bold tracking-wide text-white">
+        <h1 className="text-xl font-bold tracking-wide text-white next-gen-title">
           NextGen Arcadia
         </h1>
       </div>
@@ -20,7 +20,7 @@ export function Header() {
           <Input 
             type="search" 
             placeholder="Search games..." 
-            className="rounded-full bg-white/10 border-0 pl-10" 
+            className="rounded-full bg-white/10 border-0 pl-10 transition-all duration-300 focus:ring-2 focus:ring-white/20" 
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
         </div>
@@ -28,7 +28,7 @@ export function Header() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="rounded-full hover:bg-white/10"
+            className="rounded-full hover:bg-white/10 transition-all duration-300"
           >
             <Library className="w-5 h-5" />
           </Button>
@@ -36,7 +36,7 @@ export function Header() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="rounded-full hover:bg-white/10" 
+          className="rounded-full hover:bg-white/10 transition-all duration-300" 
           onClick={() => {
             toast({
               title: "Exiting",
