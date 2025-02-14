@@ -51,13 +51,6 @@ export function GameCard({
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
-  // Fix: Use complete URL for thumbnail
-  const getImageUrl = (path: string) => {
-    if (!path) return placeholderImage;
-    if (path.startsWith('http')) return path;
-    return `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/game-thumbnails/${path}`;
-  };
-
   return (
     <div className="group relative overflow-hidden rounded-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
       {showTapCard && !canPlayGames ? (
@@ -98,7 +91,7 @@ export function GameCard({
       
       <div className="relative h-48 overflow-hidden">
         <img 
-          src={getImageUrl(thumbnail)}
+          src={thumbnail === 'placeholder.svg' ? placeholderImage : thumbnail}
           alt={title}
           className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
         />
