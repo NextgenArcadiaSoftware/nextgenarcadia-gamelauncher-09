@@ -82,6 +82,7 @@ const Index = () => {
   const [showOwnerDashboard, setShowOwnerDashboard] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(8);
   const [canPlayGames, setCanPlayGames] = useState(false);
+  const [activeGame, setActiveGame] = useState<string | null>(null);
   const { toast } = useToast();
 
   const categories = ["All", "Action", "FPS", "Horror", "Rhythm", "Survival"];
@@ -160,27 +161,27 @@ const Index = () => {
 
   const handlePlayGame = async (title: string, executablePath: string) => {
     if (!canPlayGames) {
-      toast({
-        variant: "destructive",
-        title: "Session Required",
-        description: "Please scan an RFID card to start a gaming session.",
-      });
-      return;
+      return; // The GameCard component now handles showing the tap card screen
     }
 
     try {
+      // Send the "start_game" trigger to the Python script
       const response = await fetch('http://localhost:8080/api/launch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ path: executablePath })
+        body: JSON.stringify({ 
+          path: executablePath,
+          command: 'start_game' // This will be the trigger text for the Python script
+        })
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      setActiveGame(title);
       toast({
         title: "Game Started",
         description: `${title} has been launched`,
@@ -200,6 +201,20 @@ const Index = () => {
     : games.filter(game => game.genre === selectedCategory);
 
   const handleExitSession = () => {
+    if (activeGame) {
+      // Send stop command to Python script
+      fetch('http://localhost:8080/api/launch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          command: 'stop_game'
+        })
+      }).catch(console.error);
+      
+      setActiveGame(null);
+    }
     setShowRFIDCountdown(false);
     setCanPlayGames(false);
   };
@@ -212,6 +227,17 @@ const Index = () => {
       console.log('RFID simulation triggered');
       setShowRFIDCountdown(true);
       setCanPlayGames(true);
+      
+      // Simulate keypress for Python script
+      const event = new KeyboardEvent('keypress', {
+        key: 'start_game',
+        code: 'KeyS',
+        charCode: 83,
+        keyCode: 83,
+        which: 83,
+        bubbles: true,
+      });
+      document.dispatchEvent(event);
       
       toast({
         title: "RFID Card Detected",
@@ -239,6 +265,7 @@ const Index = () => {
         <RFIDCountdown 
           onExit={handleExitSession}
           duration={sessionDuration}
+          activeGame={activeGame}
         />
       ) : (
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">

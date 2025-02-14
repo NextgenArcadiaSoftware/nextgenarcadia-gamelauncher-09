@@ -6,9 +6,10 @@ import { useToast } from './ui/use-toast';
 interface RFIDCountdownProps {
   onExit: () => void;
   duration?: number;
+  activeGame?: string | null;
 }
 
-export function RFIDCountdown({ onExit, duration = 8 }: RFIDCountdownProps) {
+export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdownProps) {
   const [timeLeft, setTimeLeft] = useState(duration * 60); // Convert minutes to seconds
   const { toast } = useToast();
 
@@ -20,7 +21,7 @@ export function RFIDCountdown({ onExit, duration = 8 }: RFIDCountdownProps) {
           clearInterval(interval);
           toast({
             title: "Session Ended",
-            description: `Your ${duration}-minute session has ended.`,
+            description: `Your ${duration}-minute session has ended.${activeGame ? ` ${activeGame} will close automatically.` : ''}`,
           });
           onExit();
           return 0;
@@ -30,7 +31,7 @@ export function RFIDCountdown({ onExit, duration = 8 }: RFIDCountdownProps) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [onExit, toast, duration]);
+  }, [onExit, toast, duration, activeGame]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -40,9 +41,14 @@ export function RFIDCountdown({ onExit, duration = 8 }: RFIDCountdownProps) {
       <div className="text-9xl font-mono mb-8 text-white animate-pulse tracking-widest">
         {minutes}:{seconds.toString().padStart(2, '0')}
       </div>
-      <div className="text-2xl text-white/90 mb-8 animate-fade-in">
+      <div className="text-2xl text-white/90 mb-4 animate-fade-in">
         Time Remaining
       </div>
+      {activeGame && (
+        <div className="text-xl text-white/80 mb-8 animate-fade-in">
+          Currently Playing: {activeGame}
+        </div>
+      )}
       <Button
         size="lg"
         variant="destructive"
