@@ -5,25 +5,25 @@
 
 @layer base {
   :root {
-    --background: 220 20% 4%;
-    --foreground: 0 0% 98%;
-    --card: 220 20% 8%;
-    --card-foreground: 0 0% 98%;
-    --popover: 220 20% 4%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 210 100% 50%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 220 20% 8%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 220 20% 8%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 220 20% 8%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 20% 8%;
-    --input: 220 20% 8%;
-    --ring: 210 100% 50%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
     --radius: 0.5rem;
   }
 }
@@ -36,11 +36,11 @@
     @apply text-foreground antialiased overflow-x-hidden font-sans;
     background: linear-gradient(
       225deg,
-      hsl(265 50% 10%) 0%,
-      hsl(220 50% 8%) 25%,
-      hsl(235 50% 12%) 50%,
-      hsl(245 50% 10%) 75%,
-      hsl(265 50% 10%) 100%
+      hsl(210 50% 98%) 0%,
+      hsl(220 50% 95%) 25%,
+      hsl(230 50% 96%) 50%,
+      hsl(240 50% 95%) 75%,
+      hsl(250 50% 98%) 100%
     );
     background-size: 400% 400%;
     animation: gradientAnimation 15s ease infinite;
@@ -80,8 +80,8 @@
 
 @layer utilities {
   .glass {
-    @apply bg-black/30 backdrop-blur-xl border border-white/10 rounded-lg;
-    box-shadow: 0 4px 32px -12px rgba(0, 0, 0, 0.5);
+    @apply bg-white/70 backdrop-blur-xl border border-white/50 rounded-lg;
+    box-shadow: 0 4px 32px -12px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
   }
@@ -96,7 +96,7 @@
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.4),
       transparent
     );
     transition: 0.5s;
@@ -109,20 +109,20 @@
   
   .game-card {
     @apply relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.1);
   }
 
   .next-gen-title {
-    @apply font-display font-bold text-white tracking-tight;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-                 0 0 40px rgba(100, 100, 255, 0.3);
+    @apply font-display font-bold text-gray-900 tracking-tight;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.1),
+                 0 0 40px rgba(0, 0, 0, 0.05);
   }
 
   .countdown-overlay {
-    @apply fixed inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50;
+    @apply fixed inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50;
   }
 
   .animate-gradient-shift {
