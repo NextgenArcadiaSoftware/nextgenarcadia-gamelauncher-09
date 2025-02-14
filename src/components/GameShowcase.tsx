@@ -2,6 +2,7 @@
 import { Button } from "./ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
 import { Badge } from "./ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import type { Game } from "@/types/game";
 
 interface GameShowcaseProps {
@@ -18,11 +19,34 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
           {games.map((game) => (
             <CarouselItem key={game.id}>
               <div className="relative w-full h-[600px]">
-                <img 
-                  src={game.thumbnail} 
-                  alt={game.title}
-                  className="w-full h-full object-cover animate-scale-in"
-                />
+                {game.trailer ? (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <img 
+                        src={game.thumbnail} 
+                        alt={game.title}
+                        className="w-full h-full object-cover animate-scale-in cursor-pointer"
+                      />
+                    </DialogTrigger>
+                    <DialogContent className="glass border-white/10 sm:max-w-[800px]">
+                      <DialogHeader>
+                        <DialogTitle className="next-gen-title">{game.title} - Trailer</DialogTitle>
+                      </DialogHeader>
+                      <iframe
+                        className="w-full aspect-video rounded-lg"
+                        src={game.trailer.replace('watch?v=', 'embed/')}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <img 
+                    src={game.thumbnail} 
+                    alt={game.title}
+                    className="w-full h-full object-cover animate-scale-in"
+                  />
+                )}
                 <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black/90 via-black/40 to-transparent animate-fade-in" />
                 <div className="absolute bottom-0 left-0 p-8 w-full animate-slide-in-right">
                   <Badge variant="secondary" className="mb-4 bg-white/10 backdrop-blur-sm animate-fade-in">
