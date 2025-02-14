@@ -24,6 +24,17 @@ const GAME_TRIGGERS: Record<string, string> = {
   "Propagation VR": "start_prop"
 };
 
+const ALL_IN_ONE_SPORTS = {
+  title: "All-in-One Sports VR",
+  description: "Experience multiple sports in VR! Play basketball, baseball, tennis, archery and more in this fun-packed sports compilation.",
+  genre: "Sports",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/9b088570-531a-47cf-b176-28bb534ba66f.png",
+  executable_path: "steam://rungameid/2076590",
+  launch_code: "SPORTS",
+  status: "enabled"
+} as const;
+
 const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -202,6 +213,31 @@ const Index = () => {
         handleRFIDSimulation();
       }
     };
+
+    const addSportsGame = async () => {
+      try {
+        const { data: existingGames } = await supabase
+          .from('games')
+          .select('title')
+          .eq('title', ALL_IN_ONE_SPORTS.title)
+          .single();
+
+        if (!existingGames) {
+          const { error } = await supabase
+            .from('games')
+            .insert([ALL_IN_ONE_SPORTS]);
+
+          if (error) throw error;
+          
+          console.log('Added All-in-One Sports VR to the database');
+          fetchGames(); // Refresh the games list
+        }
+      } catch (error) {
+        console.error('Error adding sports game:', error);
+      }
+    };
+
+    addSportsGame();
 
     window.addEventListener('keypress', handleKeyPress);
 
