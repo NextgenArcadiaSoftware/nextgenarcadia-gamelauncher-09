@@ -18,6 +18,11 @@ export function InputDisplay({ inputWord, targetWord }: InputDisplayProps) {
     }
   }, [inputWord, targetWord]);
 
+  // For debugging
+  console.log('Input Word:', inputWord);
+  console.log('Target Word:', targetWord);
+  console.log('Input Length:', inputWord.length);
+
   return (
     <motion.div
       animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
@@ -27,7 +32,10 @@ export function InputDisplay({ inputWord, targetWord }: InputDisplayProps) {
       {Array.from({ length: 3 }).map((_, index) => {
         const hasInput = index < inputWord.length;
         const letter = hasInput ? inputWord[index] : "";
-        const isCorrect = hasInput && inputWord[index] === targetWord[index];
+        
+        // Compare with target word regardless of case
+        const isCorrect = hasInput && 
+          inputWord[index].toUpperCase() === targetWord[index].toUpperCase();
 
         return (
           <div
