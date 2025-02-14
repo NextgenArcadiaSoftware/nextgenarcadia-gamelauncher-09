@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -239,6 +238,12 @@ const Index = () => {
 
     const addInitialGames = async () => {
       try {
+        // First, delete existing Fruit Ninja entry to ensure clean state
+        await supabase
+          .from('games')
+          .delete()
+          .eq('title', FRUIT_NINJA.title);
+
         // Check for All-in-One Sports
         const { data: existingSportsGame } = await supabase
           .from('games')
@@ -251,17 +256,9 @@ const Index = () => {
           console.log('Added All-in-One Sports VR to the database');
         }
 
-        // Check for Fruit Ninja
-        const { data: existingNinjaGame } = await supabase
-          .from('games')
-          .select('title')
-          .eq('title', FRUIT_NINJA.title)
-          .single();
-
-        if (!existingNinjaGame) {
-          await supabase.from('games').insert([FRUIT_NINJA]);
-          console.log('Added Fruit Ninja VR to the database');
-        }
+        // Add Fruit Ninja (always add to ensure new thumbnail)
+        await supabase.from('games').insert([FRUIT_NINJA]);
+        console.log('Added/Updated Fruit Ninja VR to the database');
 
         // Check for Elven Assassin
         const { data: existingElvenGame } = await supabase
