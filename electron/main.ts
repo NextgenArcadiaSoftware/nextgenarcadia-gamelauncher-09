@@ -14,15 +14,25 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
-    }
+    },
+    kiosk: true, // Enable kiosk mode
+    fullscreen: true, // Force fullscreen
+    autoHideMenuBar: true, // Hide the menu bar
+    frame: false, // Remove window frame
   });
 
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-    mainWindow.webContents.openDevTools();
+    // Only show DevTools in development if specifically needed
+    // mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
+
+  // Prevent the window from being closed with Alt+F4 or similar shortcuts
+  mainWindow.on('close', (e) => {
+    e.preventDefault();
+  });
 
   // Initialize RFID reader
   initRFIDReader();
@@ -49,6 +59,11 @@ function initRFIDReader() {
   });
 }
 
+// Add a command line switch to disable hardware acceleration
+// This can help with performance in kiosk mode
+app.commandLine.appendSwitch('disable-gpu-vsync');
+app.commandLine.appendSwitch('disable-frame-rate-limit');
+
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
@@ -73,4 +88,9 @@ ipcMain.on('launch-game', (event, executablePath) => {
     }
     event.reply('launch-game-success');
   });
+});
+
+// Add IPC handler for exiting kiosk mode (requires owner authentication)
+ipcMain.on('exit-kiosk', () => {
+  app.quit();
 });
