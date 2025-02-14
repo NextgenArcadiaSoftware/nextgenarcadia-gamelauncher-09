@@ -1,4 +1,3 @@
-
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -51,7 +50,6 @@ export function GameCard({
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
-  // Fix: Use complete URL for thumbnail
   const getImageUrl = (path: string) => {
     if (!path) return placeholderImage;
     if (path === 'placeholder.svg') return placeholderImage;
@@ -60,21 +58,19 @@ export function GameCard({
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl">
+    <div className="nintendo-card group">
       {showTapCard && !canPlayGames ? (
-        <div 
-          className="absolute inset-0 bg-gradient-to-br from-black/95 to-black/90 backdrop-blur-xl flex flex-col items-center justify-center gap-8 z-50 animate-fade-in rounded-2xl"
-        >
+        <div className="absolute inset-0 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center gap-4 z-50 animate-fade-in rounded-[2rem]">
           <div className="flex flex-col items-center gap-4 text-center px-6">
-            <div className="animate-[pulse_2s_ease-in-out_infinite] text-orange-500 text-3xl font-bold next-gen-title">
-              TAP CARD TO START GAME
+            <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
+              TAP CARD TO START
             </div>
             <p className="text-gray-400 text-sm">
-              Please present your RFID card to begin your gaming session
+              Present your RFID card
             </p>
             <Button
               variant="outline"
-              className="mt-4 apple-button"
+              className="mt-2 bg-white/10 hover:bg-white/20 text-white border-0"
               onClick={() => setShowTapCard(false)}
             >
               Cancel
@@ -85,70 +81,69 @@ export function GameCard({
       
       {showTapToStart && canPlayGames ? (
         <div 
-          className="absolute inset-0 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center gap-8 z-50 cursor-pointer animate-fade-in rounded-2xl"
+          className="absolute inset-0 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center z-50 cursor-pointer animate-fade-in rounded-[2rem]"
           onClick={() => {
             onPlay();
             setShowTapToStart(false);
           }}
         >
-          <div className="animate-[pulse_1s_ease-in-out_infinite] text-green-500 text-2xl font-bold next-gen-title">
-            TAP TO START
+          <div className="animate-[pulse_1s_ease-in-out_infinite] text-white text-2xl font-bold">
+            START GAME
           </div>
         </div>
       ) : null}
       
-      <div className="relative h-48 overflow-hidden rounded-t-2xl">
+      <div className="relative h-[280px] overflow-hidden rounded-[2rem]">
         <img 
           src={getImageUrl(thumbnail)}
           alt={title}
-          className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      </div>
-
-      <div className="glass border-0 p-6 space-y-4 rounded-b-2xl backdrop-blur-2xl">
-        <h3 className="text-xl font-bold next-gen-title group-hover:text-orange-500 transition-colors duration-300">{title}</h3>
-        <p className="text-sm text-gray-300 line-clamp-2 group-hover:text-white/90 transition-colors duration-300">{description}</p>
-        <div className="flex justify-between text-sm text-gray-300">
-          <span className="glass px-3 py-1 rounded-xl text-xs backdrop-blur-xl bg-white/5">
-            {genre}
-          </span>
-          <Button 
-            size="sm" 
-            className="apple-button bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700"
-            onClick={() => canPlayGames ? onPlay() : setShowTapCard(true)}
-          >
-            <Play className="w-4 h-4 mr-2" />
-            PLAY NOW
-          </Button>
-        </div>
-        {trailer && (
-          <Dialog>
-            <DialogTrigger asChild>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+        <div className="absolute bottom-0 left-0 p-6 w-full">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
+              <span className="inline-block px-3 py-1 rounded-full text-xs text-white/90 bg-white/20 backdrop-blur-sm">
+                {genre}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              {trailer && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button 
+                      size="icon"
+                      className="rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                    >
+                      <Video className="w-4 h-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="glass sm:max-w-[800px]">
+                    <DialogHeader>
+                      <DialogTitle>{title} - Trailer</DialogTitle>
+                    </DialogHeader>
+                    <div className="relative w-full h-0 pt-[56.25%] rounded-2xl overflow-hidden">
+                      <iframe
+                        className="absolute top-0 left-0 w-full h-full"
+                        src={getYouTubeEmbedUrl(trailer)}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
               <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full apple-button group"
+                size="icon"
+                className="rounded-full bg-white hover:bg-white/90 text-black"
+                onClick={() => canPlayGames ? onPlay() : setShowTapCard(true)}
               >
-                <Video className="w-4 h-4 mr-2 group-hover:text-orange-500" />
-                Watch Trailer
+                <Play className="w-4 h-4" />
               </Button>
-            </DialogTrigger>
-            <DialogContent className="glass border-white/10 sm:max-w-[800px]">
-              <DialogHeader>
-                <DialogTitle className="next-gen-title">{title} - Trailer</DialogTitle>
-              </DialogHeader>
-              <div className="relative w-full h-0 pt-[56.25%] rounded-xl overflow-hidden">
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full rounded-xl"
-                  src={getYouTubeEmbedUrl(trailer)}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

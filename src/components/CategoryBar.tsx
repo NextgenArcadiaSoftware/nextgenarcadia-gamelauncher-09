@@ -13,16 +13,16 @@ export function CategoryBar({
   onCategorySelect 
 }: CategoryBarProps) {
   return (
-    <div className="glass p-4 rounded-2xl flex gap-4 overflow-x-auto scrollbar-hide">
+    <div className="flex gap-3 overflow-x-auto scrollbar-hide py-2">
       {categories.map((category) => (
         <Button
           key={category}
-          variant={selectedCategory === category ? "default" : "secondary"}
+          variant="ghost"
           onClick={() => onCategorySelect(category)}
-          className={`whitespace-nowrap border-0 rounded-xl transition-all duration-300 hover:scale-105 ${
+          className={`rounded-full px-6 transition-all duration-300 ${
             selectedCategory === category 
-              ? "glass bg-white/20 hover:bg-white/30 shadow-lg" 
-              : "glass hover:bg-white/20"
+              ? "bg-white text-black hover:bg-white/90" 
+              : "text-white hover:bg-white/10"
           }`}
         >
           {category}
