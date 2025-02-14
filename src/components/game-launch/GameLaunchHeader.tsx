@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -86,7 +87,16 @@ export function GameLaunchHeader({
             </DropdownMenuContent>
           </DropdownMenu>
           
-          
+          <div className="grid grid-cols-2 gap-4 w-full">
+            <div className="text-left">
+              <p className="text-sm font-medium text-white/70">Current Game</p>
+              <p className="text-lg text-white">{activeGame || "Select a game"}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-medium text-white/70">Launch Code</p>
+              <p className="text-lg text-white">{activeGame ? gameLaunchCodes[activeGame]?.code : "N/A"}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>;
