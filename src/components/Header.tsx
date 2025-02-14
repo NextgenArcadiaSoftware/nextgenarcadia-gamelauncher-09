@@ -11,7 +11,7 @@ export function Header() {
   return (
     <div className="flex justify-between items-center w-full">
       <div className="flex items-center gap-6">
-        <h1 className="text-xl font-bold tracking-wide text-white">
+        <h1 className="text-xl font-bold tracking-wide text-white next-gen-title">
           NextGen Arcadia
         </h1>
       </div>
@@ -36,7 +36,7 @@ export function Header() {
         <Button 
           variant="destructive" 
           size="icon" 
-          className="glass border-0 bg-red-500/20 hover:bg-red-500/40 backdrop-blur-lg transition-all duration-300" 
+          className="glass border-0 bg-red-500/20 hover:bg-red-500/40 backdrop-blur-xl transition-all duration-300" 
           onClick={() => {
             toast({
               title: "Exiting",

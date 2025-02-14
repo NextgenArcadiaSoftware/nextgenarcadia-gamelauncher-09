@@ -60,10 +60,10 @@ export function GameCard({
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
+    <div className="group relative overflow-hidden rounded-2xl transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl">
       {showTapCard && !canPlayGames ? (
         <div 
-          className="absolute inset-0 bg-gradient-to-br from-black/95 to-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 animate-fade-in"
+          className="absolute inset-0 bg-gradient-to-br from-black/95 to-black/90 backdrop-blur-xl flex flex-col items-center justify-center gap-8 z-50 animate-fade-in rounded-2xl"
         >
           <div className="flex flex-col items-center gap-4 text-center px-6">
             <div className="animate-[pulse_2s_ease-in-out_infinite] text-orange-500 text-3xl font-bold next-gen-title">
@@ -74,7 +74,7 @@ export function GameCard({
             </p>
             <Button
               variant="outline"
-              className="mt-4 glass border-0 hover:bg-white/20"
+              className="mt-4 apple-button"
               onClick={() => setShowTapCard(false)}
             >
               Cancel
@@ -85,7 +85,7 @@ export function GameCard({
       
       {showTapToStart && canPlayGames ? (
         <div 
-          className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 cursor-pointer animate-fade-in"
+          className="absolute inset-0 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center gap-8 z-50 cursor-pointer animate-fade-in rounded-2xl"
           onClick={() => {
             onPlay();
             setShowTapToStart(false);
@@ -97,7 +97,7 @@ export function GameCard({
         </div>
       ) : null}
       
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden rounded-t-2xl">
         <img 
           src={getImageUrl(thumbnail)}
           alt={title}
@@ -106,20 +106,20 @@ export function GameCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
-      <div className="glass border-0 p-6 space-y-4 backdrop-blur-xl">
+      <div className="glass border-0 p-6 space-y-4 rounded-b-2xl backdrop-blur-2xl">
         <h3 className="text-xl font-bold next-gen-title group-hover:text-orange-500 transition-colors duration-300">{title}</h3>
         <p className="text-sm text-gray-300 line-clamp-2 group-hover:text-white/90 transition-colors duration-300">{description}</p>
         <div className="flex justify-between text-sm text-gray-300">
-          <span className="glass border-0 px-3 py-1 rounded-full text-xs backdrop-blur-sm bg-white/5">
+          <span className="glass px-3 py-1 rounded-xl text-xs backdrop-blur-xl bg-white/5">
             {genre}
           </span>
           <Button 
             size="sm" 
-            className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-            onClick={handlePlayButtonClick}
+            className="apple-button bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700"
+            onClick={() => canPlayGames ? onPlay() : setShowTapCard(true)}
           >
             <Play className="w-4 h-4 mr-2" />
-            PLAY GAME
+            PLAY NOW
           </Button>
         </div>
         {trailer && (
@@ -128,7 +128,7 @@ export function GameCard({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="w-full glass border-0 hover:bg-white/20 transition-all duration-300 group"
+                className="w-full apple-button group"
               >
                 <Video className="w-4 h-4 mr-2 group-hover:text-orange-500" />
                 Watch Trailer
@@ -136,11 +136,11 @@ export function GameCard({
             </DialogTrigger>
             <DialogContent className="glass border-white/10 sm:max-w-[800px]">
               <DialogHeader>
-                <DialogTitle className="next-gen-title text-white">{title} - Trailer</DialogTitle>
+                <DialogTitle className="next-gen-title">{title} - Trailer</DialogTitle>
               </DialogHeader>
-              <div className="relative w-full h-0 pt-[56.25%]">
+              <div className="relative w-full h-0 pt-[56.25%] rounded-xl overflow-hidden">
                 <iframe
-                  className="absolute top-0 left-0 w-full h-full rounded-lg"
+                  className="absolute top-0 left-0 w-full h-full rounded-xl"
                   src={getYouTubeEmbedUrl(trailer)}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
