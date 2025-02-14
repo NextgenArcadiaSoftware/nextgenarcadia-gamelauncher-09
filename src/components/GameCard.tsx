@@ -43,10 +43,10 @@ export function GameCard({
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-105">
+    <div className="group relative overflow-hidden rounded-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
       {showTapToStart ? (
         <div 
-          className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 cursor-pointer"
+          className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 cursor-pointer animate-fade-in"
           onClick={() => {
             onPlay();
             setShowTapToStart(false);
@@ -58,27 +58,28 @@ export function GameCard({
         </div>
       ) : null}
       
-      <div className="relative h-48">
+      <div className="relative h-48 overflow-hidden">
         <img
           src={thumbnail}
           alt={title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
-      <div className="glass border-0 p-6 space-y-4">
-        <h3 className="text-xl font-bold next-gen-title">{title}</h3>
-        <p className="text-sm text-gray-300 line-clamp-2">{description}</p>
+      <div className="glass border-0 p-6 space-y-4 backdrop-blur-xl">
+        <h3 className="text-xl font-bold next-gen-title group-hover:text-orange-500 transition-colors duration-300">{title}</h3>
+        <p className="text-sm text-gray-300 line-clamp-2 group-hover:text-white/90 transition-colors duration-300">{description}</p>
         <div className="flex justify-between text-sm text-gray-300">
-          <span className="glass border-0 px-3 py-1 rounded-full text-xs">
+          <span className="glass border-0 px-3 py-1 rounded-full text-xs backdrop-blur-sm bg-white/5">
             {genre}
           </span>
           <Button 
             size="sm" 
-            className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white"
+            className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
             onClick={handlePlayButtonClick}
           >
+            <Play className="w-4 h-4 mr-2" />
             PLAY GAME
           </Button>
         </div>
@@ -88,18 +89,18 @@ export function GameCard({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="w-full glass border-0 hover:bg-white/20"
+                className="w-full glass border-0 hover:bg-white/20 transition-all duration-300 group"
               >
-                <Video className="w-4 h-4 mr-2" />
+                <Video className="w-4 h-4 mr-2 group-hover:text-orange-500" />
                 Watch Trailer
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass border-white/10 sm:max-w-[800px]">
+            <DialogContent className="glass border-white/10 sm:max-w-[800px] backdrop-blur-xl">
               <DialogHeader>
                 <DialogTitle className="next-gen-title">{title} - Trailer</DialogTitle>
               </DialogHeader>
               <iframe
-                className="w-full aspect-video rounded-lg"
+                className="w-full aspect-video rounded-lg shadow-2xl"
                 src={trailer.replace('watch?v=', 'embed/')}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
