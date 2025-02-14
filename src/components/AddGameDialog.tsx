@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "./ui/button";
 import {
@@ -12,17 +13,10 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Plus } from "lucide-react";
 import { useToast } from "./ui/use-toast";
+import type { Game } from "@/types/game";
 
 interface AddGameDialogProps {
-  onAddGame: (game: {
-    title: string;
-    description: string;
-    genre: string;
-    releaseDate: string;
-    thumbnail: string;
-    trailer?: string;
-    executablePath?: string;
-  }) => void;
+  onAddGame: (game: Omit<Game, "id" | "status" | "created_at" | "updated_at">) => void;
 }
 
 export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
@@ -32,28 +26,24 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
     title: "",
     description: "",
     genre: "",
-    releaseDate: "",
+    release_date: "",
     thumbnail: "",
     trailer: "",
-    executablePath: "",
+    executable_path: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAddGame(formData);
     setOpen(false);
-    toast({
-      title: "Game Added",
-      description: "The game has been added to your library",
-    });
     setFormData({
       title: "",
       description: "",
       genre: "",
-      releaseDate: "",
+      release_date: "",
       thumbnail: "",
       trailer: "",
-      executablePath: "",
+      executable_path: "",
     });
   };
 
@@ -105,13 +95,13 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="releaseDate">Release Date</Label>
+              <Label htmlFor="release_date">Release Date</Label>
               <Input
-                id="releaseDate"
+                id="release_date"
                 type="date"
-                value={formData.releaseDate}
+                value={formData.release_date}
                 onChange={(e) =>
-                  setFormData({ ...formData, releaseDate: e.target.value })
+                  setFormData({ ...formData, release_date: e.target.value })
                 }
                 required
               />
@@ -141,14 +131,14 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="executablePath">Executable Path</Label>
+            <Label htmlFor="executable_path">Steam Game ID or Executable Path</Label>
             <Input
-              id="executablePath"
+              id="executable_path"
               type="text"
-              placeholder="C:\Games\YourGame\game.exe"
-              value={formData.executablePath}
+              placeholder="steam://rungameid/123456 or C:\Games\game.exe"
+              value={formData.executable_path}
               onChange={(e) =>
-                setFormData({ ...formData, executablePath: e.target.value })
+                setFormData({ ...formData, executable_path: e.target.value })
               }
               required
             />

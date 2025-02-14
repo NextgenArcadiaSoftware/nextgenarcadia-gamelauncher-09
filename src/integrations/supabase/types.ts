@@ -426,6 +426,48 @@ export type Database = {
         }
         Relationships: []
       }
+      games: {
+        Row: {
+          created_at: string
+          description: string | null
+          executable_path: string | null
+          genre: string | null
+          id: string
+          release_date: string | null
+          status: Database["public"]["Enums"]["game_status"] | null
+          thumbnail: string | null
+          title: string
+          trailer: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          executable_path?: string | null
+          genre?: string | null
+          id?: string
+          release_date?: string | null
+          status?: Database["public"]["Enums"]["game_status"] | null
+          thumbnail?: string | null
+          title: string
+          trailer?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          executable_path?: string | null
+          genre?: string | null
+          id?: string
+          release_date?: string | null
+          status?: Database["public"]["Enums"]["game_status"] | null
+          thumbnail?: string | null
+          title?: string
+          trailer?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       guest_profiles: {
         Row: {
           created_at: string
@@ -671,6 +713,7 @@ export type Database = {
         | "completed"
         | "failed"
       delivery_status: "pending" | "sent" | "delivered" | "failed" | "opened"
+      game_status: "enabled" | "disabled"
     }
     CompositeTypes: {
       [_ in never]: never

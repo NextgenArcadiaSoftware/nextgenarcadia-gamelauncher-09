@@ -1,16 +1,6 @@
 
 import { GameCard } from "./GameCard";
-
-interface Game {
-  id: number;
-  title: string;
-  description: string;
-  genre: string;
-  releaseDate: string;
-  thumbnail: string;
-  trailer?: string;
-  executablePath?: string;
-}
+import type { Game } from "@/types/game";
 
 interface GameGridProps {
   games: Game[];
@@ -19,16 +9,23 @@ interface GameGridProps {
 }
 
 export function GameGrid({ games, onPlayGame, canPlayGames }: GameGridProps) {
+  const enabledGames = games.filter(game => game.status === 'enabled');
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {games.map((game) => (
+      {enabledGames.map((game) => (
         <GameCard
           key={game.id}
           {...game}
-          onPlay={() => game.executablePath && onPlayGame(game.title, game.executablePath)}
+          onPlay={() => game.executable_path && onPlayGame(game.title, game.executable_path)}
           canPlayGames={canPlayGames}
         />
       ))}
+      {enabledGames.length === 0 && (
+        <div className="col-span-3 text-center py-8 text-muted-foreground">
+          No games available. Add some games to get started!
+        </div>
+      )}
     </div>
   );
 }
