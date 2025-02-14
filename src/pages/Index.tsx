@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -43,6 +44,17 @@ const FRUIT_NINJA = {
   thumbnail: "/lovable-uploads/32039c8f-e15c-4555-9a7d-5bdfd0db596f.png",
   executable_path: "steam://rungameid/923360",
   launch_code: "NINJA",
+  status: "enabled"
+} as const;
+
+const RICHIES_PLANK = {
+  title: "Richies Plank Experience",
+  description: "Face your fears in VR! Walk a narrow plank 80 stories high above a bustling city. A unique VR experience that puts your courage to the test.",
+  genre: "Simulation",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/bb8b5b5b-bf33-4e0c-b9af-a05408636bce.png",
+  executable_path: "steam://rungameid/517160",
+  launch_code: "PLANK",
   status: "enabled"
 } as const;
 
@@ -244,6 +256,12 @@ const Index = () => {
           .delete()
           .eq('title', FRUIT_NINJA.title);
 
+        // Delete existing Richie's Plank entry to ensure clean state
+        await supabase
+          .from('games')
+          .delete()
+          .eq('title', RICHIES_PLANK.title);
+
         // Check for All-in-One Sports
         const { data: existingSportsGame } = await supabase
           .from('games')
@@ -259,6 +277,10 @@ const Index = () => {
         // Add Fruit Ninja (always add to ensure new thumbnail)
         await supabase.from('games').insert([FRUIT_NINJA]);
         console.log('Added/Updated Fruit Ninja VR to the database');
+
+        // Add Richie's Plank (always add to ensure new thumbnail)
+        await supabase.from('games').insert([RICHIES_PLANK]);
+        console.log('Added/Updated Richies Plank Experience to the database');
 
         // Check for Elven Assassin
         const { data: existingElvenGame } = await supabase
