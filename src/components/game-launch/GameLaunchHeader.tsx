@@ -88,42 +88,45 @@ export function GameLaunchHeader({
   };
 
   return (
-    <div className="text-center mb-8 space-y-6">
-      <div className="text-4xl font-bold text-white animate-bounce">
+    <div className="text-center mb-4 space-y-4">
+      <div className="text-3xl font-bold text-white animate-bounce">
         {!selectedGame ? "Pick Your Game! 🎮" : `${gameLaunchCodes[selectedGame]?.emoji} ${selectedGame}`}
       </div>
       
-      <div className="glass p-6 rounded-3xl border-4 border-white/20">
-        <div className="flex flex-col items-center gap-6">
-          <div className="text-2xl text-white/90 mb-2">
-            {!selectedGame ? "Touch the button to see games!" : "Great choice! Now type the magic code:"}
+      <div className="glass p-4 rounded-2xl border-2 border-white/20">
+        <div className="flex flex-col items-center gap-3">
+          <div className="text-xl text-white/90">
+            {!selectedGame ? "Choose your game below!" : "Type this magic code:"}
           </div>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="outline" 
-                className="w-[280px] h-[60px] text-xl justify-between text-white bg-black/40 
-                         border-4 border-white/20 hover:bg-black/60 hover:scale-105 
-                         transition-all duration-300 rounded-2xl"
+                className="w-[240px] h-[50px] text-lg justify-between text-white bg-black/40 
+                         border-2 border-white/20 hover:bg-black/60 hover:scale-105 
+                         transition-all duration-300 rounded-xl"
               >
                 {selectedGame ? `${gameLaunchCodes[selectedGame].emoji} ${selectedGame}` : "🎮 Show Games"}
-                <ChevronDown className="h-6 w-6 opacity-70" />
+                <ChevronDown className="h-5 w-5 opacity-70" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[300px] bg-[#1A1F2C] border-4 border-white/20 rounded-2xl">
+            <DropdownMenuContent 
+              className="w-[260px] bg-[#1A1F2C] border-2 border-white/20 rounded-xl"
+              align="center"
+            >
               <DropdownMenuGroup>
                 {Object.entries(gameLaunchCodes).map(([game, {code, description, emoji}]) => (
                   <DropdownMenuItem 
                     key={game} 
-                    className="flex flex-col items-start p-4 focus:bg-white/10 hover:bg-white/5 
-                             cursor-pointer transition-all duration-200 hover:scale-[0.98]"
+                    className="flex flex-col items-start py-2 px-3 focus:bg-white/10 hover:bg-white/5 
+                             cursor-pointer transition-all duration-200"
                     onClick={() => handleGameSelect(game, code)}
                   >
-                    <span className="font-bold text-xl text-white">{emoji} {game}</span>
-                    <div className="flex justify-between w-full items-center mt-2">
-                      <span className="text-white/90 text-lg font-mono">{code}</span>
-                      <span className="text-white/80 text-base">{description}</span>
+                    <span className="font-bold text-base text-white">{emoji} {game}</span>
+                    <div className="flex justify-between w-full items-center mt-1">
+                      <span className="text-white/90 text-sm font-mono">{code}</span>
+                      <span className="text-white/80 text-xs">{description}</span>
                     </div>
                   </DropdownMenuItem>
                 ))}
@@ -132,13 +135,11 @@ export function GameLaunchHeader({
           </DropdownMenu>
           
           {selectedGame && (
-            <div className="grid grid-cols-1 gap-4 w-full text-center bg-white/10 p-4 rounded-2xl">
-              <div>
-                <p className="text-2xl font-bold text-white mb-2">Your Magic Code Is:</p>
-                <p className="text-4xl text-white font-mono tracking-[0.5em]">
-                  {gameLaunchCodes[selectedGame].code}
-                </p>
-              </div>
+            <div className="w-full text-center bg-white/10 p-3 rounded-xl">
+              <p className="text-xl font-bold text-white mb-1">Magic Code:</p>
+              <p className="text-3xl text-white font-mono tracking-[0.3em]">
+                {gameLaunchCodes[selectedGame].code}
+              </p>
             </div>
           )}
         </div>
