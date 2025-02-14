@@ -29,7 +29,9 @@ const getImageUrl = (path: string) => {
   if (path.startsWith('data:')) return path;
   if (path === 'placeholder.svg') return placeholderImage;
   if (path.startsWith('http')) return path;
-  return path.startsWith('/') ? path : `/${path}`;
+  // Remove any leading slashes before joining
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return cleanPath;
 };
 
 export function GameCard({

@@ -20,7 +20,9 @@ const getImageUrl = (path: string) => {
   if (path.startsWith('data:')) return path;
   if (path === 'placeholder.svg') return placeholderImage;
   if (path.startsWith('http')) return path;
-  return path.startsWith('/') ? path : `/${path}`;
+  // Remove any leading slashes before joining
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return cleanPath;
 };
 
 export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcaseProps) {
@@ -35,6 +37,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
 
   const handleImageError = (gameId: string, genre: string) => {
     console.log('Image failed to load for game:', gameId);
+    console.log('Attempting to load fallback image for genre:', genre);
     setImageSources(prev => ({
       ...prev,
       [gameId]: `https://source.unsplash.com/random/1200x800/?${encodeURIComponent(genre.toLowerCase())}`
