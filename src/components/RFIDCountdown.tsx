@@ -21,16 +21,16 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const { toast } = useToast();
 
   // Get the target word based on the active game
-  const targetWord = activeGame === "Fruit Ninja VR" ? "NINJA" :
-                    activeGame === "Richies Plank Experience" ? "PLANK" :
-                    activeGame === "Elven Assassin" ? "ELVEN" :
-                    activeGame === "All-In-One Sports VR" ? "SPORTS" :
-                    activeGame === "Crisis Brigade 2 Reloaded" ? "CRISIS" :
-                    activeGame === "Undead Citadel" ? "CITADEL" :
-                    activeGame === "Arizona Sunshine II" ? "ARIZONA" :
-                    activeGame === "iB Cricket" ? "CRICKET" :
-                    activeGame === "Subside" ? "SUBSIDE" :
-                    activeGame === "Propagation VR" ? "PROP" : "";
+  const targetWord = activeGame === "Fruit Ninja VR" ? "FNJ" :
+                    activeGame === "Richies Plank Experience" ? "RPE" :
+                    activeGame === "Elven Assassin" ? "EAX" :
+                    activeGame === "All-In-One Sports VR" ? "AIO" :
+                    activeGame === "Crisis Brigade 2 Reloaded" ? "CBR" :
+                    activeGame === "Undead Citadel" ? "UDC" :
+                    activeGame === "Arizona Sunshine II" ? "ARS" :
+                    activeGame === "iB Cricket" ? "IBC" :
+                    activeGame === "Subside" ? "SBS" :
+                    activeGame === "Propagation VR" ? "PVR" : "";
 
   // RFID Code detected simulation
   useEffect(() => {
