@@ -23,6 +23,15 @@ interface GameCardProps {
   canPlayGames: boolean;
 }
 
+// Move function declarations before they're used
+const getImageUrl = (path: string) => {
+  if (!path) return placeholderImage;
+  if (path.startsWith('data:')) return path;
+  if (path === 'placeholder.svg') return placeholderImage;
+  if (path.startsWith('http')) return path;
+  return path.startsWith('/') ? path : `/${path}`;
+};
+
 export function GameCard({
   title,
   thumbnail,
@@ -50,14 +59,6 @@ export function GameCard({
     const videoId = url.split('v=')[1]?.split('&')[0];
     if (!videoId) return '';
     return `https://www.youtube.com/embed/${videoId}`;
-  };
-
-  const getImageUrl = (path: string) => {
-    if (!path) return placeholderImage;
-    if (path.startsWith('data:')) return path;
-    if (path === 'placeholder.svg') return placeholderImage;
-    if (path.startsWith('http')) return path;
-    return path.startsWith('/') ? path : `/${path}`;
   };
 
   const handleImageError = () => {

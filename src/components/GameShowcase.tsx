@@ -14,22 +14,23 @@ interface GameShowcaseProps {
   canPlayGames: boolean;
 }
 
+// Move function declarations before they're used
+const getImageUrl = (path: string) => {
+  if (!path) return placeholderImage;
+  if (path.startsWith('data:')) return path;
+  if (path === 'placeholder.svg') return placeholderImage;
+  if (path.startsWith('http')) return path;
+  return path.startsWith('/') ? path : `/${path}`;
+};
+
 export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcaseProps) {
-  const [imageSources, setImageSources] = useState<Record<string, string>>({});
+  const [imageSources, setImageSources] = useState<Record<number, string>>({});
 
   const getYouTubeEmbedUrl = (url: string) => {
     if (!url) return '';
     const videoId = url.split('v=')[1]?.split('&')[0];
     if (!videoId) return '';
     return `https://www.youtube.com/embed/${videoId}`;
-  };
-
-  const getImageUrl = (path: string) => {
-    if (!path) return placeholderImage;
-    if (path.startsWith('data:')) return path;
-    if (path === 'placeholder.svg') return placeholderImage;
-    if (path.startsWith('http')) return path;
-    return path.startsWith('/') ? path : `/${path}`;
   };
 
   const handleImageError = (gameId: number, genre: string) => {
