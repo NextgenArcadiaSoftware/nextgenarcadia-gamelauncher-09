@@ -20,6 +20,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const [inputWord, setInputWord] = useState('');
   const { toast } = useToast();
 
+  // Define game codes with EXACT 3-letter codes
   const gameCodeMap: Record<string, string> = {
     "Elven Assassin": "EAX",
     "Fruit Ninja VR": "FNJ",
@@ -33,13 +34,16 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
     "Propagation VR": "PVR"
   };
 
-  const targetCode = activeGame ? gameCodeMap[activeGame] : '';
+  // Get the target code for the active game
+  const targetCode = activeGame ? (gameCodeMap[activeGame] || '') : '';
 
   useEffect(() => {
-    if (!activeGame) return;
-    
-    console.log('Active game:', activeGame);
-    console.log('Target code:', targetCode);
+    // Debug logging to track active game and target code
+    if (activeGame) {
+      console.log('Active game:', activeGame);
+      console.log('Target code:', targetCode);
+      console.log('Game codes available:', Object.keys(gameCodeMap));
+    }
   }, [activeGame, targetCode]);
 
   useEffect(() => {
@@ -66,7 +70,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
 
   const handleKeyPress = (key: string) => {
     if (inputWord.length < targetCode.length) {
-      const newInput = inputWord + key;
+      const newInput = inputWord + key.toUpperCase(); // Convert to uppercase to match target code
       setInputWord(newInput);
       console.log('Current input:', newInput, 'Target:', targetCode);
     }
@@ -77,7 +81,8 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   };
 
   const handleEnter = () => {
-    if (inputWord.toLowerCase() === targetCode.toLowerCase()) {
+    console.log('Comparing:', inputWord, 'with', targetCode);
+    if (inputWord === targetCode) {
       toast({
         title: "✨ Code Accepted",
         description: "Launching game...",

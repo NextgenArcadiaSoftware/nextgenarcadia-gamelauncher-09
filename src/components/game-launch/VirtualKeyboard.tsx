@@ -17,6 +17,9 @@ export function VirtualKeyboard({ inputWord, onKeyPress, onBackspace, onEnter }:
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   ];
 
+  // Convert input to uppercase for comparison
+  const upperInput = inputWord.toUpperCase();
+
   return (
     <div className="glass p-6 rounded-xl space-y-4 animate-scale-in max-w-3xl w-full">
       <div className="flex items-center gap-2 mb-6 justify-center">
@@ -30,7 +33,7 @@ export function VirtualKeyboard({ inputWord, onKeyPress, onBackspace, onEnter }:
             <KeyboardButton
               key={key}
               letter={key}
-              isPressed={inputWord.toLowerCase().includes(key.toLowerCase())}
+              isPressed={upperInput.includes(key)}
               onClick={onKeyPress}
             />
           ))}
