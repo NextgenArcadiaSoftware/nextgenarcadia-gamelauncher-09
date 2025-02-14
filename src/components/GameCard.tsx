@@ -70,6 +70,10 @@ export function GameCard({
 
   const getYouTubeEmbedUrl = (url: string) => {
     if (!url) return '';
+    if (url.includes('youtu.be')) {
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
     const videoId = url.split('v=')[1]?.split('&')[0];
     if (!videoId) return '';
     return `https://www.youtube.com/embed/${videoId}`;
