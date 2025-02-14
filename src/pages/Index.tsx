@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -63,9 +62,20 @@ const ELVEN_ASSASSIN = {
   description: "Become an elite Elven Archer and defend your castle from hordes of orcs and dragons in this action-packed VR archery game!",
   genre: "Action",
   release_date: "2023-12-01",
-  thumbnail: "/lovable-uploads/f8c126a3-87f1-4ea8-b8d8-76597554d0be.png",
+  thumbnail: "/lovable-uploads/c7421927-0f62-420f-87a6-2d35d6600141.png",
   executable_path: "steam://rungameid/503770",
   launch_code: "ELVEN",
+  status: "enabled"
+} as const;
+
+const UNDEAD_CITADEL = {
+  title: "Undead Citadel",
+  description: "Battle through hordes of the undead in this medieval combat VR game. Wield swords, axes, and more as you fight to survive in a dark fantasy world.",
+  genre: "Action",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/22b9e9da-62e9-4f60-8f96-5f13916991f6.png",
+  executable_path: "steam://rungameid/819190",
+  launch_code: "CITADEL",
   status: "enabled"
 } as const;
 
@@ -250,17 +260,26 @@ const Index = () => {
 
     const addInitialGames = async () => {
       try {
-        // First, delete existing Fruit Ninja entry to ensure clean state
+        // Delete existing entries to ensure clean state
         await supabase
           .from('games')
           .delete()
           .eq('title', FRUIT_NINJA.title);
 
-        // Delete existing Richie's Plank entry to ensure clean state
         await supabase
           .from('games')
           .delete()
           .eq('title', RICHIES_PLANK.title);
+
+        await supabase
+          .from('games')
+          .delete()
+          .eq('title', ELVEN_ASSASSIN.title);
+
+        await supabase
+          .from('games')
+          .delete()
+          .eq('title', UNDEAD_CITADEL.title);
 
         // Check for All-in-One Sports
         const { data: existingSportsGame } = await supabase
@@ -274,25 +293,18 @@ const Index = () => {
           console.log('Added All-in-One Sports VR to the database');
         }
 
-        // Add Fruit Ninja (always add to ensure new thumbnail)
+        // Add updated games
         await supabase.from('games').insert([FRUIT_NINJA]);
         console.log('Added/Updated Fruit Ninja VR to the database');
 
-        // Add Richie's Plank (always add to ensure new thumbnail)
         await supabase.from('games').insert([RICHIES_PLANK]);
         console.log('Added/Updated Richies Plank Experience to the database');
 
-        // Check for Elven Assassin
-        const { data: existingElvenGame } = await supabase
-          .from('games')
-          .select('title')
-          .eq('title', ELVEN_ASSASSIN.title)
-          .single();
+        await supabase.from('games').insert([ELVEN_ASSASSIN]);
+        console.log('Added/Updated Elven Assassin to the database');
 
-        if (!existingElvenGame) {
-          await supabase.from('games').insert([ELVEN_ASSASSIN]);
-          console.log('Added Elven Assassin to the database');
-        }
+        await supabase.from('games').insert([UNDEAD_CITADEL]);
+        console.log('Added/Updated Undead Citadel to the database');
 
         fetchGames(); // Refresh the games list
       } catch (error) {
