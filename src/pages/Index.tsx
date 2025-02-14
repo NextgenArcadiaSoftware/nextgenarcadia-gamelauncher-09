@@ -101,6 +101,39 @@ const IB_CRICKET = {
   status: "enabled"
 } as const;
 
+const PROPAGATION = {
+  title: "Propagation VR",
+  description: "Face terrifying creatures in this intense VR horror shooter. Fight for survival in a dark and atmospheric world overrun by mysterious entities.",
+  genre: "Horror",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/55ebaec7-e228-4b04-a2a3-c033d76bca1c.png",
+  executable_path: "steam://rungameid/1363430",
+  launch_code: "PROP",
+  status: "enabled"
+} as const;
+
+const SUBSIDE = {
+  title: "Subside",
+  description: "Dive into an underwater survival adventure in VR. Explore mysterious depths, solve puzzles, and uncover the secrets of the deep.",
+  genre: "Adventure",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/1f22119b-c9b1-4260-8503-8bc42fdef5b8.png",
+  executable_path: "steam://rungameid/1908810",
+  launch_code: "SUBSIDE",
+  status: "enabled"
+} as const;
+
+const CRISIS_BRIGADE = {
+  title: "Crisis Brigade 2 Reloaded",
+  description: "Join the elite tactical unit in this action-packed VR shooter. Take on dangerous missions and eliminate threats in intense combat scenarios.",
+  genre: "FPS",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/0c397672-8051-4e6f-bb5b-36548c8d7381.png",
+  executable_path: "steam://rungameid/1900720",
+  launch_code: "CRISIS",
+  status: "enabled"
+} as const;
+
 const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -313,6 +346,21 @@ const Index = () => {
           .delete()
           .eq('title', IB_CRICKET.title);
 
+        await supabase
+          .from('games')
+          .delete()
+          .eq('title', PROPAGATION.title);
+
+        await supabase
+          .from('games')
+          .delete()
+          .eq('title', SUBSIDE.title);
+
+        await supabase
+          .from('games')
+          .delete()
+          .eq('title', CRISIS_BRIGADE.title);
+
         // Check for All-in-One Sports
         const { data: existingSportsGame } = await supabase
           .from('games')
@@ -343,6 +391,15 @@ const Index = () => {
 
         await supabase.from('games').insert([IB_CRICKET]);
         console.log('Added/Updated iB Cricket to the database');
+
+        await supabase.from('games').insert([PROPAGATION]);
+        console.log('Added/Updated Propagation VR to the database');
+
+        await supabase.from('games').insert([SUBSIDE]);
+        console.log('Added/Updated Subside to the database');
+
+        await supabase.from('games').insert([CRISIS_BRIGADE]);
+        console.log('Added/Updated Crisis Brigade 2 Reloaded to the database');
 
         fetchGames(); // Refresh the games list
       } catch (error) {
