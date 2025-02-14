@@ -1,11 +1,10 @@
 
-import keyboard
+import subprocess
 import time
 import os
-import json
-import requests
-from typing import Dict, Optional
 import logging
+from typing import Dict, Optional
+import keyboard
 
 # Set up logging
 logging.basicConfig(
@@ -17,91 +16,148 @@ logger = logging.getLogger(__name__)
 
 class GameLauncher:
     def __init__(self):
-        self.current_game: Optional[str] = None
-        self.game_paths: Dict[str, str] = {
-            'Elven Assassin': r'C:\Program Files\Steam\steamapps\common\Elven Assassin\ElvenAssassin.exe',
-            'Fruit Ninja VR': r'C:\Program Files\Steam\steamapps\common\Fruit Ninja VR\FruitNinja.exe',
-            'Crisis Brigade 2 Reloaded': r'C:\Program Files\Steam\steamapps\common\Crisis Brigade 2\CrisisBrigade2.exe',
-            'All-In-One Sports VR': r'C:\Program Files\Steam\steamapps\common\All-In-One Sports VR\AllInOneSportsVR.exe',
-            'Richies Plank Experience': r'C:\Program Files\Steam\steamapps\common\Richie\'s Plank Experience\PlankExperience.exe',
-            'iB Cricket': r'C:\Program Files\Steam\steamapps\common\iB Cricket\iB Cricket.exe',
-            'Undead Citadel': r'C:\Program Files\Steam\steamapps\common\Undead Citadel\UndeadCitadel.exe',
-            'Arizona Sunshine': r'C:\Program Files\Steam\steamapps\common\Arizona Sunshine\ArizonaSunshine.exe',
-            'Subside': r'C:\Program Files\Steam\steamapps\common\Subside\Subside.exe',
-            'Propagation VR': r'C:\Program Files\Steam\steamapps\common\Propagation VR\PropagationVR.exe'
-        }
+        self.current_process: Optional[subprocess.Popen] = None
+        self.session_timer: Optional[float] = None
+        self.session_duration = 8 * 60  # 8 minutes in seconds
         
-    def launch_game(self, game_title: str) -> bool:
+        # Dictionary mapping trigger words to game paths and full names
+        self.games: Dict[str, Dict[str, str]] = {
+            'elven': {
+                'path': r'C:\Program Files\Steam\steamapps\common\Elven Assassin\ElvenAssassin.exe',
+                'name': 'Elven Assassin'
+            },
+            'fruit': {
+                'path': r'C:\Program Files\Steam\steamapps\common\Fruit Ninja VR\FruitNinja.exe',
+                'name': 'Fruit Ninja VR'
+            },
+            'crisis': {
+                'path': r'C:\Program Files\Steam\steamapps\common\Crisis Brigade 2\CrisisBrigade2.exe',
+                'name': 'Crisis Brigade 2 Reloaded'
+            },
+            'sports': {
+                'path': r'C:\Program Files\Steam\steamapps\common\All-In-One Sports VR\AllInOneSportsVR.exe',
+                'name': 'All-In-One Sports VR'
+            },
+            'plank': {
+                'path': r'C:\Program Files\Steam\steamapps\common\Richie\'s Plank Experience\PlankExperience.exe',
+                'name': 'Richies Plank Experience'
+            },
+            'cricket': {
+                'path': r'C:\Program Files\Steam\steamapps\common\iB Cricket\iB Cricket.exe',
+                'name': 'iB Cricket'
+            },
+            'undead': {
+                'path': r'C:\Program Files\Steam\steamapps\common\Undead Citadel\UndeadCitadel.exe',
+                'name': 'Undead Citadel'
+            },
+            'arizona': {
+                'path': r'C:\Program Files\Steam\steamapps\common\Arizona Sunshine\ArizonaSunshine.exe',
+                'name': 'Arizona Sunshine'
+            },
+            'subside': {
+                'path': r'C:\Program Files\Steam\steamapps\common\Subside\Subside.exe',
+                'name': 'Subside'
+            },
+            'propagation': {
+                'path': r'C:\Program Files\Steam\steamapps\common\Propagation VR\PropagationVR.exe',
+                'name': 'Propagation VR'
+            }
+        }
+
+    def launch_game(self, trigger_word: str) -> bool:
         """
-        Launch a game by its title
+        Launch a game using its trigger word
         """
         try:
-            if game_title not in self.game_paths:
-                logger.error(f"Game {game_title} not found in paths")
+            if trigger_word not in self.games:
+                logger.error(f"Game trigger '{trigger_word}' not recognized")
                 return False
-                
-            path = self.game_paths[game_title]
+
+            game_info = self.games[trigger_word]
+            path = game_info['path']
+            
             if not os.path.exists(path):
                 logger.error(f"Game executable not found at path: {path}")
                 return False
-                
+
             # Stop any currently running game
             self.stop_current_game()
+
+            # Launch the new game
+            logger.info(f"Launching {game_info['name']}...")
+            print(f"\nLaunching {game_info['name']}...")
             
-            # Launch the new game by sending a request to the Flask server
-            response = requests.post('http://localhost:8080/api/launch', 
-                json={'path': path})
-                
-            if response.status_code == 200:
-                self.current_game = game_title
-                logger.info(f"Successfully launched game: {game_title}")
-                return True
-            else:
-                logger.error(f"Failed to launch game: {response.text}")
-                return False
-                
+            self.current_process = subprocess.Popen(path, shell=True)
+            self.session_timer = time.time()
+            
+            logger.info(f"Successfully launched {game_info['name']}")
+            print(f"Session will end in {self.session_duration // 60} minutes")
+            return True
+
         except Exception as e:
-            logger.error(f"Error launching game {game_title}: {str(e)}")
+            logger.error(f"Error launching game: {str(e)}")
             return False
-            
+
     def stop_current_game(self) -> bool:
         """
         Stop the currently running game
         """
         try:
-            if self.current_game:
-                response = requests.post('http://localhost:8080/api/launch',
-                    json={'command': 'stop_game'})
-                    
-                if response.status_code == 200:
-                    logger.info(f"Successfully stopped game: {self.current_game}")
-                    self.current_game = None
-                    return True
-                else:
-                    logger.error(f"Failed to stop game: {response.text}")
-                    return False
+            if self.current_process:
+                self.current_process.terminate()
+                self.current_process = None
+                self.session_timer = None
+                logger.info("Game stopped successfully")
+                print("\nGame stopped")
+                return True
             return True
-            
+
         except Exception as e:
             logger.error(f"Error stopping game: {str(e)}")
             return False
 
+    def check_session_timeout(self) -> bool:
+        """
+        Check if the current session has timed out
+        """
+        if self.session_timer and self.current_process:
+            elapsed_time = time.time() - self.session_timer
+            if elapsed_time >= self.session_duration:
+                print("\nSession time expired - stopping game...")
+                self.stop_current_game()
+                return True
+        return False
+
 def main():
     launcher = GameLauncher()
     print("\n=== VR Game Launcher ===")
-    print("\nWaiting for game launch commands...")
-    
+    print("\nAvailable trigger words:")
+    for trigger, info in launcher.games.items():
+        print(f"'{trigger}' for {info['name']}")
+    print("\nPress 'esc' to stop the current game")
+    print("Type 'exit' to quit the launcher")
+    print("\nWaiting for commands...")
+
     while True:
         try:
-            # Wait for keyboard input
+            # Check for session timeout
+            launcher.check_session_timeout()
+
+            # Check for keyboard events
             event = keyboard.read_event(suppress=True)
             
             if event.event_type == keyboard.KEY_DOWN:
                 if event.name == 'esc':
                     print("\nStopping current game...")
                     launcher.stop_current_game()
-                    
-                # You can add more keyboard shortcuts here
+                elif event.name == 'enter':
+                    command = keyboard.get_typed_strings(keyboard.get_hotkey_name())[0].lower().strip()
+                    if command == 'exit':
+                        break
+                    elif command in launcher.games:
+                        launcher.launch_game(command)
+                    else:
+                        print(f"\nUnknown command: {command}")
                 
             time.sleep(0.1)  # Small delay to prevent high CPU usage
             
