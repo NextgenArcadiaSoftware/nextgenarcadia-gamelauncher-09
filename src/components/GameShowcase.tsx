@@ -4,6 +4,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import type { Game } from "@/types/game";
+import { Play, Video } from "lucide-react";
 import placeholderImage from "../assets/placeholder.svg";
 
 interface GameShowcaseProps {
@@ -20,7 +21,6 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
-  // Fix: Use complete URL for thumbnail
   const getImageUrl = (path: string) => {
     if (!path) return placeholderImage;
     if (path === 'placeholder.svg') return placeholderImage;
@@ -29,12 +29,12 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
   };
 
   return (
-    <div className="relative w-full h-[600px] overflow-hidden rounded-3xl animate-fade-in">
+    <div className="relative w-full h-[400px] overflow-hidden rounded-3xl animate-fade-in">
       <Carousel className="w-full">
         <CarouselContent>
           {games.map((game) => (
             <CarouselItem key={game.id}>
-              <div className="relative w-full h-[600px]">
+              <div className="relative w-full h-[400px]">
                 {game.trailer ? (
                   <Dialog>
                     <DialogTrigger asChild>
@@ -67,20 +67,32 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                     className="w-full h-full object-cover animate-scale-in"
                   />
                 )}
-                <div className="absolute inset-x-0 bottom-0 h-[70%] bg-gradient-to-t from-black/90 via-black/40 to-transparent animate-fade-in" />
-                <div className="absolute bottom-0 left-0 p-8 w-full animate-slide-in-right">
-                  <Badge variant="secondary" className="mb-4 bg-white/10 backdrop-blur-sm animate-fade-in">
-                    SHOWCASE
+                <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-black/90 via-black/40 to-transparent animate-fade-in" />
+                <div className="absolute bottom-0 left-0 p-6 w-full animate-slide-in-right">
+                  <Badge variant="secondary" className="mb-2 bg-white/10 backdrop-blur-sm animate-fade-in">
+                    FEATURED
                   </Badge>
-                  <h2 className="text-4xl font-bold text-white mb-2 animate-fade-in">{game.title}</h2>
-                  <p className="text-lg text-white/80 mb-6 animate-fade-in">{game.description}</p>
-                  <Button 
-                    onClick={() => game.executable_path && onPlayGame(game.title, game.executable_path)}
-                    disabled={!canPlayGames}
-                    className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white px-8 animate-scale-in"
-                  >
-                    PLAY NOW
-                  </Button>
+                  <h2 className="text-3xl font-bold text-white mb-2 animate-fade-in">{game.title}</h2>
+                  <p className="text-base text-white/80 mb-4 line-clamp-2 animate-fade-in">{game.description}</p>
+                  <div className="flex gap-3">
+                    <Button 
+                      onClick={() => game.executable_path && onPlayGame(game.title, game.executable_path)}
+                      disabled={!canPlayGames}
+                      className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white px-6 animate-scale-in"
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      PLAY NOW
+                    </Button>
+                    {game.trailer && (
+                      <Button 
+                        variant="outline"
+                        className="bg-white/10 hover:bg-white/20 animate-scale-in"
+                      >
+                        <Video className="w-4 h-4 mr-2" />
+                        Watch Trailer
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </CarouselItem>
