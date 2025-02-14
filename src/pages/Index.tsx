@@ -216,7 +216,7 @@ const Index = () => {
     : games.filter(game => game.genre === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F97316] via-[#D946EF] to-[#8B5CF6] animate-gradient-shift">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 animate-gradient-shift">
       {showRFIDCountdown ? (
         <RFIDCountdown 
           onExit={handleExitSession}
@@ -226,11 +226,11 @@ const Index = () => {
       ) : (
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
           <div className="flex flex-col space-y-8">
-            <div className="glass p-6 rounded-3xl flex justify-between items-center backdrop-blur-xl border border-white/20 shadow-xl">
+            <div className="glass p-6 rounded-3xl flex justify-between items-center">
               <Header />
               <Button
                 variant="outline"
-                className="glass border-0 hover:bg-white/20 flex gap-2 transition-all duration-300 hover:scale-105"
+                className="glass border-0 hover:bg-gray-50 flex gap-2 transition-all duration-300 hover:scale-105"
                 onClick={() => setShowOwnerDashboard(true)}
               >
                 <Settings className="w-4 h-4" />
@@ -244,8 +244,8 @@ const Index = () => {
                 canPlayGames={canPlayGames}
               />
             </div>
-            <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
-              <h2 className="text-2xl font-bold text-white next-gen-title">VR Games</h2>
+            <div className="glass p-8 rounded-3xl space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 next-gen-title">VR Games</h2>
               <CategoryBar 
                 categories={categories}
                 selectedCategory={selectedCategory}
