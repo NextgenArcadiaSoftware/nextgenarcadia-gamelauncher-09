@@ -1,1 +1,8 @@
-project_id = "etylmfrbfzkynbgqjfvj"
+
+[[policies]]
+name = "Enable read access for all users"
+table = "games"
+operation = "SELECT"
+definition = """
+  true
+"""
