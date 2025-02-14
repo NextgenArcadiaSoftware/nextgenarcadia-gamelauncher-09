@@ -160,13 +160,13 @@ const Index = () => {
       ) : (
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
           <div className="flex flex-col space-y-8">
-            <div className="flex justify-between items-center">
+            <div className="glass p-6 rounded-3xl flex justify-between items-center">
               <Header />
               <div className="flex gap-4">
                 <AddGameDialog onAddGame={handleAddGame} />
                 <Button
                   variant="outline"
-                  className="flex gap-2"
+                  className="glass border-0 hover:bg-white/20 flex gap-2"
                   onClick={() => setShowOwnerDashboard(true)}
                 >
                   <Settings className="w-4 h-4" />

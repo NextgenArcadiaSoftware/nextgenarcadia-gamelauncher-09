@@ -9,9 +9,9 @@ export function Header() {
   const { toast } = useToast();
 
   return (
-    <div className="glass p-6 rounded-xl flex justify-between items-center transition-all duration-300">
+    <div className="flex justify-between items-center w-full">
       <div className="flex items-center gap-6">
-        <h1 className="text-xl font-bold tracking-wide next-gen-title bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+        <h1 className="text-xl font-bold tracking-wide text-white">
           NextGen Arcadia
         </h1>
       </div>
@@ -28,7 +28,7 @@ export function Header() {
           <Button 
             variant="secondary" 
             size="icon" 
-            className="glass border-0 hover:bg-white/20 transition-all duration-300 hover:scale-105"
+            className="glass border-0 hover:bg-white/20 transition-all duration-300"
           >
             <Library className="w-5 h-5" />
           </Button>
@@ -36,7 +36,7 @@ export function Header() {
         <Button 
           variant="destructive" 
           size="icon" 
-          className="glass border-0 bg-red-500/20 hover:bg-red-500/40 backdrop-blur-lg transition-all duration-300 hover:scale-105" 
+          className="glass border-0 bg-red-500/20 hover:bg-red-500/40 backdrop-blur-lg transition-all duration-300" 
           onClick={() => {
             toast({
               title: "Exiting",
