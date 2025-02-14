@@ -6,3 +6,19 @@ operation = "SELECT"
 definition = """
   true
 """
+
+[[policies]]
+name = "Enable insert access for all users"
+table = "games"
+operation = "INSERT"
+definition = """
+  true
+"""
+
+[[policies]]
+name = "Enable update access for all users"
+table = "games"
+operation = "UPDATE"
+definition = """
+  true
+"""
