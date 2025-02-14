@@ -1,5 +1,6 @@
 
-import { Backspace, CornerDownLeft } from 'lucide-react';
+import React from 'react';
+import { Delete, CornerDownLeft } from 'lucide-react';
 import { KeyboardButton } from './KeyboardButton';
 
 interface VirtualKeyboardProps {
@@ -44,7 +45,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
           </React.Fragment>
         ))}
         <KeyboardButton onClick={onBackspace}>
-          <Backspace className="w-6 h-6 mx-auto" />
+          <Delete className="w-6 h-6 mx-auto" />
         </KeyboardButton>
         <KeyboardButton onClick={onEnter} disabled={!isInputComplete}>
           <CornerDownLeft className="w-6 h-6 mx-auto" />
