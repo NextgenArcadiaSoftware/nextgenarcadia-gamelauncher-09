@@ -22,3 +22,11 @@ operation = "UPDATE"
 definition = """
   true
 """
+
+[[policies]]
+name = "Enable delete access for all users"
+table = "games"
+operation = "DELETE"
+definition = """
+  true
+"""
