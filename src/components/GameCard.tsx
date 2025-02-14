@@ -15,7 +15,7 @@ interface GameCardProps {
   thumbnail: string;
   description: string;
   genre: string;
-  releaseDate: string;
+  release_date: string; // Changed from releaseDate to release_date
   trailer?: string;
   executablePath?: string;
   onPlay: () => void;
@@ -27,7 +27,7 @@ export function GameCard({
   thumbnail,
   description,
   genre,
-  releaseDate,
+  release_date, // Changed from releaseDate to release_date
   trailer,
   onPlay,
   canPlayGames
@@ -68,7 +68,7 @@ export function GameCard({
         <p className="text-sm text-gray-400">{description}</p>
         <div className="flex justify-between text-sm text-gray-400">
           <span>{genre}</span>
-          <span>{releaseDate}</span>
+          <span>{new Date(release_date).toLocaleDateString()}</span>
         </div>
         <div className="flex gap-2">
           {trailer && (

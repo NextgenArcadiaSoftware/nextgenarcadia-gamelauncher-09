@@ -16,7 +16,12 @@ export function GameGrid({ games, onPlayGame, canPlayGames }: GameGridProps) {
       {enabledGames.map((game) => (
         <GameCard
           key={game.id}
-          {...game}
+          title={game.title}
+          description={game.description}
+          genre={game.genre}
+          release_date={game.release_date}
+          thumbnail={game.thumbnail}
+          trailer={game.trailer}
           onPlay={() => game.executable_path && onPlayGame(game.title, game.executable_path)}
           canPlayGames={canPlayGames}
         />
