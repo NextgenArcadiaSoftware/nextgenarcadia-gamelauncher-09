@@ -11,6 +11,15 @@ import {
 import { useState } from "react";
 import placeholderImage from "../assets/placeholder.svg";
 
+// Move function definition to the top level, before any component code
+const getImageUrl = (path: string) => {
+  if (!path) return placeholderImage;
+  if (path.startsWith('data:')) return path;
+  if (path === 'placeholder.svg') return placeholderImage;
+  if (path.startsWith('http')) return path;
+  return path.startsWith('/') ? path : `/${path}`;
+};
+
 interface GameCardProps {
   title: string;
   thumbnail: string;
@@ -50,14 +59,6 @@ export function GameCard({
     const videoId = url.split('v=')[1]?.split('&')[0];
     if (!videoId) return '';
     return `https://www.youtube.com/embed/${videoId}`;
-  };
-
-  const getImageUrl = (path: string) => {
-    if (!path) return placeholderImage;
-    if (path.startsWith('data:')) return path;
-    if (path === 'placeholder.svg') return placeholderImage;
-    if (path.startsWith('http')) return path;
-    return path.startsWith('/') ? path : `/${path}`;
   };
 
   const handleImageError = () => {
@@ -146,7 +147,7 @@ export function GameCard({
                       <Video className="w-4 h-4" />
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="glass sm:max-w-[800px]">
+                  <DialogContent className="glass">
                     <DialogHeader>
                       <DialogTitle>{title} - Trailer</DialogTitle>
                     </DialogHeader>
