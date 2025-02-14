@@ -79,7 +79,7 @@ export function GameCard({
             className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white"
             onClick={handlePlayButtonClick}
           >
-            GET
+            PLAY GAME
           </Button>
         </div>
         {trailer && (
