@@ -25,10 +25,24 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
 
   useEffect(() => {
     // Set target word based on active game
-    if (activeGame?.toLowerCase().includes('fruit')) {
-      setTargetWord('FRUIT');
-    } else {
-      setTargetWord('START');
+    if (!activeGame) return;
+    
+    const gameCodeMap: Record<string, string> = {
+      "Elven Assassin": "EAX",
+      "Fruit Ninja VR": "FNJ",
+      "Crisis Brigade 2 Reloaded": "CBR",
+      "All-in-One Sports VR": "AIO",
+      "Richies Plank Experience": "RPE",
+      "iB Cricket": "IBC",
+      "Undead Citadel": "UDC",
+      "Arizona Sunshine": "ARS",
+      "Subside": "SBS",
+      "Propagation VR": "PVR"
+    };
+
+    const code = gameCodeMap[activeGame];
+    if (code) {
+      setTargetWord(code);
     }
   }, [activeGame]);
 
