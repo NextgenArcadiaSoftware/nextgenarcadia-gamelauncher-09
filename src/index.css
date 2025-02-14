@@ -33,21 +33,43 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
-    background: linear-gradient(225deg, hsl(220 20% 4%), hsl(220 20% 2%));
+    @apply text-foreground antialiased overflow-x-hidden;
+    background: linear-gradient(
+      225deg,
+      hsl(265 50% 10%) 0%,
+      hsl(220 50% 8%) 25%,
+      hsl(235 50% 12%) 50%,
+      hsl(245 50% 10%) 75%,
+      hsl(265 50% 10%) 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
     min-height: 100vh;
+  }
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-black/40 backdrop-blur-lg border border-white/10 rounded-lg;
+    @apply bg-black/30 backdrop-blur-xl border border-white/10 rounded-lg;
+    box-shadow: 0 4px 32px -12px rgba(0, 0, 0, 0.5);
   }
   
   .game-card {
     @apply relative overflow-hidden rounded-lg transition-all duration-300 hover:scale-105;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
