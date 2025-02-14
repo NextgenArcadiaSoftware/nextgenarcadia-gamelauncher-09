@@ -1,8 +1,12 @@
 
 import { useEffect, useState } from 'react';
-import { Button } from './ui/button';
 import { useToast } from './ui/use-toast';
-import { Keyboard, Delete, ArrowLeft, CornerDownLeft } from 'lucide-react';
+import { Delete } from 'lucide-react';
+import { Button } from './ui/button';
+import { GameLaunchHeader } from './game-launch/GameLaunchHeader';
+import { InputDisplay } from './game-launch/InputDisplay';
+import { VirtualKeyboard } from './game-launch/VirtualKeyboard';
+import { TimerDisplay } from './game-launch/TimerDisplay';
 
 interface RFIDCountdownProps {
   onExit: () => void;
@@ -17,7 +21,6 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const [showKeyboard, setShowKeyboard] = useState(true);
   const { toast } = useToast();
 
-  // Fixed: Set target word immediately when activeGame changes
   useEffect(() => {
     if (activeGame) {
       const gameWord = activeGame === "All-In-One Sports VR" ? "start_sports" :
@@ -57,7 +60,6 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
     }
   }, [showKeyboard, onExit, toast, duration, activeGame]);
 
-  // Fixed: Simplified key press handler
   const handleKeyPress = (key: string) => {
     console.log('Key pressed:', key);
     if (inputWord.length < targetWord.length) {
@@ -65,7 +67,6 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
       console.log('New input:', newInput, 'Target:', targetWord);
       setInputWord(newInput);
       
-      // Check if input matches target
       if (newInput.toLowerCase() === targetWord.toLowerCase()) {
         console.log('Input matches target, launching game');
         handleEnter();
@@ -95,95 +96,26 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
     }
   };
 
-  const keys = [
-    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-    ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-  ];
-
   if (showKeyboard) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in p-4">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-white mb-4 animate-fade-in">
-            Launch {activeGame}
-          </h2>
-          
-          {/* Current Input Display */}
-          <div className="text-2xl font-mono text-white mb-4 animate-fade-in">
-            Your Input: <span className="text-green-300">{inputWord || '(type the code)'}</span>
-          </div>
+        <GameLaunchHeader
+          activeGame={activeGame}
+          inputWord={inputWord}
+          targetWord={targetWord}
+        />
 
-          {/* Target Word Display */}
-          {activeGame && (
-            <div className="glass p-4 rounded-xl animate-fade-in space-y-2">
-              <div className="text-white/80">Required Launch Code:</div>
-              <div className="text-white font-mono text-xl bg-black/20 px-4 py-2 rounded-lg">
-                {targetWord}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="mb-8 flex gap-2">
-          {targetWord.split('').map((_, index) => (
-            <div
-              key={index}
-              className={`w-12 h-12 border-2 ${
-                inputWord[index] 
-                  ? inputWord[index].toLowerCase() === targetWord[index].toLowerCase()
-                    ? 'border-green-500 bg-green-500/20 scale-110' 
-                    : 'border-red-500 bg-red-500/20'
-                  : 'border-white/50 bg-white/10'
-              } rounded-lg flex items-center justify-center text-2xl font-bold text-white animate-scale-in transition-all duration-200`}
-            >
-              {inputWord[index] || ''}
-            </div>
-          ))}
-        </div>
+        <InputDisplay
+          inputWord={inputWord}
+          targetWord={targetWord}
+        />
         
-        <div className="glass p-6 rounded-xl space-y-4 animate-scale-in max-w-3xl w-full">
-          <div className="flex items-center gap-2 mb-6 justify-center">
-            <Keyboard className="w-6 h-6 text-white/80" />
-            <span className="text-white/80 text-lg">Type the launch code to begin</span>
-          </div>
-          
-          {keys.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex justify-center gap-2">
-              {row.map((key) => (
-                <Button
-                  key={key}
-                  variant="outline"
-                  className={`w-12 h-12 text-xl font-bold bg-white/10 border-white/20 
-                    hover:bg-white/20 transition-all duration-200 hover:scale-110
-                    ${inputWord.toLowerCase().includes(key.toLowerCase()) ? 'bg-green-500/20 border-green-500/50' : ''}`}
-                  onClick={() => handleKeyPress(key)}
-                >
-                  {key}
-                </Button>
-              ))}
-            </div>
-          ))}
-          
-          <div className="flex justify-center gap-4 mt-6">
-            <Button
-              variant="outline"
-              className="px-6 py-4 bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110 flex items-center gap-2"
-              onClick={handleBackspace}
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Backspace
-            </Button>
-            <Button
-              variant="outline"
-              className="px-6 py-4 bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110 flex items-center gap-2"
-              onClick={handleEnter}
-            >
-              <CornerDownLeft className="w-5 h-5" />
-              Enter
-            </Button>
-          </div>
-        </div>
+        <VirtualKeyboard
+          inputWord={inputWord}
+          onKeyPress={handleKeyPress}
+          onBackspace={handleBackspace}
+          onEnter={handleEnter}
+        />
 
         <Button
           variant="ghost"
@@ -198,27 +130,10 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
-      <div className="text-9xl font-mono mb-8 text-white animate-pulse tracking-widest">
-        {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-      </div>
-      <div className="text-2xl text-white/90 mb-4 animate-fade-in">
-        Time Remaining
-      </div>
-      {activeGame && (
-        <div className="text-xl text-white/80 mb-8 animate-fade-in">
-          Currently Playing: {activeGame}
-        </div>
-      )}
-      <Button
-        size="lg"
-        variant="destructive"
-        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in flex items-center gap-2"
-        onClick={onExit}
-      >
-        <Delete className="w-6 h-6" />
-        Exit Session
-      </Button>
-    </div>
+    <TimerDisplay
+      timeLeft={timeLeft}
+      activeGame={activeGame}
+      onExit={onExit}
+    />
   );
 }
