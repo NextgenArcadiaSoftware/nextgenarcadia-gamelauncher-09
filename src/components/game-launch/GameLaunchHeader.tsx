@@ -39,19 +39,22 @@ export function GameLaunchHeader({ activeGame, inputWord, targetWord }: GameLaun
         <div className="flex flex-col items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-[200px] justify-between">
+              <Button variant="outline" className="w-[200px] justify-between text-white bg-black/40 border-white/10 hover:bg-black/60">
                 Launch Codes
                 <ChevronDown className="h-4 w-4 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[200px] bg-white/95 backdrop-blur-sm">
+            <DropdownMenuContent className="w-[280px] bg-[#1A1F2C] border border-white/10">
               <DropdownMenuGroup>
                 {Object.entries(gameLaunchCodes).map(([game, { code, description }]) => (
-                  <DropdownMenuItem key={game} className="flex flex-col items-start p-2">
-                    <span className="font-semibold">{game}</span>
-                    <div className="flex justify-between w-full text-sm text-muted-foreground">
-                      <span>{code}</span>
-                      <span className="text-xs opacity-70">{description}</span>
+                  <DropdownMenuItem 
+                    key={game} 
+                    className="flex flex-col items-start p-2 focus:bg-white/10 hover:bg-white/5 cursor-pointer"
+                  >
+                    <span className="font-semibold text-white">{game}</span>
+                    <div className="flex justify-between w-full text-sm">
+                      <span className="text-white/90">{code}</span>
+                      <span className="text-white/60 text-xs">{description}</span>
                     </div>
                   </DropdownMenuItem>
                 ))}
