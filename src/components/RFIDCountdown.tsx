@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from './ui/button';
 import { useToast } from './ui/use-toast';
-import { Keyboard } from 'lucide-react';
+import { Keyboard, Delete, ArrowLeft, CornerDownLeft } from 'lucide-react';
 
 interface RFIDCountdownProps {
   onExit: () => void;
@@ -57,7 +57,13 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
 
   const handleKeyPress = (key: string) => {
     if (inputWord.length < targetWord.length) {
-      setInputWord(prev => prev + key.toLowerCase());
+      const newInput = inputWord + key.toLowerCase();
+      setInputWord(newInput);
+      
+      // Provide immediate feedback
+      if (newInput === targetWord) {
+        handleEnter();
+      }
     }
   };
 
@@ -69,14 +75,14 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
     if (inputWord.toLowerCase() === targetWord.toLowerCase()) {
       setShowKeyboard(false);
       toast({
-        title: "Game Starting",
+        title: "✨ Game Starting",
         description: `${activeGame} is launching...`,
       });
     } else {
       toast({
         variant: "destructive",
-        title: "Invalid Code",
-        description: "Please try again",
+        title: "❌ Invalid Code",
+        description: "The code doesn't match. Please try again.",
       });
       setInputWord('');
     }
@@ -90,16 +96,24 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
 
   if (showKeyboard) {
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
-        <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold text-white mb-2 animate-fade-in">Launch Code:</h2>
-          <div className="text-white/90 font-mono text-xl bg-black/20 px-4 py-2 rounded-lg animate-scale-in">
-            {targetWord}
+      <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in p-4">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold text-white mb-4 animate-fade-in">
+            Launch {activeGame}
+          </h2>
+          
+          {/* Current Input Display */}
+          <div className="text-2xl font-mono text-white mb-4 animate-fade-in">
+            Your Input: <span className="text-green-300">{inputWord || '(type the code)'}</span>
           </div>
+
+          {/* Target Word Display */}
           {activeGame && (
-            <div className="mt-4 text-white/80 text-sm glass p-2 rounded-lg animate-fade-in">
-              Launch Code for {activeGame}:<br />
-              {activeGame}: {targetWord}
+            <div className="glass p-4 rounded-xl animate-fade-in space-y-2">
+              <div className="text-white/80">Required Launch Code:</div>
+              <div className="text-white font-mono text-xl bg-black/20 px-4 py-2 rounded-lg">
+                {targetWord}
+              </div>
             </div>
           )}
         </div>
@@ -110,19 +124,21 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
               key={index}
               className={`w-12 h-12 border-2 ${
                 inputWord[index] 
-                  ? 'border-green-500 bg-green-500/20' 
+                  ? inputWord[index] === targetWord[index]
+                    ? 'border-green-500 bg-green-500/20 scale-110' 
+                    : 'border-red-500 bg-red-500/20'
                   : 'border-white/50 bg-white/10'
-              } rounded-lg flex items-center justify-center text-2xl font-bold text-white animate-scale-in`}
+              } rounded-lg flex items-center justify-center text-2xl font-bold text-white animate-scale-in transition-all duration-200`}
             >
               {inputWord[index] || ''}
             </div>
           ))}
         </div>
         
-        <div className="glass p-8 rounded-xl space-y-4 animate-scale-in">
-          <div className="flex items-center gap-2 mb-6">
+        <div className="glass p-6 rounded-xl space-y-4 animate-scale-in max-w-3xl w-full">
+          <div className="flex items-center gap-2 mb-6 justify-center">
             <Keyboard className="w-6 h-6 text-white/80" />
-            <span className="text-white/80 text-sm">Type the launch code to start</span>
+            <span className="text-white/80 text-lg">Type the launch code to begin</span>
           </div>
           
           {keys.map((row, rowIndex) => (
@@ -131,7 +147,9 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
                 <Button
                   key={key}
                   variant="outline"
-                  className="w-12 h-12 text-xl font-bold bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110"
+                  className={`w-12 h-12 text-xl font-bold bg-white/10 border-white/20 
+                    hover:bg-white/20 transition-all duration-200 hover:scale-110
+                    ${inputWord.toLowerCase().includes(key.toLowerCase()) ? 'bg-green-500/20 border-green-500/50' : ''}`}
                   onClick={() => handleKeyPress(key)}
                 >
                   {key}
@@ -140,19 +158,21 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
             </div>
           ))}
           
-          <div className="flex justify-center gap-2 mt-4">
+          <div className="flex justify-center gap-4 mt-6">
             <Button
               variant="outline"
-              className="px-8 py-6 bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110"
+              className="px-6 py-4 bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110 flex items-center gap-2"
               onClick={handleBackspace}
             >
+              <ArrowLeft className="w-5 h-5" />
               Backspace
             </Button>
             <Button
               variant="outline"
-              className="px-8 py-6 bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110"
+              className="px-6 py-4 bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110 flex items-center gap-2"
               onClick={handleEnter}
             >
+              <CornerDownLeft className="w-5 h-5" />
               Enter
             </Button>
           </div>
@@ -161,8 +181,9 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
         <Button
           variant="ghost"
           onClick={onExit}
-          className="mt-8 text-white/80 hover:text-white hover:bg-white/10"
+          className="mt-8 text-white/80 hover:text-white hover:bg-white/10 flex items-center gap-2"
         >
+          <Delete className="w-4 h-4" />
           Exit Session
         </Button>
       </div>
@@ -185,9 +206,10 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
       <Button
         size="lg"
         variant="destructive"
-        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in"
+        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in flex items-center gap-2"
         onClick={onExit}
       >
+        <Delete className="w-6 h-6" />
         Exit Session
       </Button>
     </div>
