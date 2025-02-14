@@ -41,12 +41,24 @@ export function GameCard({
   trailer,
   onPlay,
   canPlayGames,
-  launch_code = 'START'
 }: GameCardProps) {
   const [showTapCard, setShowTapCard] = useState(false);
   const [showTapToStart, setShowTapToStart] = useState(false);
   const [imageSrc, setImageSrc] = useState(getImageUrl(thumbnail));
   const [currentInput, setCurrentInput] = useState('');
+
+  const gameCodeMap: Record<string, string> = {
+    "Elven Assassin": "EAX",
+    "Fruit Ninja VR": "FNJ",
+    "Crisis Brigade 2 Reloaded": "CBR",
+    "All-in-One Sports VR": "AIO",
+    "Richies Plank Experience": "RPE",
+    "iB Cricket": "IBC",
+    "Undead Citadel": "UDC",
+    "Arizona Sunshine": "ARS",
+    "Subside": "SBS",
+    "Propagation VR": "PVR"
+  };
 
   const handlePlayButtonClick = () => {
     if (!canPlayGames) {
@@ -67,6 +79,8 @@ export function GameCard({
     console.log('Image failed to load:', thumbnail);
     setImageSrc(`https://source.unsplash.com/random/800x600/?${encodeURIComponent(genre.toLowerCase())}`);
   };
+
+  const launchCode = gameCodeMap[title];
 
   return (
     <div className="nintendo-card group">
@@ -118,7 +132,10 @@ export function GameCard({
         >
           <div className="flex flex-col items-center gap-4">
             <div className="animate-[pulse_1s_ease-in-out_infinite] text-white text-2xl font-bold">
-              ENTER CODE: {launch_code}
+              ENTER CODE: {launchCode}
+            </div>
+            <div className="text-white/60 text-sm">
+              Click anywhere to continue
             </div>
           </div>
         </div>
