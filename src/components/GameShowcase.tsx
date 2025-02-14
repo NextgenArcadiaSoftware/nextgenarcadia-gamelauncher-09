@@ -20,6 +20,14 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
+  // Fix: Use complete URL for thumbnail
+  const getImageUrl = (path: string) => {
+    if (!path) return placeholderImage;
+    if (path === 'placeholder.svg') return placeholderImage;
+    if (path.startsWith('http')) return path;
+    return `/${path}`;
+  };
+
   return (
     <div className="relative w-full h-[600px] overflow-hidden rounded-3xl animate-fade-in">
       <Carousel className="w-full">
@@ -32,7 +40,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                     <DialogTrigger asChild>
                       <div className="w-full h-full cursor-pointer">
                         <img 
-                          src={game.thumbnail === 'placeholder.svg' ? placeholderImage : game.thumbnail}
+                          src={getImageUrl(game.thumbnail)}
                           alt={game.title}
                           className="w-full h-full object-cover animate-scale-in"
                         />
@@ -54,7 +62,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                   </Dialog>
                 ) : (
                   <img 
-                    src={game.thumbnail === 'placeholder.svg' ? placeholderImage : game.thumbnail}
+                    src={getImageUrl(game.thumbnail)}
                     alt={game.title}
                     className="w-full h-full object-cover animate-scale-in"
                   />
