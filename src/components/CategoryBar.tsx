@@ -13,7 +13,7 @@ export function CategoryBar({
   onCategorySelect 
 }: CategoryBarProps) {
   return (
-    <div className="glass p-4 rounded-xl flex gap-4 overflow-x-auto scrollbar-hide">
+    <div className="glass p-4 rounded-xl flex gap-4 overflow-x-auto scrollbar-hide backdrop-blur-xl border border-white/10">
       {categories.map((category) => (
         <Button
           key={category}
@@ -21,8 +21,8 @@ export function CategoryBar({
           onClick={() => onCategorySelect(category)}
           className={`whitespace-nowrap border-0 transition-all duration-300 hover:scale-105 ${
             selectedCategory === category 
-              ? "bg-gray-900 text-white hover:bg-gray-800" 
-              : "bg-gray-100 hover:bg-gray-200"
+              ? "glass bg-white/20 hover:bg-white/30 shadow-lg" 
+              : "glass hover:bg-white/20"
           }`}
         >
           {category}

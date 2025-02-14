@@ -20,18 +20,11 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
-  // Fix: Handle Google Drive links
+  // Fix: Use complete URL for thumbnail
   const getImageUrl = (path: string) => {
     if (!path) return placeholderImage;
     if (path === 'placeholder.svg') return placeholderImage;
-    if (path.startsWith('http')) {
-      // Handle Google Drive links
-      if (path.includes('drive.google.com/file/d/')) {
-        const fileId = path.split('/file/d/')[1].split('/')[0];
-        return `https://drive.google.com/uc?export=view&id=${fileId}`;
-      }
-      return path;
-    }
+    if (path.startsWith('http')) return path;
     return `/${path}`;
   };
 
