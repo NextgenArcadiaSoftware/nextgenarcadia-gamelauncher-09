@@ -36,6 +36,13 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const targetCode = activeGame ? gameCodeMap[activeGame] : '';
 
   useEffect(() => {
+    if (!activeGame) return;
+    
+    console.log('Active game:', activeGame);
+    console.log('Target code:', targetCode);
+  }, [activeGame, targetCode]);
+
+  useEffect(() => {
     if (showTimer) {
       const interval = setInterval(() => {
         setTimeLeft((prev) => {
@@ -48,11 +55,6 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
         });
       }, 1000);
 
-      // Simulate RFID input (this would be replaced by actual RFID reader input)
-      const rfidCode = "0014662252";
-      console.log('RFID Code detected:', rfidCode);
-
-      // Show toast when game starts
       toast({
         title: "✨ Game Starting",
         description: `${activeGame} is launching...`,
@@ -64,7 +66,9 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
 
   const handleKeyPress = (key: string) => {
     if (inputWord.length < targetCode.length) {
-      setInputWord(prev => prev + key);
+      const newInput = inputWord + key;
+      setInputWord(newInput);
+      console.log('Current input:', newInput, 'Target:', targetCode);
     }
   };
 
