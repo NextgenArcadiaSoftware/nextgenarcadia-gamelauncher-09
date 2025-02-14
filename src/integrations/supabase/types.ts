@@ -9,7 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      games: {
+        Row: {
+          created_at: string | null
+          description: string
+          executable_path: string | null
+          genre: string
+          id: string
+          release_date: string
+          status: string
+          thumbnail: string
+          title: string
+          trailer: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          executable_path?: string | null
+          genre: string
+          id?: string
+          release_date: string
+          status?: string
+          thumbnail: string
+          title: string
+          trailer?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          executable_path?: string | null
+          genre?: string
+          id?: string
+          release_date?: string
+          status?: string
+          thumbnail?: string
+          title?: string
+          trailer?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
