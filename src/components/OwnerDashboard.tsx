@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { AddGameDialog } from "./AddGameDialog";
 import { Link } from "react-router-dom";
-import { Library, Timer, ActivitySquare } from "lucide-react";
+import { Library, Timer, ActivitySquare, LucideIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useToast } from "./ui/use-toast";
 import {
@@ -19,6 +19,12 @@ import type { Game } from "@/types/game";
 interface Session {
   startTime: string;
   duration: number;
+}
+
+interface TabItem {
+  value: string;
+  label: string;
+  icon: LucideIcon;
 }
 
 export function OwnerDashboard({ 
@@ -37,6 +43,12 @@ export function OwnerDashboard({
   const { toast } = useToast();
 
   const OWNER_PIN = "123456"; // This should be stored securely in a real application
+
+  const tabs: TabItem[] = [
+    { value: "sessions", label: "Sessions", icon: ActivitySquare },
+    { value: "games", label: "Games", icon: Library },
+    { value: "settings", label: "Timer", icon: Timer },
+  ];
 
   useEffect(() => {
     const savedSessions = localStorage.getItem("rfid_sessions");
@@ -73,10 +85,10 @@ export function OwnerDashboard({
   if (!isAuthorized) {
     return (
       <Dialog open={true} onOpenChange={() => onClose()}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Owner Access</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-2xl font-bold">Owner Access</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Enter your 6-digit PIN to access the owner dashboard.
             </DialogDescription>
           </DialogHeader>
@@ -89,6 +101,7 @@ export function OwnerDashboard({
               maxLength={6}
               pattern="\d{6}"
               required
+              className="text-center text-2xl tracking-widest"
             />
             <div className="flex gap-2">
               <Button type="submit" className="w-full">
@@ -108,44 +121,53 @@ export function OwnerDashboard({
     <Dialog open={true} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-[800px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Owner Dashboard</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-2xl font-bold">Owner Dashboard</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
             Manage your arcade settings and view session history.
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="sessions">
-          <TabsList className="w-full">
-            <TabsTrigger value="sessions" className="flex gap-2">
-              <ActivitySquare className="w-4 h-4" />
-              Sessions
-            </TabsTrigger>
-            <TabsTrigger value="games" className="flex gap-2">
-              <Library className="w-4 h-4" />
-              Games
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex gap-2">
-              <Timer className="w-4 h-4" />
-              Timer
-            </TabsTrigger>
+        <Tabs defaultValue="sessions" className="w-full">
+          <TabsList className="w-full grid grid-cols-3 gap-4">
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="flex items-center gap-2 py-3"
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          <TabsContent value="sessions" className="space-y-4">
-            <h3 className="text-xl font-semibold mb-4">Session History</h3>
-            <div className="space-y-2">
-              {sessions.map((session, index) => (
-                <div key={index} className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                  <span>{new Date(session.startTime).toLocaleString()}</span>
-                  <span>{session.duration} minutes</span>
-                </div>
-              ))}
-              {sessions.length === 0 && (
-                <p className="text-muted-foreground">No sessions recorded yet.</p>
-              )}
+          <TabsContent value="sessions" className="space-y-4 mt-6">
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold">Session History</h3>
+              <div className="space-y-3">
+                {sessions.map((session, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center p-4 bg-card rounded-lg border border-border hover:border-primary/50 transition-colors"
+                  >
+                    <span className="text-sm">
+                      {new Date(session.startTime).toLocaleString()}
+                    </span>
+                    <span className="font-medium text-primary">
+                      {session.duration} minutes
+                    </span>
+                  </div>
+                ))}
+                {sessions.length === 0 && (
+                  <p className="text-muted-foreground text-center py-8">
+                    No sessions recorded yet.
+                  </p>
+                )}
+              </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="games" className="space-y-4">
+          <TabsContent value="games" className="space-y-4 mt-6">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold">Game Management</h3>
               <div className="flex gap-2">
@@ -160,19 +182,21 @@ export function OwnerDashboard({
             </div>
           </TabsContent>
 
-          <TabsContent value="settings" className="space-y-4">
-            <h3 className="text-xl font-semibold mb-4">Timer Settings</h3>
-            <div className="flex gap-4 items-center">
-              <Input
-                type="number"
-                min="1"
-                max="60"
-                value={timerDuration}
-                onChange={(e) => setTimerDuration(Number(e.target.value))}
-                className="w-32"
-              />
-              <span>minutes</span>
-              <Button onClick={handleTimerUpdate}>Update Timer</Button>
+          <TabsContent value="settings" className="space-y-4 mt-6">
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold">Timer Settings</h3>
+              <div className="flex gap-4 items-center">
+                <Input
+                  type="number"
+                  min="1"
+                  max="60"
+                  value={timerDuration}
+                  onChange={(e) => setTimerDuration(Number(e.target.value))}
+                  className="w-32"
+                />
+                <span className="text-muted-foreground">minutes</span>
+                <Button onClick={handleTimerUpdate}>Update Timer</Button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
