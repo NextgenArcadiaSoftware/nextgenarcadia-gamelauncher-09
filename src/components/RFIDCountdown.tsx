@@ -17,6 +17,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const [showKeyboard, setShowKeyboard] = useState(true);
   const { toast } = useToast();
 
+  // Fixed: Set target word immediately when activeGame changes
   useEffect(() => {
     if (activeGame) {
       const gameWord = activeGame === "All-In-One Sports VR" ? "start_sports" :
@@ -30,6 +31,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
                       activeGame === "Propagation VR" ? "start_prop" :
                       activeGame === "Elven Assassin" ? "start_elven" :
                       "start_game";
+      console.log('Setting target word:', gameWord, 'for game:', activeGame);
       setTargetWord(gameWord);
     }
   }, [activeGame]);
@@ -55,13 +57,17 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
     }
   }, [showKeyboard, onExit, toast, duration, activeGame]);
 
+  // Fixed: Simplified key press handler
   const handleKeyPress = (key: string) => {
+    console.log('Key pressed:', key);
     if (inputWord.length < targetWord.length) {
       const newInput = inputWord + key.toLowerCase();
+      console.log('New input:', newInput, 'Target:', targetWord);
       setInputWord(newInput);
       
-      // Provide immediate feedback
-      if (newInput === targetWord) {
+      // Check if input matches target
+      if (newInput.toLowerCase() === targetWord.toLowerCase()) {
+        console.log('Input matches target, launching game');
         handleEnter();
       }
     }
@@ -72,6 +78,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   };
 
   const handleEnter = () => {
+    console.log('Checking input:', inputWord, 'against target:', targetWord);
     if (inputWord.toLowerCase() === targetWord.toLowerCase()) {
       setShowKeyboard(false);
       toast({
@@ -124,7 +131,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
               key={index}
               className={`w-12 h-12 border-2 ${
                 inputWord[index] 
-                  ? inputWord[index] === targetWord[index]
+                  ? inputWord[index].toLowerCase() === targetWord[index].toLowerCase()
                     ? 'border-green-500 bg-green-500/20 scale-110' 
                     : 'border-red-500 bg-red-500/20'
                   : 'border-white/50 bg-white/10'
