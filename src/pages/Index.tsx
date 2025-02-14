@@ -35,6 +35,17 @@ const ALL_IN_ONE_SPORTS = {
   status: "enabled"
 } as const;
 
+const FRUIT_NINJA = {
+  title: "Fruit Ninja VR",
+  description: "Slice and dice your way through waves of fruit in this classic game reimagined for VR! Become a fruit-slicing master ninja in immersive virtual reality.",
+  genre: "Action",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/ad0b4a73-7182-4cd0-a370-e527f21a9f87.png",
+  executable_path: "steam://rungameid/923360",
+  launch_code: "NINJA",
+  status: "enabled"
+} as const;
+
 const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -214,30 +225,39 @@ const Index = () => {
       }
     };
 
-    const addSportsGame = async () => {
+    const addInitialGames = async () => {
       try {
-        const { data: existingGames } = await supabase
+        // Check for All-in-One Sports
+        const { data: existingSportsGame } = await supabase
           .from('games')
           .select('title')
           .eq('title', ALL_IN_ONE_SPORTS.title)
           .single();
 
-        if (!existingGames) {
-          const { error } = await supabase
-            .from('games')
-            .insert([ALL_IN_ONE_SPORTS]);
-
-          if (error) throw error;
-          
+        if (!existingSportsGame) {
+          await supabase.from('games').insert([ALL_IN_ONE_SPORTS]);
           console.log('Added All-in-One Sports VR to the database');
-          fetchGames(); // Refresh the games list
         }
+
+        // Check for Fruit Ninja
+        const { data: existingNinjaGame } = await supabase
+          .from('games')
+          .select('title')
+          .eq('title', FRUIT_NINJA.title)
+          .single();
+
+        if (!existingNinjaGame) {
+          await supabase.from('games').insert([FRUIT_NINJA]);
+          console.log('Added Fruit Ninja VR to the database');
+        }
+
+        fetchGames(); // Refresh the games list
       } catch (error) {
-        console.error('Error adding sports game:', error);
+        console.error('Error adding initial games:', error);
       }
     };
 
-    addSportsGame();
+    addInitialGames();
 
     window.addEventListener('keypress', handleKeyPress);
 
