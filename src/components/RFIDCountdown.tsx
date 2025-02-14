@@ -36,17 +36,17 @@ export function RFIDCountdown({ onExit, duration = 8 }: RFIDCountdownProps) {
   const seconds = timeLeft % 60;
 
   return (
-    <div className="fixed inset-0 bg-black/95 flex flex-col items-center justify-center z-50 animate-fade-in">
-      <div className="text-9xl font-mono mb-8 text-green-500 animate-pulse tracking-widest">
+    <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
+      <div className="text-9xl font-mono mb-8 text-white animate-pulse tracking-widest">
         {minutes}:{seconds.toString().padStart(2, '0')}
       </div>
-      <div className="text-2xl text-green-400 mb-8 animate-fade-in">
+      <div className="text-2xl text-white/90 mb-8 animate-fade-in">
         Time Remaining
       </div>
       <Button
         size="lg"
         variant="destructive"
-        className="bg-red-600 hover:bg-red-700 text-xl px-8 py-6 animate-fade-in"
+        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-fade-in"
         onClick={onExit}
       >
         Exit Session
