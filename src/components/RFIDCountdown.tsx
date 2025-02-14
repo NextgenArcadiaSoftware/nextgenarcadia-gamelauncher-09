@@ -46,7 +46,7 @@ export function RFIDCountdown({ onExit, duration = 8 }: RFIDCountdownProps) {
       <Button
         size="lg"
         variant="destructive"
-        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-fade-in"
+        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in"
         onClick={onExit}
       >
         Exit Session
