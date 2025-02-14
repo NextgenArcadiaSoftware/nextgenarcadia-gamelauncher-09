@@ -93,15 +93,30 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                       PLAY NOW
                     </Button>
                     {game.trailer && (
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline"
-                          className="bg-white/10 hover:bg-white/20 animate-scale-in"
-                        >
-                          <Video className="w-4 h-4 mr-2" />
-                          Watch Trailer
-                        </Button>
-                      </DialogTrigger>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="outline"
+                            className="bg-white/10 hover:bg-white/20 animate-scale-in"
+                          >
+                            <Video className="w-4 h-4 mr-2" />
+                            Watch Trailer
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="glass border-white/10 sm:max-w-[800px]">
+                          <DialogHeader>
+                            <DialogTitle className="next-gen-title text-white">{game.title} - Trailer</DialogTitle>
+                          </DialogHeader>
+                          <div className="relative w-full h-0 pt-[56.25%]">
+                            <iframe
+                              className="absolute top-0 left-0 w-full h-full rounded-lg"
+                              src={getYouTubeEmbedUrl(game.trailer)}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            ></iframe>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     )}
                   </div>
                 </div>
