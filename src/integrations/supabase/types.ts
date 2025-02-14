@@ -54,7 +54,6 @@ export type Database = {
       rfid_game_mappings: {
         Row: {
           created_at: string
-          game_id: string
           id: string
           rfid_code: string
           trigger_word: string
@@ -62,7 +61,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          game_id: string
           id?: string
           rfid_code: string
           trigger_word: string
@@ -70,21 +68,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          game_id?: string
           id?: string
           rfid_code?: string
           trigger_word?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "rfid_game_mappings_game_id_fkey"
-            columns: ["game_id"]
-            isOneToOne: false
-            referencedRelation: "games"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {

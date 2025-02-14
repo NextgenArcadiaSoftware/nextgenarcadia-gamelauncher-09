@@ -27,7 +27,6 @@ class GameLauncher:
         self.session_timer: Optional[float] = None
         self.session_duration = 8 * 60  # 8 minutes in seconds
         self.rfid_buffer = ""
-        self.last_rfid_time = 0
         
         # Dictionary mapping trigger words to game paths and full names
         self.games: Dict[str, Dict[str, str]] = {
@@ -73,12 +72,12 @@ class GameLauncher:
             }
         }
 
-    async def get_trigger_word_from_rfid(self, rfid_code: str) -> Optional[str]:
+    def get_trigger_word_from_rfid(self, rfid_code: str) -> Optional[str]:
         """
         Get the trigger word associated with an RFID code from the database
         """
         try:
-            response = await supabase.table('rfid_game_mappings').select('trigger_word').eq('rfid_code', rfid_code).single().execute()
+            response = supabase.table('rfid_game_mappings').select('trigger_word').eq('rfid_code', rfid_code).single().execute()
             if response.data:
                 return response.data['trigger_word']
             return None
@@ -150,32 +149,19 @@ class GameLauncher:
                 return True
         return False
 
-    def handle_rfid_input(self, char: str) -> None:
+    def handle_rfid_input(self, rfid_code: str) -> None:
         """
-        Handle RFID card input character by character
+        Handle RFID card input
         """
-        current_time = time.time()
-        
-        # If more than 1 second has passed since last input, clear the buffer
-        if current_time - self.last_rfid_time > 1:
-            self.rfid_buffer = ""
+        if not rfid_code:
+            return
             
-        self.last_rfid_time = current_time
-        
-        # Add character to buffer
-        if char.isalnum():  # Only accept alphanumeric characters
-            self.rfid_buffer += char
-            
-        # Most RFID readers end with a return character
-        if char == '\r' or char == '\n':
-            if len(self.rfid_buffer) > 0:
-                logger.info(f"RFID code read: {self.rfid_buffer}")
-                trigger_word = self.get_trigger_word_from_rfid(self.rfid_buffer)
-                if trigger_word:
-                    self.launch_game(trigger_word)
-                else:
-                    logger.warning(f"No game associated with RFID code: {self.rfid_buffer}")
-                self.rfid_buffer = ""
+        logger.info(f"RFID code read: {rfid_code}")
+        trigger_word = self.get_trigger_word_from_rfid(rfid_code)
+        if trigger_word:
+            self.launch_game(trigger_word)
+        else:
+            logger.warning(f"No game associated with RFID code: {rfid_code}")
 
 def main():
     launcher = GameLauncher()
@@ -185,7 +171,7 @@ def main():
         print(f"'{trigger}' for {info['name']}")
     print("\nPress 'esc' to stop the current game")
     print("Type 'exit' to quit the launcher")
-    print("\nScanning for RFID cards...")
+    print("\nWaiting for RFID card...")
 
     while True:
         try:
@@ -200,16 +186,13 @@ def main():
                     print("\nStopping current game...")
                     launcher.stop_current_game()
                 elif event.name == 'enter':
-                    command = keyboard.get_typed_strings(keyboard.get_hotkey_name())[0].lower().strip()
-                    if command == 'exit':
+                    command = keyboard.get_typed_strings(keyboard.get_hotkey_name())[0].strip()
+                    if command.lower() == 'exit':
                         break
-                    elif command in launcher.games:
-                        launcher.launch_game(command)
-                    else:
-                        launcher.handle_rfid_input(command)
-                else:
-                    # Handle RFID input character by character
-                    launcher.handle_rfid_input(event.name)
+                    # For testing: if command starts with "rfid:", treat rest as RFID code
+                    elif command.lower().startswith("rfid:"):
+                        rfid_code = command[5:].strip()  # Remove "rfid:" prefix
+                        launcher.handle_rfid_input(rfid_code)
                 
             time.sleep(0.1)  # Small delay to prevent high CPU usage
             
