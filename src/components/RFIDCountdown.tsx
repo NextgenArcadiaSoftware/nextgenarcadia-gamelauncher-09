@@ -96,6 +96,19 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
           <div className="text-white/90 font-mono text-xl bg-black/20 px-4 py-2 rounded-lg animate-scale-in">
             {targetWord}
           </div>
+          <div className="mt-4 text-white/80 text-sm glass p-2 rounded-lg">
+            All Launch Codes:<br />
+            All-In-One Sports VR: start_sports<br />
+            Fruit Ninja VR: start_ninja<br />
+            Crisis Brigade 2: start_crisis<br />
+            Richies Plank: start_plank<br />
+            iB Cricket: start_cricket<br />
+            Undead Citadel: start_citadel<br />
+            Arizona Sunshine: start_arizona<br />
+            Subside: start_subside<br />
+            Propagation VR: start_prop<br />
+            Elven Assassin: start_elven
+          </div>
         </div>
 
         <div className="mb-8 flex gap-2">
