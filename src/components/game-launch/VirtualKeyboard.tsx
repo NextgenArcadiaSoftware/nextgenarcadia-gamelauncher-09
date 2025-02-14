@@ -12,44 +12,44 @@ interface VirtualKeyboardProps {
 
 export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }: VirtualKeyboardProps) {
   const keys = [
-    ['1', '2', '3'],
-    ['4', '5', '6'],
-    ['7', '8', '9'],
-    ['A', 'B', 'C'],
-    ['D', 'E', 'F'],
-    ['G', 'H', 'I'],
-    ['J', 'K', 'L'],
-    ['M', 'N', 'O'],
-    ['P', 'Q', 'R'],
-    ['S', 'T', 'U'],
-    ['V', 'W', 'X'],
-    ['Y', 'Z', ' '],
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   ];
 
   const isInputComplete = inputWord.length === 3;
 
   return (
-    <div className="glass p-6 rounded-3xl w-full max-w-md">
-      <div className="grid grid-cols-3 gap-4">
+    <div className="glass p-6 rounded-3xl w-full max-w-3xl">
+      <div className="space-y-2">
         {keys.map((row, rowIndex) => (
-          <React.Fragment key={rowIndex}>
-            {row.map((key, keyIndex) => (
+          <div key={rowIndex} className="flex justify-center gap-1">
+            {rowIndex === 2 && <div className="w-8" />} {/* Shift spacing */}
+            {row.map((key) => (
               <KeyboardButton
-                key={`${rowIndex}-${keyIndex}`}
-                onClick={() => key !== ' ' && onKeyPress(key)}
-                disabled={isInputComplete || key === ' '}
+                key={key}
+                onClick={() => onKeyPress(key)}
+                disabled={isInputComplete}
               >
-                {key === ' ' ? '' : key}
+                {key}
               </KeyboardButton>
             ))}
-          </React.Fragment>
+            {rowIndex === 2 && (
+              <KeyboardButton onClick={onBackspace}>
+                <Delete className="w-4 h-4" />
+              </KeyboardButton>
+            )}
+          </div>
         ))}
-        <KeyboardButton onClick={onBackspace}>
-          <Delete className="w-6 h-6 mx-auto" />
-        </KeyboardButton>
-        <KeyboardButton onClick={onEnter} disabled={!isInputComplete}>
-          <CornerDownLeft className="w-6 h-6 mx-auto" />
-        </KeyboardButton>
+        <div className="flex justify-between gap-1 mt-1">
+          <KeyboardButton onClick={() => {}} disabled>123</KeyboardButton>
+          <KeyboardButton onClick={() => {}} disabled>🌐</KeyboardButton>
+          <KeyboardButton variant="wide" onClick={() => {}} disabled>space</KeyboardButton>
+          <KeyboardButton onClick={() => {}} disabled>.</KeyboardButton>
+          <KeyboardButton onClick={onEnter} disabled={!isInputComplete}>
+            Go
+          </KeyboardButton>
+        </div>
       </div>
     </div>
   );

@@ -15,9 +15,21 @@ export function KeyboardButton({ children, onClick, disabled, variant = 'default
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
       disabled={disabled}
-      className={`${
-        variant === 'wide' ? 'col-span-2' : ''
-      } p-4 text-2xl font-bold bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
+      className={`
+        ${variant === 'wide' ? 'px-12' : 'px-3'} 
+        py-2.5 
+        text-sm 
+        font-medium 
+        bg-white/90 
+        hover:bg-white 
+        text-black 
+        rounded-lg 
+        transition-colors 
+        duration-200 
+        disabled:opacity-50 
+        disabled:cursor-not-allowed
+        min-w-[2.5rem]
+      `}
     >
       {children}
     </motion.button>

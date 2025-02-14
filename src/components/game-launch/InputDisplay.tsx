@@ -25,21 +25,15 @@ export function InputDisplay({ inputWord, targetWord }: InputDisplayProps) {
       className="flex gap-4 mb-12"
     >
       {Array.from({ length: 3 }).map((_, index) => {
-        const isCorrect = inputWord[index] === targetWord[index];
         const hasInput = index < inputWord.length;
+        const letter = hasInput ? inputWord[index] : "";
 
         return (
           <div
             key={index}
-            className={`w-16 h-20 flex items-center justify-center text-3xl font-bold rounded-xl border-2 transition-colors duration-300 ${
-              hasInput
-                ? isCorrect
-                  ? "bg-green-500 border-green-400 text-white"
-                  : "bg-red-500 border-red-400 text-white"
-                : "bg-white/10 border-white/20 text-white"
-            }`}
+            className={`w-24 h-24 flex items-center justify-center text-4xl font-bold bg-neutral-400 text-black`}
           >
-            {hasInput ? inputWord[index] : ""}
+            {letter}
           </div>
         );
       })}
