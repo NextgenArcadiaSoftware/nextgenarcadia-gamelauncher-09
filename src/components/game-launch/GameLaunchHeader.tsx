@@ -1,5 +1,14 @@
 
 import React from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 interface GameLaunchHeaderProps {
   activeGame: string | null | undefined;
@@ -8,23 +17,17 @@ interface GameLaunchHeaderProps {
 }
 
 export function GameLaunchHeader({ activeGame, inputWord, targetWord }: GameLaunchHeaderProps) {
-  const getGameLaunchCode = (gameTitle: string | null | undefined): string => {
-    if (!gameTitle) return "XXX";
-    
-    const codeMap: Record<string, string> = {
-      "Elven Assassin": "EAX",
-      "Fruit Ninja VR": "FNJ",
-      "Crisis Brigade 2 Reloaded": "CBR",
-      "All-in-One Sports VR": "AIO",
-      "Richies Plank Experience": "RPE",
-      "iB Cricket": "IBC",
-      "Undead Citadel": "UDC",
-      "Arizona Sunshine": "ARS",
-      "Subside": "SBS",
-      "Propagation VR": "PVR"
-    };
-    
-    return codeMap[gameTitle] || "XXX";
+  const gameLaunchCodes: Record<string, { code: string; description: string }> = {
+    "Elven Assassin": { code: "EAX", description: "Elite archer combat" },
+    "Fruit Ninja VR": { code: "FNJ", description: "Fruit slicing action" },
+    "Crisis Brigade 2 Reloaded": { code: "CBR", description: "Tactical shooter" },
+    "All-in-One Sports VR": { code: "AIO", description: "Multi-sport experience" },
+    "Richies Plank Experience": { code: "RPE", description: "Height simulation" },
+    "iB Cricket": { code: "IBC", description: "Cricket simulation" },
+    "Undead Citadel": { code: "UDC", description: "Medieval combat" },
+    "Arizona Sunshine": { code: "ARS", description: "Zombie survival" },
+    "Subside": { code: "SBS", description: "Underwater adventure" },
+    "Propagation VR": { code: "PVR", description: "Horror survival" }
   };
 
   return (
@@ -33,11 +36,39 @@ export function GameLaunchHeader({ activeGame, inputWord, targetWord }: GameLaun
         {activeGame}
       </h1>
       <div className="glass p-4 rounded-lg">
-        <div className="grid grid-cols-2 gap-4">
-          <p className="text-xl font-medium text-white">Game Name</p>
-          <p className="text-xl font-medium text-white">Launch Code</p>
-          <p className="text-lg text-white/90">{activeGame || "Select a game"}</p>
-          <p className="text-lg text-white/90">{getGameLaunchCode(activeGame)}</p>
+        <div className="flex flex-col items-center gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-[200px] justify-between">
+                Launch Codes
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[200px] bg-white/95 backdrop-blur-sm">
+              <DropdownMenuGroup>
+                {Object.entries(gameLaunchCodes).map(([game, { code, description }]) => (
+                  <DropdownMenuItem key={game} className="flex flex-col items-start p-2">
+                    <span className="font-semibold">{game}</span>
+                    <div className="flex justify-between w-full text-sm text-muted-foreground">
+                      <span>{code}</span>
+                      <span className="text-xs opacity-70">{description}</span>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          <div className="grid grid-cols-2 gap-4 w-full">
+            <div className="text-left">
+              <p className="text-sm font-medium text-white/70">Current Game</p>
+              <p className="text-lg text-white">{activeGame || "Select a game"}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-medium text-white/70">Launch Code</p>
+              <p className="text-lg text-white">{activeGame ? gameLaunchCodes[activeGame]?.code || "N/A" : "N/A"}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
