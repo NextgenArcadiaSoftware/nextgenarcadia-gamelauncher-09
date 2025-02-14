@@ -74,6 +74,15 @@ const MOCK_GAMES: Omit<Game, "id" | "created_at" | "updated_at">[] = [
   }
 ];
 
+const GAME_TRIGGERS: Record<string, string> = {
+  "Street Fighter VI": "start_sf6",
+  "Mortal Kombat 1": "start_mk1",
+  "Beat Saber": "start_beat",
+  "DOOM Eternal": "start_doom",
+  "Resident Evil Village": "start_rev",
+  "Lethal Company": "start_lc"
+};
+
 const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -154,76 +163,59 @@ const Index = () => {
     }
   };
 
+  const simulateKeyboardInput = (text: string) => {
+    text.split('').forEach(char => {
+      const keyEvent = new KeyboardEvent('keypress', {
+        key: char,
+        code: `Key${char.toUpperCase()}`,
+        charCode: char.charCodeAt(0),
+        keyCode: char.charCodeAt(0),
+        which: char.charCodeAt(0),
+        bubbles: true,
+      });
+      document.dispatchEvent(keyEvent);
+    });
+
+    const enterEvent = new KeyboardEvent('keypress', {
+      key: 'Enter',
+      code: 'Enter',
+      charCode: 13,
+      keyCode: 13,
+      which: 13,
+      bubbles: true,
+    });
+    document.dispatchEvent(enterEvent);
+  };
+
   const handlePlayGame = async (title: string, executablePath: string) => {
     if (!canPlayGames) {
-      return; // The GameCard component now handles showing the tap card screen
+      return; // The GameCard component handles showing the tap card screen
     }
 
     try {
-      const simulateStartGame = () => {
-        'start_game'.split('').forEach(char => {
-          const keyEvent = new KeyboardEvent('keypress', {
-            key: char,
-            code: `Key${char.toUpperCase()}`,
-            charCode: char.charCodeAt(0),
-            keyCode: char.charCodeAt(0),
-            which: char.charCodeAt(0),
-            bubbles: true,
-          });
-          document.dispatchEvent(keyEvent);
-        });
-
-        const enterEvent = new KeyboardEvent('keypress', {
-          key: 'Enter',
-          code: 'Enter',
-          charCode: 13,
-          keyCode: 13,
-          which: 13,
-          bubbles: true,
-        });
-        document.dispatchEvent(enterEvent);
-      };
-
-      simulateStartGame();
+      const triggerWord = GAME_TRIGGERS[title] || 'start_game';
+      console.log('Using trigger word:', triggerWord, 'for game:', title);
+      
+      simulateKeyboardInput(triggerWord);
       setActiveGame(title);
       console.log('Game started:', title, 'Path:', executablePath);
     } catch (error) {
-      console.error('Launch error:', error);
+      console.error('Error starting game:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to launch game. Please make sure the game launcher is running.",
+        description: "Failed to start game",
       });
     }
   };
 
   const handleExitSession = () => {
     if (activeGame) {
-      const simulateStopGame = () => {
-        'stop_game'.split('').forEach(char => {
-          const keyEvent = new KeyboardEvent('keypress', {
-            key: char,
-            code: `Key${char.toUpperCase()}`,
-            charCode: char.charCodeAt(0),
-            keyCode: char.charCodeAt(0),
-            which: char.charCodeAt(0),
-            bubbles: true,
-          });
-          document.dispatchEvent(keyEvent);
-        });
-
-        const enterEvent = new KeyboardEvent('keypress', {
-          key: 'Enter',
-          code: 'Enter',
-          charCode: 13,
-          keyCode: 13,
-          which: 13,
-          bubbles: true,
-        });
-        document.dispatchEvent(enterEvent);
-      };
-
-      simulateStopGame();
+      const triggerWord = activeGame ? GAME_TRIGGERS[activeGame] : 'start_game';
+      const stopCommand = triggerWord.replace('start_', 'stop_');
+      console.log('Using stop command:', stopCommand, 'for game:', activeGame);
+      
+      simulateKeyboardInput(stopCommand);
       setActiveGame(null);
     }
     setShowRFIDCountdown(false);
