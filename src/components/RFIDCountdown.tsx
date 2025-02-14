@@ -17,27 +17,9 @@ interface RFIDCountdownProps {
 export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdownProps) {
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [inputWord, setInputWord] = useState('');
-  const [targetWord, setTargetWord] = useState('');
+  const [targetWord, setTargetWord] = useState('FRUIT');
   const [showKeyboard, setShowKeyboard] = useState(true);
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (activeGame) {
-      const gameWord = activeGame === "All-In-One Sports VR" ? "start_sports" :
-                      activeGame === "Fruit Ninja VR" ? "start_ninja" :
-                      activeGame === "Crisis Brigade 2 Reloaded" ? "start_crisis" :
-                      activeGame === "Richies Plank Experience" ? "start_plank" :
-                      activeGame === "iB Cricket" ? "start_cricket" :
-                      activeGame === "Undead Citadel" ? "start_citadel" :
-                      activeGame === "Arizona Sunshine" ? "start_arizona" :
-                      activeGame === "Subside" ? "start_subside" :
-                      activeGame === "Propagation VR" ? "start_prop" :
-                      activeGame === "Elven Assassin" ? "start_elven" :
-                      "start_game";
-      console.log('Setting target word:', gameWord, 'for game:', activeGame);
-      setTargetWord(gameWord);
-    }
-  }, [activeGame]);
 
   useEffect(() => {
     if (!showKeyboard) {
@@ -61,14 +43,11 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   }, [showKeyboard, onExit, toast, duration, activeGame]);
 
   const handleKeyPress = (key: string) => {
-    console.log('Key pressed:', key);
     if (inputWord.length < targetWord.length) {
       const newInput = inputWord + key.toLowerCase();
-      console.log('New input:', newInput, 'Target:', targetWord);
       setInputWord(newInput);
       
       if (newInput.toLowerCase() === targetWord.toLowerCase()) {
-        console.log('Input matches target, launching game');
         handleEnter();
       }
     }
@@ -79,7 +58,6 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   };
 
   const handleEnter = () => {
-    console.log('Checking input:', inputWord, 'against target:', targetWord);
     if (inputWord.toLowerCase() === targetWord.toLowerCase()) {
       setShowKeyboard(false);
       toast({
