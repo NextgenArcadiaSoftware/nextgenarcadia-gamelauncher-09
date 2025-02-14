@@ -25,16 +25,16 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
     if (!gameTitle) return "XXX";
     
     const codeMap: Record<string, string> = {
-      "Elven Assassin": "ELV",
-      "Fruit Ninja VR": "FRT",
-      "Crisis Brigade 2 Reloaded": "CRS",
+      "Elven Assassin": "EAX",
+      "Fruit Ninja VR": "FNJ",
+      "Crisis Brigade 2 Reloaded": "CBR",
       "All-in-One Sports VR": "AIO",
-      "Richies Plank Experience": "PLK",
+      "Richies Plank Experience": "RPE",
       "iB Cricket": "IBC",
       "Undead Citadel": "UDC",
-      "Arizona Sunshine": "ARZ",
-      "Subside": "SUB",
-      "Propagation VR": "PRO"
+      "Arizona Sunshine": "ARS",
+      "Subside": "SBS",
+      "Propagation VR": "PVR"
     };
     
     return codeMap[gameTitle] || "XXX";
