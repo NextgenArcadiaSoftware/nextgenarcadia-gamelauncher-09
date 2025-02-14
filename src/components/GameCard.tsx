@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { useState } from "react";
+import placeholderImage from "../assets/placeholder.svg";
 
 interface GameCardProps {
   title: string;
@@ -50,6 +51,8 @@ export function GameCard({
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
+  const imageUrl = thumbnail || placeholderImage;
+
   return (
     <div className="group relative overflow-hidden rounded-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
       {showTapCard && !canPlayGames ? (
@@ -89,8 +92,8 @@ export function GameCard({
       ) : null}
       
       <div className="relative h-48 overflow-hidden">
-        <img
-          src={`${thumbnail}`}
+        <img 
+          src={imageUrl}
           alt={title}
           className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
         />

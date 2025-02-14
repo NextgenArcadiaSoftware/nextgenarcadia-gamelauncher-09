@@ -4,6 +4,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Badge } from "./ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import type { Game } from "@/types/game";
+import placeholderImage from "../assets/placeholder.svg";
 
 interface GameShowcaseProps {
   games: Game[];
@@ -31,7 +32,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                     <DialogTrigger asChild>
                       <div className="w-full h-full cursor-pointer">
                         <img 
-                          src={`${game.thumbnail}`}
+                          src={game.thumbnail || placeholderImage}
                           alt={game.title}
                           className="w-full h-full object-cover animate-scale-in"
                         />
@@ -53,7 +54,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                   </Dialog>
                 ) : (
                   <img 
-                    src={`${game.thumbnail}`}
+                    src={game.thumbnail || placeholderImage}
                     alt={game.title}
                     className="w-full h-full object-cover animate-scale-in"
                   />
