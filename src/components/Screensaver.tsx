@@ -80,14 +80,17 @@ export function Screensaver() {
           <div className="absolute inset-0 backdrop-blur-[100px]" />
           
           {/* Content */}
-          <div className="relative z-10 text-center">
-            <motion.h1 
-              className="text-7xl font-display font-bold text-white mb-4 tracking-tight"
+          <div className="relative z-10 text-center space-y-8">
+            <motion.img 
+              src="/lovable-uploads/92349df3-c447-40b7-8e36-af1bdaf6071a.png"
+              alt="NextGen Arcadia Logo"
+              className="w-64 mx-auto mb-8"
               animate={{ 
-                textShadow: [
-                  '0 0 20px rgba(255,255,255,0.3)',
-                  '0 0 40px rgba(255,255,255,0.6)',
-                  '0 0 20px rgba(255,255,255,0.3)'
+                scale: [1, 1.05, 1],
+                filter: [
+                  'drop-shadow(0 0 20px rgba(255,255,255,0.3))',
+                  'drop-shadow(0 0 40px rgba(255,255,255,0.6))',
+                  'drop-shadow(0 0 20px rgba(255,255,255,0.3))'
                 ]
               }}
               transition={{
@@ -95,9 +98,7 @@ export function Screensaver() {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-            >
-              NextGen Arcadia
-            </motion.h1>
+            />
             <motion.p 
               className="text-xl text-white/70"
               animate={{ 
@@ -118,4 +119,3 @@ export function Screensaver() {
     </AnimatePresence>
   );
 }
-
