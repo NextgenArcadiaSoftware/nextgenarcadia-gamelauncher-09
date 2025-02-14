@@ -422,7 +422,7 @@ const Index = () => {
     : games.filter(game => game.genre === selectedCategory);
 
   return (
-    <div className="min-h-screen animate-gradient-shift" style={{
+    <div className="min-h-screen animate-gradient" style={{
       background: 'linear-gradient(225deg, #F97316 0%, #D946EF 50%, #8B5CF6 100%)',
       backgroundSize: '400% 400%'
     }}>
