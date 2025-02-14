@@ -19,6 +19,30 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
 
   const isInputComplete = inputWord.length === 3;
 
+  const handleKeyPress = (key: string) => {
+    // Send the keypress to the Python backend through electron
+    if (window.electron) {
+      window.electron.ipcRenderer.send('simulate-keypress', key);
+    }
+    onKeyPress(key);
+  };
+
+  const handleBackspace = () => {
+    // Simulate backspace key press
+    if (window.electron) {
+      window.electron.ipcRenderer.send('simulate-keypress', 'backspace');
+    }
+    onBackspace();
+  };
+
+  const handleEnter = () => {
+    // Simulate enter key press
+    if (window.electron) {
+      window.electron.ipcRenderer.send('simulate-keypress', 'enter');
+    }
+    onEnter();
+  };
+
   return (
     <div className="glass p-6 rounded-3xl w-full max-w-3xl">
       <div className="space-y-2">
@@ -28,14 +52,14 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
             {row.map((key) => (
               <KeyboardButton
                 key={key}
-                onClick={() => onKeyPress(key)}
+                onClick={() => handleKeyPress(key)}
                 disabled={isInputComplete}
               >
                 {key}
               </KeyboardButton>
             ))}
             {rowIndex === 2 && (
-              <KeyboardButton onClick={onBackspace}>
+              <KeyboardButton onClick={handleBackspace}>
                 <Delete className="w-4 h-4" />
               </KeyboardButton>
             )}
@@ -46,7 +70,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
           <KeyboardButton onClick={() => {}} disabled>🌐</KeyboardButton>
           <KeyboardButton variant="wide" onClick={() => {}} disabled>space</KeyboardButton>
           <KeyboardButton onClick={() => {}} disabled>.</KeyboardButton>
-          <KeyboardButton onClick={onEnter} disabled={!isInputComplete}>
+          <KeyboardButton onClick={handleEnter} disabled={!isInputComplete}>
             Go
           </KeyboardButton>
         </div>
