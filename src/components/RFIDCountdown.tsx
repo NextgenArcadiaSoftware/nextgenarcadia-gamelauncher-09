@@ -113,7 +113,11 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-blue-600 via-blue-800 to-blue-900 flex flex-col items-center justify-center z-50 animate-fade-in p-6">
+    <div className="fixed inset-0 animate-gradient flex flex-col items-center justify-center z-50 p-6" 
+         style={{
+           background: 'linear-gradient(225deg, #F97316 0%, #D946EF 50%, #8B5CF6 100%)',
+           backgroundSize: '400% 400%'
+         }}>
       <GameLaunchHeader
         activeGame={activeGame}
         inputWord={inputWord}
