@@ -79,6 +79,17 @@ const UNDEAD_CITADEL = {
   status: "enabled"
 } as const;
 
+const ARIZONA_SUNSHINE = {
+  title: "Arizona Sunshine II",
+  description: "Survive the zombie apocalypse in the sun-scorched desert of Arizona. Team up with your canine companion and face hordes of zombies in this thrilling VR shooter sequel.",
+  genre: "FPS",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/4e2b1ea9-0729-4f84-b8c4-974e08cd8c30.png",
+  executable_path: "steam://rungameid/2159470",
+  launch_code: "ARIZONA",
+  status: "enabled"
+} as const;
+
 const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -281,6 +292,11 @@ const Index = () => {
           .delete()
           .eq('title', UNDEAD_CITADEL.title);
 
+        await supabase
+          .from('games')
+          .delete()
+          .eq('title', ARIZONA_SUNSHINE.title);
+
         // Check for All-in-One Sports
         const { data: existingSportsGame } = await supabase
           .from('games')
@@ -305,6 +321,9 @@ const Index = () => {
 
         await supabase.from('games').insert([UNDEAD_CITADEL]);
         console.log('Added/Updated Undead Citadel to the database');
+
+        await supabase.from('games').insert([ARIZONA_SUNSHINE]);
+        console.log('Added/Updated Arizona Sunshine II to the database');
 
         fetchGames(); // Refresh the games list
       } catch (error) {
