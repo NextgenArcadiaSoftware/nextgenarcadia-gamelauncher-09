@@ -24,7 +24,7 @@ const getImageUrl = (path: string) => {
 };
 
 export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcaseProps) {
-  const [imageSources, setImageSources] = useState<Record<number, string>>({});
+  const [imageSources, setImageSources] = useState<Record<string, string>>({});
 
   const getYouTubeEmbedUrl = (url: string) => {
     if (!url) return '';
@@ -33,7 +33,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
-  const handleImageError = (gameId: number, genre: string) => {
+  const handleImageError = (gameId: string, genre: string) => {
     console.log('Image failed to load for game:', gameId);
     setImageSources(prev => ({
       ...prev,
