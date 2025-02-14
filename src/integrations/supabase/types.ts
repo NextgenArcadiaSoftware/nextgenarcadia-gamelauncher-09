@@ -16,6 +16,7 @@ export type Database = {
           executable_path: string | null
           genre: string
           id: string
+          launch_code: string | null
           release_date: string
           status: string
           thumbnail: string
@@ -29,6 +30,7 @@ export type Database = {
           executable_path?: string | null
           genre: string
           id?: string
+          launch_code?: string | null
           release_date: string
           status?: string
           thumbnail: string
@@ -42,6 +44,7 @@ export type Database = {
           executable_path?: string | null
           genre?: string
           id?: string
+          launch_code?: string | null
           release_date?: string
           status?: string
           thumbnail?: string

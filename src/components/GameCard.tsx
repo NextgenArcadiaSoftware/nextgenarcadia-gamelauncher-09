@@ -11,7 +11,6 @@ import {
 import { useState } from "react";
 import placeholderImage from "../assets/placeholder.svg";
 
-// Move function definition to the top level, before any component code
 const getImageUrl = (path: string) => {
   if (!path) return placeholderImage;
   if (path.startsWith('data:')) return path;
@@ -28,6 +27,7 @@ interface GameCardProps {
   release_date: string;
   trailer?: string;
   executablePath?: string;
+  launch_code?: string;
   onPlay: () => void;
   canPlayGames: boolean;
 }
@@ -40,11 +40,13 @@ export function GameCard({
   release_date,
   trailer,
   onPlay,
-  canPlayGames
+  canPlayGames,
+  launch_code = 'START'
 }: GameCardProps) {
   const [showTapCard, setShowTapCard] = useState(false);
   const [showTapToStart, setShowTapToStart] = useState(false);
   const [imageSrc, setImageSrc] = useState(getImageUrl(thumbnail));
+  const [currentInput, setCurrentInput] = useState('');
 
   const handlePlayButtonClick = () => {
     if (!canPlayGames) {
@@ -114,8 +116,10 @@ export function GameCard({
             setShowTapToStart(false);
           }}
         >
-          <div className="animate-[pulse_1s_ease-in-out_infinite] text-white text-2xl font-bold">
-            START GAME
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-[pulse_1s_ease-in-out_infinite] text-white text-2xl font-bold">
+              ENTER CODE: {launch_code}
+            </div>
           </div>
         </div>
       ) : null}
@@ -137,42 +141,4 @@ export function GameCard({
               </span>
             </div>
             <div className="flex gap-2">
-              {trailer && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button 
-                      size="icon"
-                      className="rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                    >
-                      <Video className="w-4 h-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="glass">
-                    <DialogHeader>
-                      <DialogTitle>{title} - Trailer</DialogTitle>
-                    </DialogHeader>
-                    <div className="relative w-full h-0 pt-[56.25%] rounded-2xl overflow-hidden">
-                      <iframe
-                        className="absolute top-0 left-0 w-full h-full"
-                        src={getYouTubeEmbedUrl(trailer)}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
-              <Button 
-                size="icon"
-                className="rounded-full bg-white hover:bg-white/90 text-black"
-                onClick={handlePlayButtonClick}
-              >
-                <Play className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+              {trailer &&
