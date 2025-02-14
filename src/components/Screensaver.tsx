@@ -38,7 +38,15 @@ export function Screensaver() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           onClick={() => setIsVisible(false)}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-900/90 via-blue-900/90 to-violet-900/90 animate-gradient-shift backdrop-blur-lg" />
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/90 via-purple-600/90 to-pink-500/90 animate-gradient-shift" style={{
+            backgroundSize: '400% 400%',
+            animation: 'gradient-shift 10s ease infinite',
+          }} />
+          <div className="absolute inset-0 bg-gradient-to-tl from-blue-600/50 via-violet-600/50 to-fuchsia-500/50 animate-gradient-shift mix-blend-overlay" style={{
+            backgroundSize: '400% 400%',
+            animation: 'gradient-shift 15s ease infinite',
+          }} />
+          <div className="absolute inset-0 backdrop-blur-lg" />
           <div className="relative z-10 text-center">
             <h1 className="text-7xl font-display font-bold text-white mb-4 tracking-tight animate-pulse">
               NextGen Arcadia
