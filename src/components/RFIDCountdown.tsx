@@ -28,6 +28,10 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
       });
     }, 1000);
 
+    // Simulate RFID input (this would be replaced by actual RFID reader input)
+    const rfidCode = "0014662252";
+    console.log('RFID Code detected:', rfidCode);
+
     // Show toast when game starts
     toast({
       title: "✨ Game Starting",
