@@ -131,7 +131,9 @@ export function GameCard({
           className="w-full h-full object-cover"
           onError={handleImageError}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%)'
+        }} />
         <div className="absolute bottom-0 left-0 p-6 w-full">
           <div className="flex items-center justify-between">
             <div>
