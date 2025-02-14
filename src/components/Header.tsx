@@ -11,14 +11,6 @@ export function Header() {
   return (
     <div className="glass p-6 rounded-xl flex justify-between items-center transition-all duration-300">
       <div className="flex items-center gap-6">
-        <div className="relative group">
-          <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 opacity-40 group-hover:opacity-100 transition-opacity duration-300 blur" />
-          <img 
-            src="/lovable-uploads/f12eb427-db97-42db-975b-2ccadfb41224.png" 
-            alt="NextGen Arcadia Logo" 
-            className="relative w-12 h-12 transform hover:scale-110 transition-transform duration-300" 
-          />
-        </div>
         <h1 className="text-xl font-bold tracking-wide next-gen-title bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
           NextGen Arcadia
         </h1>
