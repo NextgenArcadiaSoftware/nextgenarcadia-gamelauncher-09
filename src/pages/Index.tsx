@@ -216,7 +216,10 @@ const Index = () => {
     : games.filter(game => game.genre === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 animate-gradient-shift">
+    <div className="min-h-screen animate-gradient-shift" style={{
+      background: 'linear-gradient(225deg, #F97316 0%, #D946EF 50%, #8B5CF6 100%)',
+      backgroundSize: '400% 400%'
+    }}>
       {showRFIDCountdown ? (
         <RFIDCountdown 
           onExit={handleExitSession}
