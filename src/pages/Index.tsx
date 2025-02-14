@@ -11,76 +11,17 @@ import { GameShowcase } from "@/components/GameShowcase";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
 
-const MOCK_GAMES: Omit<Game, "id" | "created_at" | "updated_at">[] = [
-  {
-    title: "Street Fighter VI",
-    description: "The legendary fighting game series returns with its sixth mainline entry! Choose from 18 diverse fighters and battle in stunning arenas worldwide.",
-    genre: "Action",
-    release_date: "2023-06-02",
-    thumbnail: "/lovable-uploads/82c15066-5851-4a30-a1f4-c8fc42e685bd.png",
-    trailer: "https://www.youtube.com/watch?v=9nB1nfwmiLQ",
-    executable_path: "C:\\Games\\StreetFighter6\\SF6.exe",
-    status: "enabled"
-  },
-  {
-    title: "Mortal Kombat 1",
-    description: "Experience the all-new Mortal Kombat Universe created by the Fire God Liu Kang. A reborn Mortal Kombat with reimagined versions of iconic characters.",
-    genre: "Action",
-    release_date: "2023-09-19",
-    thumbnail: "/lovable-uploads/09374846-fe58-4998-868a-5691a68042c5.png",
-    trailer: "https://www.youtube.com/watch?v=jnVTPkCWzcI",
-    executable_path: "C:\\Games\\MK1\\MK1.exe",
-    status: "enabled"
-  },
-  {
-    title: "Beat Saber",
-    description: "An immersive rhythm game where you slash the beats of adrenaline-pumping music as they fly towards you, surrounded by a futuristic world.",
-    genre: "Rhythm",
-    release_date: "2019-05-21",
-    thumbnail: "/lovable-uploads/cac2759b-8463-4e08-b1ea-aeb608ac84a9.png",
-    trailer: "https://www.youtube.com/watch?v=vL39Sg2AqWg",
-    executable_path: "C:\\Games\\BeatSaber\\Beat Saber.exe",
-    status: "enabled"
-  },
-  {
-    title: "DOOM Eternal",
-    description: "Rip and tear through hell's armies in this fast-paced first person shooter. Become the Slayer and stop the demonic invasion.",
-    genre: "FPS",
-    release_date: "2020-03-20",
-    thumbnail: "/lovable-uploads/2f7ba916-4fc9-4136-b3cc-9f1e2ba0be94.png",
-    trailer: "https://www.youtube.com/watch?v=FkklG9MA0vM",
-    executable_path: "C:\\Games\\DOOMEternal\\DOOMEternalx64vk.exe",
-    status: "enabled"
-  },
-  {
-    title: "Resident Evil Village",
-    description: "Experience survival horror like never before in the 8th major installment in the Resident Evil franchise. Fight for survival in a mysterious village.",
-    genre: "Horror",
-    release_date: "2021-05-07",
-    thumbnail: "/lovable-uploads/cf7a9406-76de-470d-971d-ebb18c291622.png",
-    trailer: "https://www.youtube.com/watch?v=tjfTxFzGh3Q",
-    executable_path: "C:\\Games\\RE8\\re8.exe",
-    status: "enabled"
-  },
-  {
-    title: "Lethal Company",
-    description: "A co-op horror survival game where you explore abandoned moons to collect scrap and valuable resources. Work together to survive the horrors that await.",
-    genre: "Survival",
-    release_date: "2023-10-23",
-    thumbnail: "/lovable-uploads/d38b1a33-5653-43f5-802b-51546fe7fefb.png",
-    trailer: "https://www.youtube.com/watch?v=mpzeBbn-olY",
-    executable_path: "C:\\Games\\LethalCompany\\Lethal Company.exe",
-    status: "enabled"
-  }
-];
-
 const GAME_TRIGGERS: Record<string, string> = {
-  "Street Fighter VI": "start_sf6",
-  "Mortal Kombat 1": "start_mk1",
-  "Beat Saber": "start_beat",
-  "DOOM Eternal": "start_doom",
-  "Resident Evil Village": "start_rev",
-  "Lethal Company": "start_lc"
+  "Elven Assassin": "start_elven",
+  "Fruit Ninja VR": "start_ninja",
+  "Crisis Brigade 2 Reloaded": "start_crisis",
+  "All-In-One Sports VR": "start_sports",
+  "Richies Plank Experience": "start_plank",
+  "iB Cricket": "start_cricket",
+  "Undead Citadel": "start_citadel",
+  "Arizona Sunshine": "start_arizona",
+  "Subside": "start_subside",
+  "Propagation VR": "start_prop"
 };
 
 const Index = () => {
@@ -93,7 +34,7 @@ const Index = () => {
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const categories = ["All", "Action", "FPS", "Horror", "Rhythm", "Survival"];
+  const categories = ["All", "Action", "FPS", "Horror", "Sports", "Simulation"];
 
   useEffect(() => {
     fetchGames();
@@ -222,10 +163,6 @@ const Index = () => {
     setCanPlayGames(false);
   };
 
-  const filteredGames = selectedCategory === "All" 
-    ? games 
-    : games.filter(game => game.genre === selectedCategory);
-
   useEffect(() => {
     console.log('Setting up RFID key press listener');
 
@@ -280,6 +217,10 @@ const Index = () => {
     };
   }, [toast, sessionDuration]);
 
+  const filteredGames = selectedCategory === "All" 
+    ? games 
+    : games.filter(game => game.genre === selectedCategory);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F97316] via-[#D946EF] to-[#8B5CF6] animate-gradient-shift">
       {showRFIDCountdown ? (
@@ -310,7 +251,7 @@ const Index = () => {
               />
             </div>
             <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
-              <h2 className="text-2xl font-bold text-white next-gen-title">Top Arcade Games</h2>
+              <h2 className="text-2xl font-bold text-white next-gen-title">VR Games</h2>
               <CategoryBar 
                 categories={categories}
                 selectedCategory={selectedCategory}
