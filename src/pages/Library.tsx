@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
-import { Library as LibraryIcon, ArrowLeft, Trash2, Search } from "lucide-react";
+import { Library as LibraryIcon, ArrowLeft, Trash2, Search, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
 import {
@@ -18,11 +17,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const Library = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [editingGame, setEditingGame] = useState<Game | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -106,6 +115,44 @@ const Library = () => {
     }
   };
 
+  const handleEditGame = async (game: Game) => {
+    try {
+      const { error } = await supabase
+        .from('games')
+        .update({
+          title: game.title,
+          description: game.description,
+          genre: game.genre,
+          release_date: game.release_date,
+          thumbnail: game.thumbnail,
+          trailer: game.trailer,
+          executable_path: game.executable_path,
+        })
+        .eq('id', game.id);
+
+      if (error) throw error;
+
+      setGames(prevGames =>
+        prevGames.map(g =>
+          g.id === game.id ? game : g
+        )
+      );
+
+      setEditingGame(null);
+      toast({
+        title: "Game Updated",
+        description: "The game has been successfully updated.",
+      });
+    } catch (error) {
+      console.error('Error updating game:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update game",
+      });
+    }
+  };
+
   const filteredGames = games.filter(game => 
     game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     game.genre.toLowerCase().includes(searchQuery.toLowerCase())
@@ -170,6 +217,116 @@ const Library = () => {
                       {game.status === 'enabled' ? 'Enabled' : 'Disabled'}
                     </span>
                   </div>
+                  <Dialog onOpenChange={(open) => !open && setEditingGame(null)}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10"
+                        onClick={() => setEditingGame(game)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="glass border-white/10 sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Edit Game</DialogTitle>
+                      </DialogHeader>
+                      {editingGame && (
+                        <form onSubmit={(e) => {
+                          e.preventDefault();
+                          handleEditGame(editingGame);
+                        }} className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="title">Title</Label>
+                            <Input
+                              id="title"
+                              value={editingGame.title}
+                              onChange={(e) =>
+                                setEditingGame({ ...editingGame, title: e.target.value })
+                              }
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea
+                              id="description"
+                              value={editingGame.description}
+                              onChange={(e) =>
+                                setEditingGame({ ...editingGame, description: e.target.value })
+                              }
+                              required
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="genre">Genre</Label>
+                              <Input
+                                id="genre"
+                                value={editingGame.genre}
+                                onChange={(e) =>
+                                  setEditingGame({ ...editingGame, genre: e.target.value })
+                                }
+                                required
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="release_date">Release Date</Label>
+                              <Input
+                                id="release_date"
+                                type="date"
+                                value={editingGame.release_date}
+                                onChange={(e) =>
+                                  setEditingGame({ ...editingGame, release_date: e.target.value })
+                                }
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="thumbnail">Thumbnail URL</Label>
+                            <Input
+                              id="thumbnail"
+                              type="url"
+                              value={editingGame.thumbnail}
+                              onChange={(e) =>
+                                setEditingGame({ ...editingGame, thumbnail: e.target.value })
+                              }
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="trailer">Trailer URL (Optional)</Label>
+                            <Input
+                              id="trailer"
+                              type="url"
+                              value={editingGame.trailer || ''}
+                              onChange={(e) =>
+                                setEditingGame({ ...editingGame, trailer: e.target.value })
+                              }
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="executable_path">Steam Game ID or Executable Path</Label>
+                            <Input
+                              id="executable_path"
+                              type="text"
+                              placeholder="steam://rungameid/123456 or C:\Games\game.exe"
+                              value={editingGame.executable_path || ''}
+                              onChange={(e) =>
+                                setEditingGame({ ...editingGame, executable_path: e.target.value })
+                              }
+                              required
+                            />
+                          </div>
+                          <Button type="submit" className="w-full">
+                            Save Changes
+                          </Button>
+                        </form>
+                      )}
+                    </DialogContent>
+                  </Dialog>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button 
