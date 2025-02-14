@@ -7,6 +7,7 @@ import { GameLaunchHeader } from './game-launch/GameLaunchHeader';
 import { InputDisplay } from './game-launch/InputDisplay';
 import { VirtualKeyboard } from './game-launch/VirtualKeyboard';
 import { TimerDisplay } from './game-launch/TimerDisplay';
+import { RatingScreen } from './game-launch/RatingScreen';
 
 interface RFIDCountdownProps {
   onExit: () => void;
@@ -19,6 +20,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const [inputWord, setInputWord] = useState('');
   const [targetWord, setTargetWord] = useState('FRUIT');
   const [showKeyboard, setShowKeyboard] = useState(true);
+  const [showRating, setShowRating] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -27,11 +29,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
         setTimeLeft((prev) => {
           if (prev <= 1) {
             clearInterval(interval);
-            toast({
-              title: "Session Ended",
-              description: `Your ${duration}-minute session has ended.${activeGame ? ` ${activeGame} will close automatically.` : ''}`,
-            });
-            onExit();
+            setShowRating(true);
             return 0;
           }
           return prev - 1;
@@ -40,7 +38,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
 
       return () => clearInterval(interval);
     }
-  }, [showKeyboard, onExit, toast, duration, activeGame]);
+  }, [showKeyboard]);
 
   const handleKeyPress = (key: string) => {
     if (inputWord.length < targetWord.length) {
@@ -73,6 +71,18 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
       setInputWord('');
     }
   };
+
+  const handleRatingSubmit = (rating: number) => {
+    toast({
+      title: "Thank You!",
+      description: `You rated ${activeGame} ${rating} stars.`,
+    });
+    onExit();
+  };
+
+  if (showRating) {
+    return <RatingScreen activeGame={activeGame} onSubmit={handleRatingSubmit} />;
+  }
 
   if (showKeyboard) {
     return (
