@@ -32,19 +32,42 @@ export function GameCard({
   onPlay,
   canPlayGames
 }: GameCardProps) {
+  const [showTapCard, setShowTapCard] = useState(false);
   const [showTapToStart, setShowTapToStart] = useState(false);
 
   const handlePlayButtonClick = () => {
-    if (canPlayGames) {
-      setShowTapToStart(true);
+    if (!canPlayGames) {
+      setShowTapCard(true);
     } else {
-      onPlay();
+      setShowTapToStart(true);
     }
   };
 
   return (
     <div className="group relative overflow-hidden rounded-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
-      {showTapToStart ? (
+      {showTapCard && !canPlayGames ? (
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-black/95 to-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 animate-fade-in"
+        >
+          <div className="flex flex-col items-center gap-4 text-center px-6">
+            <div className="animate-[pulse_2s_ease-in-out_infinite] text-orange-500 text-3xl font-bold next-gen-title">
+              TAP CARD TO START GAME
+            </div>
+            <p className="text-gray-400 text-sm">
+              Please present your RFID card to begin your gaming session
+            </p>
+            <Button
+              variant="outline"
+              className="mt-4 glass border-0 hover:bg-white/20"
+              onClick={() => setShowTapCard(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      
+      {showTapToStart && canPlayGames ? (
         <div 
           className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 cursor-pointer animate-fade-in"
           onClick={() => {
