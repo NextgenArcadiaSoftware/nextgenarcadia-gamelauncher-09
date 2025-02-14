@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -40,7 +41,7 @@ const FRUIT_NINJA = {
   description: "Slice and dice your way through waves of fruit in this classic game reimagined for VR! Become a fruit-slicing master ninja in immersive virtual reality.",
   genre: "Action",
   release_date: "2023-12-01",
-  thumbnail: "/lovable-uploads/ad0b4a73-7182-4cd0-a370-e527f21a9f87.png",
+  thumbnail: "/lovable-uploads/cac2759b-8463-4e08-b1ea-aeb608ac84a9.png",
   executable_path: "steam://rungameid/923360",
   launch_code: "NINJA",
   status: "enabled"
