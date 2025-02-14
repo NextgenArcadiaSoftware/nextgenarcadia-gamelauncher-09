@@ -4,7 +4,6 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Link } from "react-router-dom";
 import { useToast } from "./ui/use-toast";
-import { AddGameDialog } from "./AddGameDialog";
 
 export function Header() {
   const { toast } = useToast();
@@ -35,7 +34,6 @@ export function Header() {
             <Library className="w-5 h-5" />
           </Button>
         </Link>
-        <AddGameDialog onAddGame={() => {}} />
         <Button
           variant="destructive"
           size="icon"
