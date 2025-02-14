@@ -44,7 +44,9 @@ export function GameCard({
   };
 
   const getYouTubeEmbedUrl = (url: string) => {
-    const videoId = url.split('v=')[1];
+    if (!url) return '';
+    const videoId = url.split('v=')[1]?.split('&')[0];
+    if (!videoId) return '';
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
@@ -88,7 +90,7 @@ export function GameCard({
       
       <div className="relative h-48 overflow-hidden">
         <img
-          src={thumbnail}
+          src={`${thumbnail}`}
           alt={title}
           className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
         />
@@ -127,7 +129,7 @@ export function GameCard({
               <DialogHeader>
                 <DialogTitle className="next-gen-title text-white">{title} - Trailer</DialogTitle>
               </DialogHeader>
-              <div className="relative w-full pt-[56.25%]">
+              <div className="relative w-full h-0 pt-[56.25%]">
                 <iframe
                   className="absolute top-0 left-0 w-full h-full rounded-lg"
                   src={getYouTubeEmbedUrl(trailer)}

@@ -13,7 +13,9 @@ interface GameShowcaseProps {
 
 export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcaseProps) {
   const getYouTubeEmbedUrl = (url: string) => {
-    const videoId = url.split('v=')[1];
+    if (!url) return '';
+    const videoId = url.split('v=')[1]?.split('&')[0];
+    if (!videoId) return '';
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
@@ -27,17 +29,19 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                 {game.trailer ? (
                   <Dialog>
                     <DialogTrigger asChild>
-                      <img 
-                        src={game.thumbnail}
-                        alt={game.title}
-                        className="w-full h-full object-cover animate-scale-in cursor-pointer"
-                      />
+                      <div className="w-full h-full cursor-pointer">
+                        <img 
+                          src={`${game.thumbnail}`}
+                          alt={game.title}
+                          className="w-full h-full object-cover animate-scale-in"
+                        />
+                      </div>
                     </DialogTrigger>
                     <DialogContent className="glass border-white/10 sm:max-w-[800px]">
                       <DialogHeader>
                         <DialogTitle className="next-gen-title text-white">{game.title} - Trailer</DialogTitle>
                       </DialogHeader>
-                      <div className="relative w-full pt-[56.25%]">
+                      <div className="relative w-full h-0 pt-[56.25%]">
                         <iframe
                           className="absolute top-0 left-0 w-full h-full rounded-lg"
                           src={getYouTubeEmbedUrl(game.trailer)}
@@ -49,7 +53,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                   </Dialog>
                 ) : (
                   <img 
-                    src={game.thumbnail}
+                    src={`${game.thumbnail}`}
                     alt={game.title}
                     className="w-full h-full object-cover animate-scale-in"
                   />
