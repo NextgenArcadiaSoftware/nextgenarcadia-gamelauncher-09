@@ -1,4 +1,3 @@
-
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -23,17 +22,6 @@ interface GameCardProps {
   canPlayGames: boolean;
 }
 
-// Move function declarations before they're used
-const getImageUrl = (path: string) => {
-  if (!path) return placeholderImage;
-  if (path.startsWith('data:')) return path;
-  if (path === 'placeholder.svg') return placeholderImage;
-  if (path.startsWith('http')) return path;
-  // Remove any leading slashes and add public path
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-  return `/${cleanPath}`;
-};
-
 export function GameCard({
   title,
   thumbnail,
@@ -46,7 +34,6 @@ export function GameCard({
 }: GameCardProps) {
   const [showTapCard, setShowTapCard] = useState(false);
   const [showTapToStart, setShowTapToStart] = useState(false);
-  const [imageSrc, setImageSrc] = useState(getImageUrl(thumbnail));
 
   const handlePlayButtonClick = () => {
     if (!canPlayGames) {
@@ -63,47 +50,31 @@ export function GameCard({
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
-  const handleImageError = () => {
-    console.log('Image failed to load:', thumbnail);
-    setImageSrc(`https://source.unsplash.com/random/800x600/?${encodeURIComponent(genre.toLowerCase())}`);
+  const getImageUrl = (path: string) => {
+    if (!path) return placeholderImage;
+    if (path === 'placeholder.svg') return placeholderImage;
+    if (path.startsWith('http')) return path;
+    return `/${path}`;
   };
 
   return (
     <div className="nintendo-card group">
       {showTapCard && !canPlayGames ? (
-        <div 
-          className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-50 animate-fade-in rounded-[2rem] overflow-hidden"
-          style={{
-            background: 'linear-gradient(-45deg, #ea384c, #22c55e, #ea384c, #22c55e)',
-            backgroundSize: '400% 400%',
-            animation: 'gradient 15s ease infinite',
-          }}
-        >
-          <style>
-            {`
-              @keyframes gradient {
-                0% { background-position: 0% 50%; }
-                50% { background-position: 100% 50%; }
-                100% { background-position: 0% 50%; }
-              }
-            `}
-          </style>
-          <div className="backdrop-blur-xl w-full h-full flex flex-col items-center justify-center gap-4">
-            <div className="flex flex-col items-center gap-4 text-center px-6">
-              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold drop-shadow-lg">
-                TAP CARD TO START
-              </div>
-              <p className="text-white text-sm drop-shadow">
-                Present your RFID card
-              </p>
-              <Button
-                variant="outline"
-                className="mt-2 bg-white/10 hover:bg-white/20 text-white border-0"
-                onClick={() => setShowTapCard(false)}
-              >
-                Cancel
-              </Button>
+        <div className="absolute inset-0 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center gap-4 z-50 animate-fade-in rounded-[2rem]">
+          <div className="flex flex-col items-center gap-4 text-center px-6">
+            <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
+              TAP CARD TO START
             </div>
+            <p className="text-gray-400 text-sm">
+              Present your RFID card
+            </p>
+            <Button
+              variant="outline"
+              className="mt-2 bg-white/10 hover:bg-white/20 text-white border-0"
+              onClick={() => setShowTapCard(false)}
+            >
+              Cancel
+            </Button>
           </div>
         </div>
       ) : null}
@@ -124,10 +95,9 @@ export function GameCard({
       
       <div className="relative h-[280px] overflow-hidden rounded-[2rem]">
         <img 
-          src={imageSrc}
+          src={getImageUrl(thumbnail)}
           alt={title}
           className="w-full h-full object-cover"
-          onError={handleImageError}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
         <div className="absolute bottom-0 left-0 p-6 w-full">
@@ -167,7 +137,7 @@ export function GameCard({
               <Button 
                 size="icon"
                 className="rounded-full bg-white hover:bg-white/90 text-black"
-                onClick={handlePlayButtonClick}
+                onClick={() => canPlayGames ? onPlay() : setShowTapCard(true)}
               >
                 <Play className="w-4 h-4" />
               </Button>

@@ -18,19 +18,10 @@ interface RFIDCountdownProps {
 export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdownProps) {
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [inputWord, setInputWord] = useState('');
-  const [targetWord, setTargetWord] = useState('');
+  const [targetWord, setTargetWord] = useState('FRUIT');
   const [showKeyboard, setShowKeyboard] = useState(true);
   const [showRating, setShowRating] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    // Set target word based on active game
-    if (activeGame?.toLowerCase().includes('fruit')) {
-      setTargetWord('FRUIT');
-    } else {
-      setTargetWord('START');
-    }
-  }, [activeGame]);
 
   useEffect(() => {
     if (!showKeyboard) {
