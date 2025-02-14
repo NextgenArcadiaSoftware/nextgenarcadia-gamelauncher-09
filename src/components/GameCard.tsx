@@ -95,7 +95,7 @@ export function GameCard({
                 Watch Trailer
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass border-white/10 sm:max-w-[1000px] md:max-w-[1200px] p-0 overflow-hidden bg-black/95">
+            <DialogContent className="glass fixed inset-x-4 top-[50%] translate-y-[-50%] sm:inset-auto border-white/10 sm:max-w-[1000px] md:max-w-[1200px] p-0 overflow-hidden bg-black/95">
               <DialogHeader className="p-6">
                 <DialogTitle className="next-gen-title text-2xl">{title} - Trailer</DialogTitle>
               </DialogHeader>
