@@ -91,6 +91,13 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   if (showKeyboard) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
+        <div className="text-center mb-4">
+          <h2 className="text-2xl font-bold text-white mb-2 animate-fade-in">Launch Code:</h2>
+          <div className="text-white/90 font-mono text-xl bg-black/20 px-4 py-2 rounded-lg animate-scale-in">
+            {targetWord}
+          </div>
+        </div>
+
         <div className="mb-8 flex gap-2">
           {targetWord.split('').map((_, index) => (
             <div
@@ -109,7 +116,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
         <div className="glass p-8 rounded-xl space-y-4 animate-scale-in">
           <div className="flex items-center gap-2 mb-6">
             <Keyboard className="w-6 h-6 text-white/80" />
-            <span className="text-white/80 text-sm">Enter the launch code</span>
+            <span className="text-white/80 text-sm">Type the launch code to start</span>
           </div>
           
           {keys.map((row, rowIndex) => (
