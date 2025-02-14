@@ -99,6 +99,23 @@ export function Screensaver() {
                 ease: "easeInOut"
               }}
             />
+            <motion.h1 
+              className="text-7xl font-display font-bold text-white mb-4 tracking-tight"
+              animate={{ 
+                textShadow: [
+                  '0 0 20px rgba(255,255,255,0.3)',
+                  '0 0 40px rgba(255,255,255,0.6)',
+                  '0 0 20px rgba(255,255,255,0.3)'
+                ]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              NextGen Arcadia
+            </motion.h1>
             <motion.p 
               className="text-xl text-white/70"
               animate={{ 
