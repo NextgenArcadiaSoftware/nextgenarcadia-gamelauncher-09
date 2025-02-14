@@ -47,6 +47,17 @@ const FRUIT_NINJA = {
   status: "enabled"
 } as const;
 
+const ELVEN_ASSASSIN = {
+  title: "Elven Assassin",
+  description: "Become an elite Elven Archer and defend your castle from hordes of orcs and dragons in this action-packed VR archery game!",
+  genre: "Action",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/f8c126a3-87f1-4ea8-b8d8-76597554d0be.png",
+  executable_path: "steam://rungameid/503770",
+  launch_code: "ELVEN",
+  status: "enabled"
+} as const;
+
 const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -250,6 +261,18 @@ const Index = () => {
         if (!existingNinjaGame) {
           await supabase.from('games').insert([FRUIT_NINJA]);
           console.log('Added Fruit Ninja VR to the database');
+        }
+
+        // Check for Elven Assassin
+        const { data: existingElvenGame } = await supabase
+          .from('games')
+          .select('title')
+          .eq('title', ELVEN_ASSASSIN.title)
+          .single();
+
+        if (!existingElvenGame) {
+          await supabase.from('games').insert([ELVEN_ASSASSIN]);
+          console.log('Added Elven Assassin to the database');
         }
 
         fetchGames(); // Refresh the games list
