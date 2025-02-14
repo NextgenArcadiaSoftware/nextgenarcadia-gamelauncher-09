@@ -1,3 +1,4 @@
+
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -34,6 +35,7 @@ export function GameCard({
 }: GameCardProps) {
   const [showTapCard, setShowTapCard] = useState(false);
   const [showTapToStart, setShowTapToStart] = useState(false);
+  const [imageSrc, setImageSrc] = useState(getImageUrl(thumbnail));
 
   const handlePlayButtonClick = () => {
     if (!canPlayGames) {
@@ -56,6 +58,11 @@ export function GameCard({
     if (path === 'placeholder.svg') return placeholderImage;
     if (path.startsWith('http')) return path;
     return path.startsWith('/') ? path : `/${path}`;
+  };
+
+  const handleImageError = () => {
+    console.log('Image failed to load:', thumbnail);
+    setImageSrc(`https://source.unsplash.com/random/800x600/?${encodeURIComponent(genre.toLowerCase())}`);
   };
 
   return (
@@ -114,13 +121,10 @@ export function GameCard({
       
       <div className="relative h-[280px] overflow-hidden rounded-[2rem]">
         <img 
-          src={getImageUrl(thumbnail)}
+          src={imageSrc}
           alt={title}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = placeholderImage;
-          }}
+          onError={handleImageError}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
         <div className="absolute bottom-0 left-0 p-6 w-full">
