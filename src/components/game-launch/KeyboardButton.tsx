@@ -11,9 +11,8 @@ export function KeyboardButton({ letter, isPressed, onClick }: KeyboardButtonPro
   return (
     <Button
       variant="outline"
-      className={`w-12 h-12 text-xl font-bold bg-white/10 border-white/20 
-        hover:bg-white/20 transition-all duration-200 hover:scale-110
-        ${isPressed ? 'bg-green-500/20 border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.5)]' : ''}`}
+      className={`w-10 h-10 text-lg font-medium bg-gray-200 hover:bg-gray-300 text-black border-0
+        transition-all duration-200 rounded-md ${isPressed ? 'bg-gray-300' : ''}`}
       onClick={() => onClick(letter)}
     >
       {letter}

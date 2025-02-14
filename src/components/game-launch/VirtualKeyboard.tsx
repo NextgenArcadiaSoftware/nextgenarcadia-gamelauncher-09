@@ -1,5 +1,4 @@
 
-import { Keyboard, ArrowLeft, CornerDownLeft } from 'lucide-react';
 import { Button } from '../ui/button';
 import { KeyboardButton } from './KeyboardButton';
 
@@ -18,14 +17,9 @@ export function VirtualKeyboard({ inputWord, onKeyPress, onBackspace, onEnter }:
   ];
 
   return (
-    <div className="glass p-6 rounded-xl space-y-4 animate-scale-in max-w-3xl w-full">
-      <div className="flex items-center gap-2 mb-6 justify-center">
-        <Keyboard className="w-6 h-6 text-white/80" />
-        <span className="text-white/80 text-lg">Type the launch code to begin</span>
-      </div>
-      
+    <div className="glass p-6 rounded-xl space-y-2 animate-scale-in max-w-2xl w-full">
       {keys.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex justify-center gap-2">
+        <div key={rowIndex} className="flex justify-center gap-1.5">
           {row.map((key) => (
             <KeyboardButton
               key={key}
@@ -37,23 +31,40 @@ export function VirtualKeyboard({ inputWord, onKeyPress, onBackspace, onEnter }:
         </div>
       ))}
       
-      <div className="flex justify-center gap-4 mt-6">
-        <Button
-          variant="outline"
-          className="px-6 py-4 bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110 flex items-center gap-2"
-          onClick={onBackspace}
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Backspace
-        </Button>
-        <Button
-          variant="outline"
-          className="px-6 py-4 bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-200 hover:scale-110 flex items-center gap-2"
-          onClick={onEnter}
-        >
-          <CornerDownLeft className="w-5 h-5" />
-          Enter
-        </Button>
+      <div className="flex justify-between px-2 mt-4">
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="px-4 py-2 bg-gray-200 text-black hover:bg-gray-300 transition-all duration-200"
+            onClick={() => null}
+          >
+            123
+          </Button>
+          <Button
+            variant="outline"
+            className="px-4 py-2 bg-gray-200 text-black hover:bg-gray-300 transition-all duration-200"
+            onClick={() => null}
+          >
+            🌐
+          </Button>
+        </div>
+        
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="px-4 py-2 bg-gray-200 text-black hover:bg-gray-300 transition-all duration-200 min-w-[100px]"
+            onClick={onBackspace}
+          >
+            ←
+          </Button>
+          <Button
+            variant="outline"
+            className="px-4 py-2 bg-gray-200 text-black hover:bg-gray-300 transition-all duration-200 min-w-[100px]"
+            onClick={onEnter}
+          >
+            Go
+          </Button>
+        </div>
       </div>
     </div>
   );
