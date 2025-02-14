@@ -60,6 +60,18 @@
   }
 }
 
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 @layer utilities {
   .glass {
     @apply bg-black/30 backdrop-blur-xl border border-white/10 rounded-lg;
@@ -80,5 +92,10 @@
 
   .countdown-overlay {
     @apply fixed inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50;
+  }
+
+  .animate-gradient-shift {
+    animation: gradient-shift 15s ease infinite;
+    background-size: 400% 400%;
   }
 }
