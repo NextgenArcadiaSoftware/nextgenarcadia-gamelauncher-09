@@ -51,17 +51,16 @@ const Index = () => {
         throw error;
       }
 
-      if (!data || data.length === 0) {
-        const { data: insertedData, error: insertError } = await supabase
-          .from('games')
-          .insert(MOCK_GAMES)
-          .select();
-
-        if (insertError) throw insertError;
-        
-        setGames(insertedData as Game[]);
-      } else {
+      if (data) {
         setGames(data as Game[]);
+      } else {
+        console.error('No games found in the database');
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No games found in the database",
+        });
+        setGames([]);
       }
     } catch (error) {
       console.error('Error fetching games:', error);
@@ -70,12 +69,7 @@ const Index = () => {
         title: "Error",
         description: "Failed to fetch games",
       });
-      setGames(MOCK_GAMES.map((game, index) => ({
-        ...game,
-        id: `mock-${index}`,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })));
+      setGames([]);
     }
   };
 
@@ -130,7 +124,7 @@ const Index = () => {
 
   const handlePlayGame = async (title: string, executablePath: string) => {
     if (!canPlayGames) {
-      return; // The GameCard component handles showing the tap card screen
+      return;
     }
 
     try {
