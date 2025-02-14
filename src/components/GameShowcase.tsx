@@ -32,7 +32,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                     <DialogTrigger asChild>
                       <div className="w-full h-full cursor-pointer">
                         <img 
-                          src={game.thumbnail || placeholderImage}
+                          src={game.thumbnail ? `${window.location.origin}${game.thumbnail}` : placeholderImage}
                           alt={game.title}
                           className="w-full h-full object-cover animate-scale-in"
                         />
@@ -54,7 +54,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                   </Dialog>
                 ) : (
                   <img 
-                    src={game.thumbnail || placeholderImage}
+                    src={game.thumbnail ? `${window.location.origin}${game.thumbnail}` : placeholderImage}
                     alt={game.title}
                     className="w-full h-full object-cover animate-scale-in"
                   />

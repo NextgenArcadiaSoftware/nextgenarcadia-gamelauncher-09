@@ -51,7 +51,7 @@ export function GameCard({
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
-  const imageUrl = thumbnail || placeholderImage;
+  const imageUrl = thumbnail ? `${window.location.origin}${thumbnail}` : placeholderImage;
 
   return (
     <div className="group relative overflow-hidden rounded-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
