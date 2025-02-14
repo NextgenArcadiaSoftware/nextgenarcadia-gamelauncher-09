@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import type { Game } from "@/types/game";
 import { Play, Video } from "lucide-react";
 import placeholderImage from "../assets/placeholder.svg";
+import { useState } from "react";
 
 interface GameShowcaseProps {
   games: Game[];
@@ -14,6 +15,8 @@ interface GameShowcaseProps {
 }
 
 export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcaseProps) {
+  const [imageSources, setImageSources] = useState<Record<string, string>>({});
+
   const getYouTubeEmbedUrl = (url: string) => {
     if (!url) return '';
     const videoId = url.split('v=')[1]?.split('&')[0];
@@ -23,9 +26,18 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
 
   const getImageUrl = (path: string) => {
     if (!path) return placeholderImage;
+    if (path.startsWith('data:')) return path;
     if (path === 'placeholder.svg') return placeholderImage;
     if (path.startsWith('http')) return path;
-    return `/${path}`;
+    return path.startsWith('/') ? path : `/${path}`;
+  };
+
+  const handleImageError = (gameId: number, genre: string) => {
+    console.log('Image failed to load for game:', gameId);
+    setImageSources(prev => ({
+      ...prev,
+      [gameId]: `https://source.unsplash.com/random/1200x800/?${encodeURIComponent(genre.toLowerCase())}`
+    }));
   };
 
   return (
@@ -40,9 +52,10 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                     <DialogTrigger asChild>
                       <div className="w-full h-full cursor-pointer">
                         <img 
-                          src={getImageUrl(game.thumbnail)}
+                          src={imageSources[game.id] || getImageUrl(game.thumbnail)}
                           alt={game.title}
                           className="w-full h-full object-cover animate-scale-in"
+                          onError={() => handleImageError(game.id, game.genre)}
                         />
                       </div>
                     </DialogTrigger>
@@ -62,9 +75,10 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                   </Dialog>
                 ) : (
                   <img 
-                    src={getImageUrl(game.thumbnail)}
+                    src={imageSources[game.id] || getImageUrl(game.thumbnail)}
                     alt={game.title}
                     className="w-full h-full object-cover animate-scale-in"
+                    onError={() => handleImageError(game.id, game.genre)}
                   />
                 )}
                 <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-black/90 via-black/40 to-transparent animate-fade-in" />
@@ -84,13 +98,30 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                       PLAY NOW
                     </Button>
                     {game.trailer && (
-                      <Button 
-                        variant="outline"
-                        className="bg-white/10 hover:bg-white/20 animate-scale-in"
-                      >
-                        <Video className="w-4 h-4 mr-2" />
-                        Watch Trailer
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            variant="outline"
+                            className="bg-white/10 hover:bg-white/20 animate-scale-in"
+                          >
+                            <Video className="w-4 h-4 mr-2" />
+                            Watch Trailer
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="glass border-white/10 sm:max-w-[800px]">
+                          <DialogHeader>
+                            <DialogTitle className="next-gen-title text-white">{game.title} - Trailer</DialogTitle>
+                          </DialogHeader>
+                          <div className="relative w-full h-0 pt-[56.25%]">
+                            <iframe
+                              className="absolute top-0 left-0 w-full h-full rounded-lg"
+                              src={getYouTubeEmbedUrl(game.trailer)}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            ></iframe>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     )}
                   </div>
                 </div>
