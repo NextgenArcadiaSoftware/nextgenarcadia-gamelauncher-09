@@ -27,11 +27,19 @@ export function InputDisplay({ inputWord, targetWord }: InputDisplayProps) {
       {Array.from({ length: 3 }).map((_, index) => {
         const hasInput = index < inputWord.length;
         const letter = hasInput ? inputWord[index] : "";
+        const isCorrect = hasInput && inputWord[index] === targetWord[index];
 
         return (
           <div
             key={index}
-            className={`w-24 h-24 flex items-center justify-center text-4xl font-bold bg-neutral-400 text-black`}
+            className={`w-24 h-24 flex items-center justify-center text-4xl font-bold 
+              ${hasInput 
+                ? isCorrect 
+                  ? 'bg-emerald-400 text-white' 
+                  : 'bg-rose-400 text-white'
+                : 'bg-neutral-400 text-black'
+              } 
+              transition-colors duration-300`}
           >
             {letter}
           </div>
