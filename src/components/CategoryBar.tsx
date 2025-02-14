@@ -13,16 +13,16 @@ export function CategoryBar({
   onCategorySelect 
 }: CategoryBarProps) {
   return (
-    <div className="flex gap-4 overflow-x-auto pb-2 glass p-4 rounded-lg">
+    <div className="glass p-4 rounded-xl flex gap-4 overflow-x-auto">
       {categories.map((category) => (
         <Button
           key={category}
           variant={selectedCategory === category ? "default" : "secondary"}
           onClick={() => onCategorySelect(category)}
-          className={`glass whitespace-nowrap ${
+          className={`whitespace-nowrap border-0 ${
             selectedCategory === category 
-              ? "bg-primary/20 hover:bg-primary/30" 
-              : "hover:bg-gray-800/50"
+              ? "glass bg-white/20 hover:bg-white/30" 
+              : "glass hover:bg-white/20"
           }`}
         >
           {category}

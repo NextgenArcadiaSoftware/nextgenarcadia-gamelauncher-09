@@ -27,7 +27,7 @@ export function GameCard({
   thumbnail,
   description,
   genre,
-  release_date, // Changed from releaseDate to release_date
+  release_date,
   trailer,
   onPlay,
   canPlayGames
@@ -43,7 +43,7 @@ export function GameCard({
   };
 
   return (
-    <div className="game-card group transform transition-all duration-200 hover:scale-105">
+    <div className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-105">
       {showTapToStart ? (
         <div 
           className="absolute inset-0 bg-black/90 backdrop-blur-sm flex flex-col items-center justify-center gap-8 z-50 cursor-pointer"
@@ -61,14 +61,18 @@ export function GameCard({
       <img
         src={thumbnail}
         alt={title}
-        className="w-full h-48 object-cover rounded-t-lg"
+        className="w-full h-48 object-cover"
       />
-      <div className="p-4 space-y-4">
-        <h3 className="text-xl font-bold">{title}</h3>
-        <p className="text-sm text-gray-400">{description}</p>
-        <div className="flex justify-between text-sm text-gray-400">
-          <span>{genre}</span>
-          <span>{new Date(release_date).toLocaleDateString()}</span>
+      <div className="glass border-0 p-6 space-y-4">
+        <h3 className="text-xl font-bold next-gen-title">{title}</h3>
+        <p className="text-sm text-gray-300">{description}</p>
+        <div className="flex justify-between text-sm text-gray-300">
+          <span className="glass border-0 px-3 py-1 rounded-full text-xs">
+            {genre}
+          </span>
+          <span className="glass border-0 px-3 py-1 rounded-full text-xs">
+            {new Date(release_date).toLocaleDateString()}
+          </span>
         </div>
         <div className="flex gap-2">
           {trailer && (
@@ -77,15 +81,15 @@ export function GameCard({
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="w-full glass"
+                  className="w-full glass border-0 hover:bg-white/20"
                 >
                   <Video className="w-4 h-4 mr-2" />
                   Watch Trailer
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[800px] bg-gray-900 border-gray-800">
+              <DialogContent className="glass border-white/10 sm:max-w-[800px]">
                 <DialogHeader>
-                  <DialogTitle>{title} - Trailer</DialogTitle>
+                  <DialogTitle className="next-gen-title">{title} - Trailer</DialogTitle>
                 </DialogHeader>
                 <iframe
                   className="w-full aspect-video rounded-lg"
@@ -99,7 +103,7 @@ export function GameCard({
           <Button 
             variant="default" 
             size="sm" 
-            className="w-full glass"
+            className="w-full glass border-0 hover:bg-white/20"
             onClick={handlePlayButtonClick}
           >
             <Play className="w-4 h-4 mr-2" />

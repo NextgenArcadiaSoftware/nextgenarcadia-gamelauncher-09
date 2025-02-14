@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,7 +34,7 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    background: hsl(220 20% 4%);
+    background: linear-gradient(225deg, hsl(220 20% 4%), hsl(220 20% 2%));
     min-height: 100vh;
   }
 }
