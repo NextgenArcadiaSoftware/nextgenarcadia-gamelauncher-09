@@ -43,6 +43,11 @@ export function GameCard({
     }
   };
 
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoId = url.split('v=')[1];
+    return `https://www.youtube.com/embed/${videoId}`;
+  };
+
   return (
     <div className="group relative overflow-hidden rounded-xl transition-all duration-500 hover:scale-105 hover:shadow-2xl">
       {showTapCard && !canPlayGames ? (
@@ -118,19 +123,17 @@ export function GameCard({
                 Watch Trailer
               </Button>
             </DialogTrigger>
-            <DialogContent className="fixed !inset-0 !m-0 !p-0 !w-screen !h-screen sm:!inset-auto sm:!h-auto sm:!w-auto sm:!max-w-[1000px] md:!max-w-[1200px] !rounded-none sm:!rounded-lg overflow-hidden bg-black/95">
-              <div className="relative flex flex-col w-full h-full sm:h-auto">
-                <DialogHeader className="p-6">
-                  <DialogTitle className="next-gen-title text-2xl">{title} - Trailer</DialogTitle>
-                </DialogHeader>
-                <div className="relative w-full flex-1 sm:pb-[56.25%]">
-                  <iframe
-                    className="absolute top-0 left-0 w-full h-full"
-                    src={trailer.replace('watch?v=', 'embed/') + '?autoplay=1'}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
+            <DialogContent className="glass border-white/10 sm:max-w-[800px]">
+              <DialogHeader>
+                <DialogTitle className="next-gen-title text-white">{title} - Trailer</DialogTitle>
+              </DialogHeader>
+              <div className="relative w-full pt-[56.25%]">
+                <iframe
+                  className="absolute top-0 left-0 w-full h-full rounded-lg"
+                  src={getYouTubeEmbedUrl(trailer)}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
               </div>
             </DialogContent>
           </Dialog>

@@ -12,6 +12,11 @@ interface GameShowcaseProps {
 }
 
 export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcaseProps) {
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoId = url.split('v=')[1];
+    return `https://www.youtube.com/embed/${videoId}`;
+  };
+
   return (
     <div className="relative w-full h-[600px] overflow-hidden rounded-3xl animate-fade-in">
       <Carousel className="w-full">
@@ -23,26 +28,28 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                   <Dialog>
                     <DialogTrigger asChild>
                       <img 
-                        src={game.thumbnail} 
+                        src={game.thumbnail}
                         alt={game.title}
                         className="w-full h-full object-cover animate-scale-in cursor-pointer"
                       />
                     </DialogTrigger>
                     <DialogContent className="glass border-white/10 sm:max-w-[800px]">
                       <DialogHeader>
-                        <DialogTitle className="next-gen-title">{game.title} - Trailer</DialogTitle>
+                        <DialogTitle className="next-gen-title text-white">{game.title} - Trailer</DialogTitle>
                       </DialogHeader>
-                      <iframe
-                        className="w-full aspect-video rounded-lg"
-                        src={game.trailer.replace('watch?v=', 'embed/')}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
+                      <div className="relative w-full pt-[56.25%]">
+                        <iframe
+                          className="absolute top-0 left-0 w-full h-full rounded-lg"
+                          src={getYouTubeEmbedUrl(game.trailer)}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
                     </DialogContent>
                   </Dialog>
                 ) : (
                   <img 
-                    src={game.thumbnail} 
+                    src={game.thumbnail}
                     alt={game.title}
                     className="w-full h-full object-cover animate-scale-in"
                   />
@@ -59,7 +66,7 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                     disabled={!canPlayGames}
                     className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white px-8 animate-scale-in"
                   >
-                    GET
+                    PLAY NOW
                   </Button>
                 </div>
               </div>
