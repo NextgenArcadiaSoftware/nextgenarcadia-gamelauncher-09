@@ -35,46 +35,87 @@ export function Screensaver() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
           onClick={() => setIsVisible(false)}
         >
-          {/* Base gradient layer */}
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/90 via-purple-600/90 to-pink-500/90 animate-gradient-shift" style={{
-            backgroundSize: '400% 400%',
-            animation: 'gradient-shift 10s ease infinite',
-          }} />
+          {/* Multi-layered animated gradients */}
+          <div 
+            className="absolute inset-0 animate-gradient" 
+            style={{
+              background: 'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)',
+              filter: 'brightness(0.8) saturate(1.2)',
+              backgroundSize: '400% 400%'
+            }}
+          />
           
-          {/* Secondary gradient layer */}
-          <div className="absolute inset-0 bg-gradient-to-tl from-blue-600/50 via-violet-600/50 to-fuchsia-500/50 animate-gradient-shift mix-blend-overlay" style={{
-            backgroundSize: '400% 400%',
-            animation: 'gradient-shift 15s ease infinite',
-          }} />
+          <div 
+            className="absolute inset-0 animate-gradient mix-blend-overlay" 
+            style={{
+              background: 'linear-gradient(45deg, #12c2e9, #c471ed, #f64f59)',
+              backgroundSize: '400% 400%',
+              animationDelay: '-4s'
+            }}
+          />
           
-          {/* Additional color layers */}
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/30 via-teal-500/30 to-emerald-600/30 animate-gradient-shift mix-blend-color" style={{
-            backgroundSize: '400% 400%',
-            animation: 'gradient-shift 20s ease infinite',
-          }} />
-          
-          <div className="absolute inset-0 bg-gradient-to-bl from-rose-400/20 via-orange-500/20 to-amber-600/20 animate-gradient-shift mix-blend-soft-light" style={{
-            backgroundSize: '400% 400%',
-            animation: 'gradient-shift 25s ease infinite',
-          }} />
+          <div 
+            className="absolute inset-0 animate-gradient mix-blend-soft-light" 
+            style={{
+              background: 'linear-gradient(135deg, #00F5A0, #00D9F5)',
+              backgroundSize: '400% 400%',
+              animationDelay: '-8s'
+            }}
+          />
+
+          {/* Animated mesh gradient overlay */}
+          <div 
+            className="absolute inset-0 animate-gradient opacity-30" 
+            style={{
+              background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.1) 100%)',
+              backgroundSize: '200% 200%',
+              animationDuration: '20s'
+            }}
+          />
           
           {/* Blur effect */}
-          <div className="absolute inset-0 backdrop-blur-lg" />
+          <div className="absolute inset-0 backdrop-blur-[100px]" />
           
           {/* Content */}
           <div className="relative z-10 text-center">
-            <h1 className="text-7xl font-display font-bold text-white mb-4 tracking-tight animate-pulse">
+            <motion.h1 
+              className="text-7xl font-display font-bold text-white mb-4 tracking-tight"
+              animate={{ 
+                textShadow: [
+                  '0 0 20px rgba(255,255,255,0.3)',
+                  '0 0 40px rgba(255,255,255,0.6)',
+                  '0 0 20px rgba(255,255,255,0.3)'
+                ]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
               NextGen Arcadia
-            </h1>
-            <p className="text-xl text-white/70 animate-bounce">
+            </motion.h1>
+            <motion.p 
+              className="text-xl text-white/70"
+              animate={{ 
+                opacity: [0.7, 1, 0.7],
+                y: [0, -10, 0]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
               Click anywhere to continue...
-            </p>
+            </motion.p>
           </div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
+
