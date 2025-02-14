@@ -20,6 +20,18 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const [inputWord, setInputWord] = useState('');
   const { toast } = useToast();
 
+  // Get the target word based on the active game
+  const targetWord = activeGame === "Fruit Ninja VR" ? "NINJA" :
+                    activeGame === "Richies Plank Experience" ? "PLANK" :
+                    activeGame === "Elven Assassin" ? "ELVEN" :
+                    activeGame === "All-In-One Sports VR" ? "SPORTS" :
+                    activeGame === "Crisis Brigade 2 Reloaded" ? "CRISIS" :
+                    activeGame === "Undead Citadel" ? "CITADEL" :
+                    activeGame === "Arizona Sunshine II" ? "ARIZONA" :
+                    activeGame === "iB Cricket" ? "CRICKET" :
+                    activeGame === "Subside" ? "SUBSIDE" :
+                    activeGame === "Propagation VR" ? "PROP" : "";
+
   // RFID Code detected simulation
   useEffect(() => {
     // Simulate RFID input (this would be replaced by actual RFID reader input)
@@ -27,10 +39,12 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
     console.log('RFID Code detected:', rfidCode);
 
     // Show toast when game starts
-    toast({
-      title: "✨ Game Starting",
-      description: `${activeGame} is launching...`,
-    });
+    if (activeGame) {
+      toast({
+        title: "✨ Launch Code Required",
+        description: `Enter the code to start ${activeGame}`,
+      });
+    }
   }, [activeGame, toast]);
 
   // Timer countdown
@@ -85,18 +99,6 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
     });
     onExit();
   };
-
-  // Game-specific launch codes
-  const targetWord = activeGame === "Fruit Ninja VR" ? "NINJA" :
-                    activeGame === "Richies Plank Experience" ? "PLANK" :
-                    activeGame === "Elven Assassin" ? "ELVEN" :
-                    activeGame === "All-in-One Sports VR" ? "SPORTS" :
-                    activeGame === "Crisis Brigade 2 Reloaded" ? "CRISIS" :
-                    activeGame === "Undead Citadel" ? "CITADEL" :
-                    activeGame === "Arizona Sunshine" ? "ARIZONA" :
-                    activeGame === "iB Cricket" ? "CRICKET" :
-                    activeGame === "Subside" ? "SUBSIDE" :
-                    activeGame === "Propagation VR" ? "PROP" : "";
 
   if (showRating) {
     return <RatingScreen activeGame={activeGame} onSubmit={handleRatingSubmit} />;
