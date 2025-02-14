@@ -24,7 +24,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const getGameCode = (gameTitle: string | null | undefined): string => {
     if (!gameTitle) return "XXX";
     
-    // These codes must match exactly with the Python backend GAMES dictionary
+    // These codes match exactly with the Python backend GAMES dictionary
     const codeMap: Record<string, string> = {
       "Elven Assassin": "EAX",
       "Fruit Ninja VR": "FNJ",
