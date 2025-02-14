@@ -72,7 +72,7 @@ export function GameCard({
         <div 
           className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-50 animate-fade-in rounded-[2rem] overflow-hidden"
           style={{
-            background: 'linear-gradient(-45deg, #ea384c, #22c55e, #ea384c, #22c55e)',
+            background: 'linear-gradient(-45deg, #22c55e, #16a34a, #15803d, #166534)',
             backgroundSize: '400% 400%',
             animation: 'gradient 15s ease infinite',
           }}
