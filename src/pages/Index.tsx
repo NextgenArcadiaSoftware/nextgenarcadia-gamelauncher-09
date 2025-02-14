@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -231,7 +232,7 @@ const Index = () => {
   }, [toast, sessionDuration]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F97316] via-[#D946EF] to-[#8B5CF6]">
+    <div className="min-h-screen bg-gradient-to-br from-[#1A1F2C] via-[#221F26] to-[#403E43]">
       {showRFIDCountdown ? (
         <RFIDCountdown 
           onExit={handleExitSession}
