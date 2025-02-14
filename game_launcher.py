@@ -5,6 +5,7 @@ import os
 import logging
 from typing import Dict, Optional
 import keyboard
+from supabase import create_client, Client
 
 # Set up logging
 logging.basicConfig(
@@ -14,11 +15,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Initialize Supabase client
+supabase: Client = create_client(
+    "https://kucigyynsgjfymtzzwvs.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1Y2lneXluc2dqZnltdHp6d3ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk1Mjc2MjgsImV4cCI6MjA1NTEwMzYyOH0.lcAlKNHWkj8uId-oFU2lHeCHQZcLwaZSSlc3H5erTrA"
+)
+
 class GameLauncher:
     def __init__(self):
         self.current_process: Optional[subprocess.Popen] = None
         self.session_timer: Optional[float] = None
         self.session_duration = 8 * 60  # 8 minutes in seconds
+        self.rfid_buffer = ""
+        self.last_rfid_time = 0
         
         # Dictionary mapping trigger words to game paths and full names
         self.games: Dict[str, Dict[str, str]] = {
@@ -63,6 +72,19 @@ class GameLauncher:
                 'name': 'Propagation VR'
             }
         }
+
+    async def get_trigger_word_from_rfid(self, rfid_code: str) -> Optional[str]:
+        """
+        Get the trigger word associated with an RFID code from the database
+        """
+        try:
+            response = await supabase.table('rfid_game_mappings').select('trigger_word').eq('rfid_code', rfid_code).single().execute()
+            if response.data:
+                return response.data['trigger_word']
+            return None
+        except Exception as e:
+            logger.error(f"Error getting trigger word for RFID {rfid_code}: {str(e)}")
+            return None
 
     def launch_game(self, trigger_word: str) -> bool:
         """
@@ -128,6 +150,33 @@ class GameLauncher:
                 return True
         return False
 
+    def handle_rfid_input(self, char: str) -> None:
+        """
+        Handle RFID card input character by character
+        """
+        current_time = time.time()
+        
+        # If more than 1 second has passed since last input, clear the buffer
+        if current_time - self.last_rfid_time > 1:
+            self.rfid_buffer = ""
+            
+        self.last_rfid_time = current_time
+        
+        # Add character to buffer
+        if char.isalnum():  # Only accept alphanumeric characters
+            self.rfid_buffer += char
+            
+        # Most RFID readers end with a return character
+        if char == '\r' or char == '\n':
+            if len(self.rfid_buffer) > 0:
+                logger.info(f"RFID code read: {self.rfid_buffer}")
+                trigger_word = self.get_trigger_word_from_rfid(self.rfid_buffer)
+                if trigger_word:
+                    self.launch_game(trigger_word)
+                else:
+                    logger.warning(f"No game associated with RFID code: {self.rfid_buffer}")
+                self.rfid_buffer = ""
+
 def main():
     launcher = GameLauncher()
     print("\n=== VR Game Launcher ===")
@@ -136,7 +185,7 @@ def main():
         print(f"'{trigger}' for {info['name']}")
     print("\nPress 'esc' to stop the current game")
     print("Type 'exit' to quit the launcher")
-    print("\nWaiting for commands...")
+    print("\nScanning for RFID cards...")
 
     while True:
         try:
@@ -157,7 +206,10 @@ def main():
                     elif command in launcher.games:
                         launcher.launch_game(command)
                     else:
-                        print(f"\nUnknown command: {command}")
+                        launcher.handle_rfid_input(command)
+                else:
+                    # Handle RFID input character by character
+                    launcher.handle_rfid_input(event.name)
                 
             time.sleep(0.1)  # Small delay to prevent high CPU usage
             
