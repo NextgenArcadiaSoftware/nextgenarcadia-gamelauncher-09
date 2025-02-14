@@ -23,9 +23,10 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
 
   const getImageUrl = (path: string) => {
     if (!path) return placeholderImage;
+    if (path.startsWith('data:')) return path;
     if (path === 'placeholder.svg') return placeholderImage;
     if (path.startsWith('http')) return path;
-    return `/${path}`;
+    return path.startsWith('/') ? path : `/${path}`;
   };
 
   return (
@@ -43,6 +44,10 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                           src={getImageUrl(game.thumbnail)}
                           alt={game.title}
                           className="w-full h-full object-cover animate-scale-in"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = placeholderImage;
+                          }}
                         />
                       </div>
                     </DialogTrigger>
@@ -65,6 +70,10 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                     src={getImageUrl(game.thumbnail)}
                     alt={game.title}
                     className="w-full h-full object-cover animate-scale-in"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = placeholderImage;
+                    }}
                   />
                 )}
                 <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-black/90 via-black/40 to-transparent animate-fade-in" />
@@ -84,13 +93,15 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
                       PLAY NOW
                     </Button>
                     {game.trailer && (
-                      <Button 
-                        variant="outline"
-                        className="bg-white/10 hover:bg-white/20 animate-scale-in"
-                      >
-                        <Video className="w-4 h-4 mr-2" />
-                        Watch Trailer
-                      </Button>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline"
+                          className="bg-white/10 hover:bg-white/20 animate-scale-in"
+                        >
+                          <Video className="w-4 h-4 mr-2" />
+                          Watch Trailer
+                        </Button>
+                      </DialogTrigger>
                     )}
                   </div>
                 </div>

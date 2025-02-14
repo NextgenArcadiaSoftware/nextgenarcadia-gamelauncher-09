@@ -1,3 +1,4 @@
+
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -52,9 +53,10 @@ export function GameCard({
 
   const getImageUrl = (path: string) => {
     if (!path) return placeholderImage;
+    if (path.startsWith('data:')) return path;
     if (path === 'placeholder.svg') return placeholderImage;
     if (path.startsWith('http')) return path;
-    return `/${path}`;
+    return path.startsWith('/') ? path : `/${path}`;
   };
 
   return (
@@ -98,6 +100,10 @@ export function GameCard({
           src={getImageUrl(thumbnail)}
           alt={title}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = placeholderImage;
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
         <div className="absolute bottom-0 left-0 p-6 w-full">
@@ -137,7 +143,7 @@ export function GameCard({
               <Button 
                 size="icon"
                 className="rounded-full bg-white hover:bg-white/90 text-black"
-                onClick={() => canPlayGames ? onPlay() : setShowTapCard(true)}
+                onClick={handlePlayButtonClick}
               >
                 <Play className="w-4 h-4" />
               </Button>
