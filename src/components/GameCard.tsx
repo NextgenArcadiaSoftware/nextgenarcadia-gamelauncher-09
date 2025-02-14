@@ -95,17 +95,19 @@ export function GameCard({
                 Watch Trailer
               </Button>
             </DialogTrigger>
-            <DialogContent className="glass fixed inset-x-4 top-[50%] translate-y-[-50%] sm:inset-auto border-white/10 sm:max-w-[1000px] md:max-w-[1200px] p-0 overflow-hidden bg-black/95">
-              <DialogHeader className="p-6">
-                <DialogTitle className="next-gen-title text-2xl">{title} - Trailer</DialogTitle>
-              </DialogHeader>
-              <div className="relative w-full pb-[56.25%]">
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src={trailer.replace('watch?v=', 'embed/') + '?autoplay=1'}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+            <DialogContent className="fixed !inset-0 !m-0 !p-0 !w-screen !h-screen sm:!inset-auto sm:!h-auto sm:!w-auto sm:!max-w-[1000px] md:!max-w-[1200px] !rounded-none sm:!rounded-lg overflow-hidden bg-black/95">
+              <div className="relative flex flex-col w-full h-full sm:h-auto">
+                <DialogHeader className="p-6">
+                  <DialogTitle className="next-gen-title text-2xl">{title} - Trailer</DialogTitle>
+                </DialogHeader>
+                <div className="relative w-full flex-1 sm:pb-[56.25%]">
+                  <iframe
+                    className="absolute top-0 left-0 w-full h-full"
+                    src={trailer.replace('watch?v=', 'embed/') + '?autoplay=1'}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                </div>
               </div>
             </DialogContent>
           </Dialog>
