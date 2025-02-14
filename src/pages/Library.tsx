@@ -35,7 +35,7 @@ const Library = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setGames(data || []);
+      setGames(data as Game[]);
     } catch (error) {
       console.error('Error fetching games:', error);
       toast({
@@ -48,7 +48,7 @@ const Library = () => {
 
   const handleToggleGame = async (gameId: string) => {
     const game = games.find(g => g.id === gameId);
-    const newStatus = game?.status === 'enabled' ? 'disabled' : 'enabled';
+    const newStatus = game?.status === 'enabled' ? 'disabled' as const : 'enabled' as const;
 
     try {
       const { error } = await supabase

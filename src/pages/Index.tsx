@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -108,9 +109,12 @@ const Index = () => {
           .select();
 
         if (insertError) throw insertError;
-        setGames(insertedData || []);
+        
+        // Explicitly type the data as Game[]
+        setGames(insertedData as Game[]);
       } else {
-        setGames(data);
+        // Explicitly type the data as Game[]
+        setGames(data as Game[]);
       }
     } catch (error) {
       console.error('Error fetching games:', error);
@@ -133,13 +137,13 @@ const Index = () => {
     try {
       const { data, error } = await supabase
         .from('games')
-        .insert([{ ...newGame, status: 'enabled' }])
+        .insert([{ ...newGame, status: 'enabled' as const }])
         .select()
         .single();
 
       if (error) throw error;
 
-      setGames(prevGames => [data, ...prevGames]);
+      setGames(prevGames => [data as Game, ...prevGames]);
       toast({
         title: "Game Added",
         description: "The game has been added to your library",
