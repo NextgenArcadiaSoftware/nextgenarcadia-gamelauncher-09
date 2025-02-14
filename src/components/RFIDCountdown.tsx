@@ -20,18 +20,6 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const [inputWord, setInputWord] = useState('');
   const { toast } = useToast();
 
-  // Get the target word based on the active game
-  const targetWord = activeGame === "Fruit Ninja VR" ? "FNJ" :
-                    activeGame === "Richies Plank Experience" ? "RPE" :
-                    activeGame === "Elven Assassin" ? "EAX" :
-                    activeGame === "All-In-One Sports VR" ? "AIO" :
-                    activeGame === "Crisis Brigade 2 Reloaded" ? "CBR" :
-                    activeGame === "Undead Citadel" ? "UDC" :
-                    activeGame === "Arizona Sunshine II" ? "ARS" :
-                    activeGame === "iB Cricket" ? "IBC" :
-                    activeGame === "Subside" ? "SBS" :
-                    activeGame === "Propagation VR" ? "PVR" : "";
-
   // RFID Code detected simulation
   useEffect(() => {
     // Simulate RFID input (this would be replaced by actual RFID reader input)
@@ -66,7 +54,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   }, [showTimer]);
 
   const handleKeyPress = (key: string) => {
-    if (inputWord.length < targetWord.length) {
+    if (inputWord.length < 3) {
       setInputWord(prev => prev + key);
     }
   };
@@ -76,7 +64,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   };
 
   const handleEnter = () => {
-    if (inputWord.toLowerCase() === targetWord.toLowerCase()) {
+    if (inputWord.length === 3) {
       toast({
         title: "✨ Code Accepted",
         description: "Launching game...",
@@ -123,12 +111,12 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
       <GameLaunchHeader
         activeGame={activeGame}
         inputWord={inputWord}
-        targetWord={targetWord}
+        targetWord="123"
       />
       
       <InputDisplay
         inputWord={inputWord}
-        targetWord={targetWord}
+        targetWord="123"
       />
       
       <VirtualKeyboard
