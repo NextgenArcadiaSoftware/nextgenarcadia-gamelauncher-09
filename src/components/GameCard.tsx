@@ -15,7 +15,7 @@ interface GameCardProps {
   thumbnail: string;
   description: string;
   genre: string;
-  release_date: string; // Changed from releaseDate to release_date
+  release_date: string;
   trailer?: string;
   executablePath?: string;
   onPlay: () => void;
@@ -58,58 +58,55 @@ export function GameCard({
         </div>
       ) : null}
       
-      <img
-        src={thumbnail}
-        alt={title}
-        className="w-full h-48 object-cover"
-      />
+      <div className="relative h-48">
+        <img
+          src={thumbnail}
+          alt={title}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+      </div>
+
       <div className="glass border-0 p-6 space-y-4">
         <h3 className="text-xl font-bold next-gen-title">{title}</h3>
-        <p className="text-sm text-gray-300">{description}</p>
+        <p className="text-sm text-gray-300 line-clamp-2">{description}</p>
         <div className="flex justify-between text-sm text-gray-300">
           <span className="glass border-0 px-3 py-1 rounded-full text-xs">
             {genre}
           </span>
-          <span className="glass border-0 px-3 py-1 rounded-full text-xs">
-            {new Date(release_date).toLocaleDateString()}
-          </span>
-        </div>
-        <div className="flex gap-2">
-          {trailer && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full glass border-0 hover:bg-white/20"
-                >
-                  <Video className="w-4 h-4 mr-2" />
-                  Watch Trailer
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="glass border-white/10 sm:max-w-[800px]">
-                <DialogHeader>
-                  <DialogTitle className="next-gen-title">{title} - Trailer</DialogTitle>
-                </DialogHeader>
-                <iframe
-                  className="w-full aspect-video rounded-lg"
-                  src={trailer.replace('watch?v=', 'embed/')}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              </DialogContent>
-            </Dialog>
-          )}
           <Button 
-            variant="default" 
             size="sm" 
-            className="w-full glass border-0 hover:bg-white/20"
+            className="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white"
             onClick={handlePlayButtonClick}
           >
-            <Play className="w-4 h-4 mr-2" />
-            Play Game
+            GET
           </Button>
         </div>
+        {trailer && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full glass border-0 hover:bg-white/20"
+              >
+                <Video className="w-4 h-4 mr-2" />
+                Watch Trailer
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="glass border-white/10 sm:max-w-[800px]">
+              <DialogHeader>
+                <DialogTitle className="next-gen-title">{title} - Trailer</DialogTitle>
+              </DialogHeader>
+              <iframe
+                className="w-full aspect-video rounded-lg"
+                src={trailer.replace('watch?v=', 'embed/')}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );

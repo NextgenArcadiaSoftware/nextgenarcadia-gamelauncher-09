@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import { OwnerDashboard } from "@/components/OwnerDashboard";
 import { AddGameDialog } from "@/components/AddGameDialog";
+import { GameShowcase } from "@/components/GameShowcase";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
 
@@ -150,14 +151,14 @@ const Index = () => {
   }, [toast, sessionDuration]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-[#F97316] via-[#D946EF] to-[#8B5CF6]">
       {showRFIDCountdown ? (
         <RFIDCountdown 
           onExit={handleExitSession}
           duration={sessionDuration}
         />
       ) : (
-        <div className="max-w-7xl mx-auto p-8">
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
           <div className="flex flex-col space-y-8">
             <div className="flex justify-between items-center">
               <Header />
@@ -173,16 +174,27 @@ const Index = () => {
                 </Button>
               </div>
             </div>
-            <CategoryBar 
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategorySelect={setSelectedCategory}
-            />
-            <GameGrid 
-              games={filteredGames}
+            
+            {/* Game Showcase */}
+            <GameShowcase 
+              games={games.slice(0, 3)} 
               onPlayGame={handlePlayGame}
               canPlayGames={canPlayGames}
             />
+
+            <div className="glass p-8 rounded-3xl space-y-6">
+              <h2 className="text-2xl font-bold text-white">Top Arcade Games</h2>
+              <CategoryBar 
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategorySelect={setSelectedCategory}
+              />
+              <GameGrid 
+                games={filteredGames}
+                onPlayGame={handlePlayGame}
+                canPlayGames={canPlayGames}
+              />
+            </div>
           </div>
         </div>
       )}
