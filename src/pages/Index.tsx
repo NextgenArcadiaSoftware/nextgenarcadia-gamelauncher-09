@@ -90,6 +90,17 @@ const ARIZONA_SUNSHINE = {
   status: "enabled"
 } as const;
 
+const IB_CRICKET = {
+  title: "iB Cricket",
+  description: "Experience the thrill of cricket in VR! Play in stunning stadiums, face challenging bowlers, and perfect your batting technique in this immersive cricket simulation.",
+  genre: "Sports",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/be53debf-e66a-4b71-8445-6a4694a2d95e.png",
+  executable_path: "steam://rungameid/957950",
+  launch_code: "CRICKET",
+  status: "enabled"
+} as const;
+
 const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -297,6 +308,11 @@ const Index = () => {
           .delete()
           .eq('title', ARIZONA_SUNSHINE.title);
 
+        await supabase
+          .from('games')
+          .delete()
+          .eq('title', IB_CRICKET.title);
+
         // Check for All-in-One Sports
         const { data: existingSportsGame } = await supabase
           .from('games')
@@ -324,6 +340,9 @@ const Index = () => {
 
         await supabase.from('games').insert([ARIZONA_SUNSHINE]);
         console.log('Added/Updated Arizona Sunshine II to the database');
+
+        await supabase.from('games').insert([IB_CRICKET]);
+        console.log('Added/Updated iB Cricket to the database');
 
         fetchGames(); // Refresh the games list
       } catch (error) {
