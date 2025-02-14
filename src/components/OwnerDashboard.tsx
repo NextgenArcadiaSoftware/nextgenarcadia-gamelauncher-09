@@ -14,15 +14,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
+import type { Game } from "@/types/game";
 
 interface Session {
   startTime: string;
   duration: number;
 }
 
-export function OwnerDashboard({ onClose, onTimerDurationChange }: { 
+export function OwnerDashboard({ 
+  onClose, 
+  onTimerDurationChange,
+  onAddGame 
+}: { 
   onClose: () => void;
   onTimerDurationChange: (minutes: number) => void;
+  onAddGame: (game: Omit<Game, "id" | "status" | "created_at" | "updated_at">) => void;
 }) {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [pin, setPin] = useState("");
@@ -143,7 +149,7 @@ export function OwnerDashboard({ onClose, onTimerDurationChange }: {
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold">Game Management</h3>
               <div className="flex gap-2">
-                <AddGameDialog onAddGame={() => {}} />
+                <AddGameDialog onAddGame={onAddGame} />
                 <Link to="/library">
                   <Button variant="outline" className="flex gap-2">
                     <Library className="w-4 h-4" />

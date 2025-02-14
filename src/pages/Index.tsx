@@ -7,7 +7,6 @@ import { GameGrid } from "@/components/GameGrid";
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import { OwnerDashboard } from "@/components/OwnerDashboard";
-import { AddGameDialog } from "@/components/AddGameDialog";
 import { GameShowcase } from "@/components/GameShowcase";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
@@ -242,17 +241,14 @@ const Index = () => {
           <div className="flex flex-col space-y-8">
             <div className="glass p-6 rounded-3xl flex justify-between items-center">
               <Header />
-              <div className="flex gap-4">
-                <AddGameDialog onAddGame={handleAddGame} />
-                <Button
-                  variant="outline"
-                  className="glass border-0 hover:bg-white/20 flex gap-2"
-                  onClick={() => setShowOwnerDashboard(true)}
-                >
-                  <Settings className="w-4 h-4" />
-                  Owner Dashboard
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                className="glass border-0 hover:bg-white/20 flex gap-2"
+                onClick={() => setShowOwnerDashboard(true)}
+              >
+                <Settings className="w-4 h-4" />
+                Owner Dashboard
+              </Button>
             </div>
             
             {/* Game Showcase */}
@@ -283,6 +279,7 @@ const Index = () => {
         <OwnerDashboard
           onClose={() => setShowOwnerDashboard(false)}
           onTimerDurationChange={setSessionDuration}
+          onAddGame={handleAddGame}
         />
       )}
     </div>
