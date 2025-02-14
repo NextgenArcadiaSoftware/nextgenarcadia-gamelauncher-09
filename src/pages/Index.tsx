@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -103,7 +102,6 @@ const Index = () => {
       }
 
       if (!data || data.length === 0) {
-        // If no games in database, insert mock games
         const { data: insertedData, error: insertError } = await supabase
           .from('games')
           .insert(MOCK_GAMES)
@@ -111,10 +109,8 @@ const Index = () => {
 
         if (insertError) throw insertError;
         
-        // Explicitly type the data as Game[]
         setGames(insertedData as Game[]);
       } else {
-        // Explicitly type the data as Game[]
         setGames(data as Game[]);
       }
     } catch (error) {
@@ -124,7 +120,6 @@ const Index = () => {
         title: "Error",
         description: "Failed to fetch games",
       });
-      // Use mock games as fallback if database fails
       setGames(MOCK_GAMES.map((game, index) => ({
         ...game,
         id: `mock-${index}`,
@@ -165,27 +160,33 @@ const Index = () => {
     }
 
     try {
-      // Send the "start_game" trigger to the Python script
-      const response = await fetch('http://localhost:8080/api/launch', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          path: executablePath,
-          command: 'start_game' // This will be the trigger text for the Python script
-        })
-      });
+      const simulateStartGame = () => {
+        'start_game'.split('').forEach(char => {
+          const keyEvent = new KeyboardEvent('keypress', {
+            key: char,
+            code: `Key${char.toUpperCase()}`,
+            charCode: char.charCodeAt(0),
+            keyCode: char.charCodeAt(0),
+            which: char.charCodeAt(0),
+            bubbles: true,
+          });
+          document.dispatchEvent(keyEvent);
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+        const enterEvent = new KeyboardEvent('keypress', {
+          key: 'Enter',
+          code: 'Enter',
+          charCode: 13,
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+        });
+        document.dispatchEvent(enterEvent);
+      };
 
+      simulateStartGame();
       setActiveGame(title);
-      toast({
-        title: "Game Started",
-        description: `${title} has been launched`,
-      });
+      console.log('Game started:', title, 'Path:', executablePath);
     } catch (error) {
       console.error('Launch error:', error);
       toast({
@@ -196,30 +197,43 @@ const Index = () => {
     }
   };
 
-  const filteredGames = selectedCategory === "All" 
-    ? games 
-    : games.filter(game => game.genre === selectedCategory);
-
   const handleExitSession = () => {
     if (activeGame) {
-      // Send stop command to Python script
-      fetch('http://localhost:8080/api/launch', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          command: 'stop_game'
-        })
-      }).catch(console.error);
-      
+      const simulateStopGame = () => {
+        'stop_game'.split('').forEach(char => {
+          const keyEvent = new KeyboardEvent('keypress', {
+            key: char,
+            code: `Key${char.toUpperCase()}`,
+            charCode: char.charCodeAt(0),
+            keyCode: char.charCodeAt(0),
+            which: char.charCodeAt(0),
+            bubbles: true,
+          });
+          document.dispatchEvent(keyEvent);
+        });
+
+        const enterEvent = new KeyboardEvent('keypress', {
+          key: 'Enter',
+          code: 'Enter',
+          charCode: 13,
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+        });
+        document.dispatchEvent(enterEvent);
+      };
+
+      simulateStopGame();
       setActiveGame(null);
     }
     setShowRFIDCountdown(false);
     setCanPlayGames(false);
   };
 
-  // RFID detection
+  const filteredGames = selectedCategory === "All" 
+    ? games 
+    : games.filter(game => game.genre === selectedCategory);
+
   useEffect(() => {
     console.log('Setting up RFID key press listener');
 
@@ -228,16 +242,31 @@ const Index = () => {
       setShowRFIDCountdown(true);
       setCanPlayGames(true);
       
-      // Simulate keypress for Python script
-      const event = new KeyboardEvent('keypress', {
-        key: 'start_game',
-        code: 'KeyS',
-        charCode: 83,
-        keyCode: 83,
-        which: 83,
-        bubbles: true,
-      });
-      document.dispatchEvent(event);
+      const simulateStartSession = () => {
+        'start_game'.split('').forEach(char => {
+          const keyEvent = new KeyboardEvent('keypress', {
+            key: char,
+            code: `Key${char.toUpperCase()}`,
+            charCode: char.charCodeAt(0),
+            keyCode: char.charCodeAt(0),
+            which: char.charCodeAt(0),
+            bubbles: true,
+          });
+          document.dispatchEvent(keyEvent);
+        });
+
+        const enterEvent = new KeyboardEvent('keypress', {
+          key: 'Enter',
+          code: 'Enter',
+          charCode: 13,
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+        });
+        document.dispatchEvent(enterEvent);
+      };
+
+      simulateStartSession();
       
       toast({
         title: "RFID Card Detected",
@@ -270,7 +299,6 @@ const Index = () => {
       ) : (
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
           <div className="flex flex-col space-y-8">
-            {/* Header Section */}
             <div className="glass p-6 rounded-3xl flex justify-between items-center backdrop-blur-xl border border-white/20 shadow-xl">
               <Header />
               <Button
@@ -282,8 +310,6 @@ const Index = () => {
                 Owner Dashboard
               </Button>
             </div>
-            
-            {/* Game Showcase with enhanced animations */}
             <div className="transform hover:scale-[1.02] transition-transform duration-300">
               <GameShowcase 
                 games={games.slice(0, 3)} 
@@ -291,8 +317,6 @@ const Index = () => {
                 canPlayGames={canPlayGames}
               />
             </div>
-
-            {/* Games Grid Section */}
             <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
               <h2 className="text-2xl font-bold text-white next-gen-title">Top Arcade Games</h2>
               <CategoryBar 
