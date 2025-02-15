@@ -5,31 +5,29 @@ import { useToast } from '@/components/ui/use-toast';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 
 export default function PropagationLaunch() {
-  const [showTimer, setShowTimer] = useState(false);
+  const [step, setStep] = useState<'rfid' | 'ready' | 'timer'>('rfid');
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    toast({
-      title: "✨ Game Ready",
-      description: "Propagation VR is ready to launch"
-    });
-  }, [toast]);
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (/^\d$/.test(event.key) && step === 'rfid') {
+        toast({
+          title: "✨ RFID Detected",
+          description: "Propagation VR is ready to launch"
+        });
+        setStep('ready');
+      }
+    };
+    window.addEventListener('keypress', handleKeyPress);
+    return () => window.removeEventListener('keypress', handleKeyPress);
+  }, [toast, step]);
 
   const handleFPress = () => {
-    const fKeyEvent = new KeyboardEvent('keydown', {
-      key: 'f',
-      code: 'KeyF',
-      keyCode: 70,
-      which: 70,
-      bubbles: true,
-      cancelable: true
-    });
-    document.dispatchEvent(fKeyEvent);
-    setShowTimer(true);
+    setStep('timer');
   };
 
-  if (showTimer) {
+  if (step === 'timer') {
     return <RFIDCountdown 
       onExit={() => navigate('/')} 
       duration={8}
@@ -67,37 +65,5 @@ export default function PropagationLaunch() {
             </div>
           </div>
 
-          <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
-            PRESS F TO START
-          </div>
-
-          <div className="flex justify-center">
-            <button
-              onClick={handleFPress}
-              className="w-32 h-32 text-6xl font-bold text-white bg-neutral-500 rounded-2xl hover:bg-neutral-600 
-                       transform transition-all duration-200 hover:scale-105 active:scale-95
-                       border-4 border-white/20 shadow-lg backdrop-blur-sm"
-            >
-              F
-            </button>
-          </div>
-
-          <div className="text-center">
-            <p className="text-white/90 text-xl leading-relaxed">
-              Survive a post-apocalyptic world overrun by horrifying creatures! Fight for your life 
-              in this intense VR horror experience with stunning graphics and immersive gameplay.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 text-center">
-            {['Story Mode', 'Survival', 'Boss Fights'].map((feature, index) => (
-              <div key={index} className="p-4 rounded-xl bg-neutral-500/10 backdrop-blur-sm">
-                <span className="text-white font-semibold">{feature}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+          {step === 'rfid' ? (
+            <div className="space-y-8">

@@ -5,34 +5,29 @@ import { useToast } from '@/components/ui/use-toast';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 
 export default function FruitNinjaLaunch() {
-  const [showTimer, setShowTimer] = useState(false);
+  const [step, setStep] = useState<'rfid' | 'ready' | 'timer'>('rfid');
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    toast({
-      title: "✨ Game Ready",
-      description: "Fruit Ninja VR is ready to launch"
-    });
-  }, [toast]);
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (/^\d$/.test(event.key) && step === 'rfid') {
+        toast({
+          title: "✨ RFID Detected",
+          description: "Fruit Ninja VR is ready to launch"
+        });
+        setStep('ready');
+      }
+    };
+    window.addEventListener('keypress', handleKeyPress);
+    return () => window.removeEventListener('keypress', handleKeyPress);
+  }, [toast, step]);
 
   const handleFPress = () => {
-    // Simulate F key press
-    const fKeyEvent = new KeyboardEvent('keydown', {
-      key: 'f',
-      code: 'KeyF',
-      keyCode: 70,
-      which: 70,
-      bubbles: true,
-      cancelable: true
-    });
-    document.dispatchEvent(fKeyEvent);
-
-    // Start timer
-    setShowTimer(true);
+    setStep('timer');
   };
 
-  if (showTimer) {
+  if (step === 'timer') {
     return <RFIDCountdown 
       onExit={() => navigate('/')} 
       duration={8}
@@ -42,7 +37,6 @@ export default function FruitNinjaLaunch() {
 
   return (
     <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
-      {/* Animated fruit slicing background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0" style={{
           background: 'linear-gradient(225deg, #FF4800 0%, #FF0000 100%)',
@@ -53,10 +47,8 @@ export default function FruitNinjaLaunch() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="relative z-10 max-w-4xl w-full mx-auto p-8">
         <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-white/20">
-          {/* Game Logo/Title */}
           <div className="text-center">
             <h1 className="text-6xl font-bold text-white mb-4 font-display" style={{
               textShadow: '0 0 20px rgba(255,0,0,0.5), 0 0 40px rgba(255,0,0,0.3)'
@@ -73,24 +65,32 @@ export default function FruitNinjaLaunch() {
             </div>
           </div>
 
-          {/* Press F to Start */}
-          <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
-            PRESS F TO START
-          </div>
+          {step === 'rfid' ? (
+            <div className="space-y-8">
+              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
+                TAP RFID CARD TO START
+              </div>
+              <div className="flex justify-center">
+                <div className="w-32 h-32 flex items-center justify-center bg-red-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
+                  <span className="text-4xl text-white">🎮</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
+                PRESS F WHEN READY
+              </div>
+              <div className="flex justify-center">
+                <button onClick={handleFPress} className="w-32 h-32 text-6xl font-bold text-white bg-red-500 rounded-2xl hover:bg-red-600 
+                           transform transition-all duration-200 hover:scale-105 active:scale-95
+                           border-4 border-white/20 shadow-lg backdrop-blur-sm">
+                  F
+                </button>
+              </div>
+            </div>
+          )}
 
-          {/* Big F Button */}
-          <div className="flex justify-center">
-            <button
-              onClick={handleFPress}
-              className="w-32 h-32 text-6xl font-bold text-white bg-red-500 rounded-2xl hover:bg-red-600 
-                       transform transition-all duration-200 hover:scale-105 active:scale-95
-                       border-4 border-white/20 shadow-lg backdrop-blur-sm"
-            >
-              F
-            </button>
-          </div>
-
-          {/* Game Description */}
           <div className="text-center">
             <p className="text-white/90 text-xl leading-relaxed">
               Become a fruit-slicing master in VR! Slice and dice your way through waves of juicy fruits, 
@@ -98,7 +98,6 @@ export default function FruitNinjaLaunch() {
             </p>
           </div>
 
-          {/* Game Features */}
           <div className="grid grid-cols-3 gap-4 text-center">
             {['Classic Mode', 'Zen Mode', 'Arcade Mode'].map((feature, index) => (
               <div key={index} className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
