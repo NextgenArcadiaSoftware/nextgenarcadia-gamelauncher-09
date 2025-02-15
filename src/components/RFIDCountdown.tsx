@@ -8,18 +8,37 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface RFIDCountdownProps {
   onExit: () => void;
-  duration?: number;
   activeGame?: string | null;
 }
 
-export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdownProps) {
-  const [timeLeft, setTimeLeft] = useState(duration * 60);
+export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showRating, setShowRating] = useState(false);
   const [showLaunchScreen, setShowLaunchScreen] = useState(true);
   const { toast } = useToast();
 
-  // Set up real-time subscription to timer changes
+  // Initial timer duration fetch
   useEffect(() => {
+    const fetchTimerDuration = async () => {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('timer_duration')
+        .eq('id', 'global')
+        .single();
+
+      if (error) {
+        console.error('Error fetching timer duration:', error);
+        return;
+      }
+
+      if (data) {
+        setTimeLeft(data.timer_duration * 60);
+      }
+    };
+
+    fetchTimerDuration();
+
+    // Set up real-time subscription to timer changes
     const channel = supabase
       .channel('settings_changes')
       .on(
@@ -45,28 +64,6 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
       supabase.removeChannel(channel);
     };
   }, [toast]);
-
-  // Initial timer duration fetch
-  useEffect(() => {
-    const fetchTimerDuration = async () => {
-      const { data, error } = await supabase
-        .from('settings')
-        .select('timer_duration')
-        .eq('id', 'global')
-        .single();
-
-      if (error) {
-        console.error('Error fetching timer duration:', error);
-        return;
-      }
-
-      if (data) {
-        setTimeLeft(data.timer_duration * 60);
-      }
-    };
-
-    fetchTimerDuration();
-  }, []);
 
   // Convert game title to launch code
   const getGameCode = (gameTitle: string | null | undefined): string => {
@@ -101,10 +98,10 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   }, [activeGame, toast]);
 
   useEffect(() => {
-    if (!showLaunchScreen) {
+    if (!showLaunchScreen && timeLeft !== null) {
       const interval = setInterval(() => {
         setTimeLeft((prev) => {
-          if (prev <= 1) {
+          if (!prev || prev <= 1) {
             clearInterval(interval);
             setShowRating(true);
             return 0;
@@ -124,7 +121,7 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
 
       return () => clearInterval(interval);
     }
-  }, [showLaunchScreen, targetWord]);
+  }, [showLaunchScreen, targetWord, timeLeft]);
 
   const handleRatingSubmit = (rating: number) => {
     // When exiting, send the stop command to the Python backend
@@ -157,6 +154,11 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
         onContinue={() => setShowLaunchScreen(false)}
       />
     );
+  }
+
+  // Show loading state if timer hasn't been fetched yet
+  if (timeLeft === null) {
+    return <div className="flex items-center justify-center h-screen">Loading timer...</div>;
   }
 
   return (
