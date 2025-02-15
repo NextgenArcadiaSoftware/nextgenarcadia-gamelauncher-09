@@ -78,6 +78,27 @@ export type Database = {
         }
         Relationships: []
       }
+      settings: {
+        Row: {
+          created_at: string
+          id: string
+          timer_duration: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          timer_duration?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          timer_duration?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

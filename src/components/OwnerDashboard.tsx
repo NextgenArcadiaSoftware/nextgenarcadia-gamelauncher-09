@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { Library, Timer, ActivitySquare, LucideIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useToast } from "./ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,29 @@ export function OwnerDashboard({
     { value: "settings", label: "Timer", icon: Timer },
   ];
 
+  // Fetch initial timer duration
+  useEffect(() => {
+    const fetchTimerDuration = async () => {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('timer_duration')
+        .eq('id', 'global')
+        .single();
+
+      if (error) {
+        console.error('Error fetching timer duration:', error);
+        return;
+      }
+
+      if (data) {
+        setTimerDuration(data.timer_duration);
+        onTimerDurationChange(data.timer_duration);
+      }
+    };
+
+    fetchTimerDuration();
+  }, [onTimerDurationChange]);
+
   useEffect(() => {
     const savedSessions = localStorage.getItem("rfid_sessions");
     if (savedSessions) {
@@ -67,19 +91,35 @@ export function OwnerDashboard({
       });
     } else {
       toast({
+        variant: "destructive",
         title: "Access Denied",
         description: "Incorrect PIN",
-        variant: "destructive",
       });
     }
   };
 
-  const handleTimerUpdate = () => {
-    onTimerDurationChange(timerDuration);
-    toast({
-      title: "Timer Updated",
-      description: `Session duration set to ${timerDuration} minutes`,
-    });
+  const handleTimerUpdate = async () => {
+    try {
+      const { error } = await supabase
+        .from('settings')
+        .update({ timer_duration: timerDuration })
+        .eq('id', 'global');
+
+      if (error) throw error;
+
+      onTimerDurationChange(timerDuration);
+      toast({
+        title: "Timer Updated",
+        description: `Session duration set to ${timerDuration} minutes`,
+      });
+    } catch (error) {
+      console.error('Error updating timer:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update timer duration",
+      });
+    }
   };
 
   if (!isAuthorized) {

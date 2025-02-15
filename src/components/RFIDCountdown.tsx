@@ -4,6 +4,7 @@ import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
 import { RatingScreen } from './game-launch/RatingScreen';
 import { GameLaunchScreen } from './game-launch/GameLaunchScreen';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RFIDCountdownProps {
   onExit: () => void;
@@ -16,6 +17,27 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const [showRating, setShowRating] = useState(false);
   const [showLaunchScreen, setShowLaunchScreen] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchTimerDuration = async () => {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('timer_duration')
+        .eq('id', 'global')
+        .single();
+
+      if (error) {
+        console.error('Error fetching timer duration:', error);
+        return;
+      }
+
+      if (data) {
+        setTimeLeft(data.timer_duration * 60);
+      }
+    };
+
+    fetchTimerDuration();
+  }, []);
 
   // Convert game title to launch code
   const getGameCode = (gameTitle: string | null | undefined): string => {
