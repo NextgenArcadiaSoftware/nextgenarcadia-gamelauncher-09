@@ -6,6 +6,7 @@ import { OwnerDashboard } from "./OwnerDashboard";
 import { PinVerification } from "./PinVerification";
 import { useToast } from "./ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -54,14 +55,24 @@ export function Header() {
           NextGen Arcadia
         </h1>
       </div>
-      <Button
-        variant="outline"
-        size="icon"
-        className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:border-white/30"
-        onClick={() => setShowPinDialog(true)}
-      >
-        <Settings className="h-4 w-4 text-white" />
-      </Button>
+      <div className="flex items-center gap-4">
+        <Link to="/library">
+          <Button
+            variant="outline"
+            className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:border-white/30"
+          >
+            Manage Games
+          </Button>
+        </Link>
+        <Button
+          variant="outline"
+          size="icon"
+          className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:border-white/30"
+          onClick={() => setShowPinDialog(true)}
+        >
+          <Settings className="h-4 w-4 text-white" />
+        </Button>
+      </div>
 
       <Dialog open={showPinDialog} onOpenChange={setShowPinDialog}>
         <DialogContent className="sm:max-w-[425px]">
