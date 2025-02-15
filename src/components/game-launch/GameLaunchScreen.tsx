@@ -31,25 +31,50 @@ export function GameLaunchScreen({
         });
         setShowLaunchScreen(true);
       }
+
+      // Handle F key press directly in the event listener
+      if (event.key.toLowerCase() === 'f') {
+        console.log('F key pressed through keyboard event');
+        handleFPress();
+      }
     };
     
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
   }, [game.title, showLaunchScreen, toast]);
 
-  const handleKeyPress = (key: string) => {
-    if (inputWord.length < 3) {
-      setInputWord(prev => prev + key);
+  const handleFPress = () => {
+    console.log('F button clicked in GameLaunchScreen');
+    
+    // Try to use Electron IPC if available
+    if (window.electron) {
+      console.log('Sending F key press to electron main process');
+      window.electron.ipcRenderer.send('simulate-keypress', 'f');
+    } else {
+      console.log('Browser environment detected, simulating F key press');
+      // Create and dispatch a keyboard event for browser environment
+      const fKeyEvent = new KeyboardEvent('keypress', {
+        key: 'f',
+        code: 'KeyF',
+        keyCode: 70,
+        which: 70,
+        bubbles: true,
+        cancelable: true
+      });
+      document.dispatchEvent(fKeyEvent);
     }
+    
+    toast({
+      title: "Key Press Sent",
+      description: "F key press registered"
+    });
+    
+    onContinue();
   };
 
-  const handleBackspace = () => {
-    setInputWord(prev => prev.slice(0, -1));
-  };
-
-  const handleEnter = () => {
-    if (inputWord.length === 3) {
-      onContinue();
+  const handleKeyPress = (key: string) => {
+    if (key.toLowerCase() === 'f') {
+      handleFPress();
     }
   };
 
@@ -121,13 +146,24 @@ export function GameLaunchScreen({
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-8">
-            <InputDisplay inputWord={inputWord} targetWord="CBR" />
+          <div className="flex flex-col items-center gap-4 mt-8">
+            <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
+              Press F When Ready
+            </div>
+            <button 
+              onClick={handleFPress} 
+              className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
+            >
+              F
+            </button>
+          </div>
+
+          <div className="mt-8">
             <VirtualKeyboard
               onKeyPress={handleKeyPress}
-              onBackspace={handleBackspace}
-              onEnter={handleEnter}
-              inputWord={inputWord}
+              onBackspace={() => {}}
+              onEnter={() => {}}
+              inputWord=""
             />
           </div>
         </div>
