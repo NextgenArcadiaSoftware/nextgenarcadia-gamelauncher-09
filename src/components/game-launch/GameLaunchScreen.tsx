@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 
@@ -35,24 +34,10 @@ export function GameLaunchScreen({
   }, [game.title, showLaunchScreen, toast]);
 
   const handleFPress = () => {
-    // Send keypress to Python backend via electron
     if (window.electron) {
+      console.log('Sending F key press to Python backend');
       window.electron.ipcRenderer.send('simulate-keypress', 'f');
     }
-
-    // Simulate the 'f' keypress for any other listeners
-    const keyEvent = new KeyboardEvent('keypress', {
-      key: 'f',
-      code: 'KeyF',
-      charCode: 102, // ASCII code for 'f'
-      keyCode: 70,   // ASCII code for 'F'
-      which: 70,
-      bubbles: true,
-      cancelable: true
-    });
-    document.dispatchEvent(keyEvent);
-
-    // Call the continue callback
     onContinue();
   };
 

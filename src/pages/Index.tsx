@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -208,40 +207,12 @@ const Index = () => {
     }
   };
 
-  const simulateKeyboardInput = (text: string) => {
-    text.split('').forEach(char => {
-      const keyEvent = new KeyboardEvent('keypress', {
-        key: char,
-        code: `Key${char.toUpperCase()}`,
-        charCode: char.charCodeAt(0),
-        keyCode: char.charCodeAt(0),
-        which: char.charCodeAt(0),
-        bubbles: true,
-      });
-      document.dispatchEvent(keyEvent);
-    });
-
-    const enterEvent = new KeyboardEvent('keypress', {
-      key: 'Enter',
-      code: 'Enter',
-      charCode: 13,
-      keyCode: 13,
-      which: 13,
-      bubbles: true,
-    });
-    document.dispatchEvent(enterEvent);
-  };
-
   const handlePlayGame = async (title: string, executablePath: string) => {
     if (!canPlayGames) {
       return;
     }
 
     try {
-      const triggerWord = GAME_TRIGGERS[title] || 'start_game';
-      console.log('Using trigger word:', triggerWord, 'for game:', title);
-      
-      simulateKeyboardInput(triggerWord);
       setActiveGame(title);
       console.log('Game started:', title, 'Path:', executablePath);
     } catch (error) {
@@ -255,14 +226,7 @@ const Index = () => {
   };
 
   const handleExitSession = () => {
-    if (activeGame) {
-      const triggerWord = activeGame ? GAME_TRIGGERS[activeGame] : 'start_game';
-      const stopCommand = triggerWord.replace('start_', 'stop_');
-      console.log('Using stop command:', stopCommand, 'for game:', activeGame);
-      
-      simulateKeyboardInput(stopCommand);
-      setActiveGame(null);
-    }
+    setActiveGame(null);
     setShowRFIDCountdown(false);
     setCanPlayGames(false);
   };
@@ -275,32 +239,6 @@ const Index = () => {
       setShowRFIDCountdown(true);
       setCanPlayGames(true);
       
-      const simulateStartSession = () => {
-        'start_game'.split('').forEach(char => {
-          const keyEvent = new KeyboardEvent('keypress', {
-            key: char,
-            code: `Key${char.toUpperCase()}`,
-            charCode: char.charCodeAt(0),
-            keyCode: char.charCodeAt(0),
-            which: char.charCodeAt(0),
-            bubbles: true,
-          });
-          document.dispatchEvent(keyEvent);
-        });
-
-        const enterEvent = new KeyboardEvent('keypress', {
-          key: 'Enter',
-          code: 'Enter',
-          charCode: 13,
-          keyCode: 13,
-          which: 13,
-          bubbles: true,
-        });
-        document.dispatchEvent(enterEvent);
-      };
-
-      simulateStartSession();
-      
       toast({
         title: "RFID Card Detected",
         description: "Starting session...",
@@ -311,11 +249,15 @@ const Index = () => {
       if (/^\d$/.test(event.key)) {
         handleRFIDSimulation();
       }
+      
+      if (event.key.toLowerCase() === 'f' && window.electron) {
+        console.log('F key pressed, sending to Python backend');
+        window.electron.ipcRenderer.send('simulate-keypress', 'f');
+      }
     };
 
     const addInitialGames = async () => {
       try {
-        // Delete existing entries to ensure clean state
         await supabase
           .from('games')
           .delete()
@@ -361,7 +303,6 @@ const Index = () => {
           .delete()
           .eq('title', CRISIS_BRIGADE.title);
 
-        // Check for All-in-One Sports
         const { data: existingSportsGame } = await supabase
           .from('games')
           .select('title')
@@ -373,7 +314,6 @@ const Index = () => {
           console.log('Added All-in-One Sports VR to the database');
         }
 
-        // Add updated games
         await supabase.from('games').insert([FRUIT_NINJA]);
         console.log('Added/Updated Fruit Ninja VR to the database');
 
