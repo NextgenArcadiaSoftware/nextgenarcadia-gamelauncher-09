@@ -45,7 +45,6 @@ export function GameCard({
   const [showTapCard, setShowTapCard] = useState(false);
   const [showTapToStart, setShowTapToStart] = useState(false);
   const [imageSrc, setImageSrc] = useState(getImageUrl(thumbnail));
-  const [currentInput, setCurrentInput] = useState('');
 
   const gameCodeMap: Record<string, string> = {
     "Elven Assassin": "EAX",
