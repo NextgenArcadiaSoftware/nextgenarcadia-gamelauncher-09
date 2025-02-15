@@ -20,6 +20,8 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   const isInputComplete = inputWord.length === 3;
 
   const simulateKeyPress = (key: string) => {
+    console.log('Simulating keypress for:', key);
+    
     // Create and dispatch keydown event
     const keydownEvent = new KeyboardEvent('keydown', {
       key: key,
@@ -42,6 +44,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
 
     // Also send to electron for the Python backend
     if (window.electron) {
+      console.log('Sending to electron:', key);
       window.electron.ipcRenderer.send('simulate-keypress', key);
     }
   };
@@ -52,6 +55,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   };
 
   const handleBackspace = () => {
+    console.log('Simulating backspace');
     // Simulate backspace key press
     const backspaceEvent = new KeyboardEvent('keydown', {
       key: 'Backspace',
@@ -69,6 +73,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   };
 
   const handleEnter = () => {
+    console.log('Simulating enter');
     // Simulate enter key press
     const enterEvent = new KeyboardEvent('keydown', {
       key: 'Enter',
