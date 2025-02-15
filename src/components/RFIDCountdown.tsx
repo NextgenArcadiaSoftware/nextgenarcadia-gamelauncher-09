@@ -8,7 +8,6 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface RFIDCountdownProps {
   onExit: () => void;
-  duration?: number;
   activeGame?: string | null;
 }
 
@@ -18,28 +17,33 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
   const [showLaunchScreen, setShowLaunchScreen] = useState(true);
   const { toast } = useToast();
 
-  // Initial timer duration fetch
+  // Initial timer duration fetch and subscription setup
   useEffect(() => {
+    let isMounted = true;
+
     const fetchTimerDuration = async () => {
-      const { data, error } = await supabase
-        .from('settings')
-        .select('timer_duration')
-        .eq('id', 'global')
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('settings')
+          .select('timer_duration')
+          .eq('id', 'global')
+          .single();
 
-      if (error) {
+        if (error) throw error;
+
+        if (data && isMounted) {
+          console.log('Setting initial timer duration:', data.timer_duration);
+          setTimeLeft(data.timer_duration * 60);
+        }
+      } catch (error) {
         console.error('Error fetching timer duration:', error);
-        return;
-      }
-
-      if (data) {
-        setTimeLeft(data.timer_duration * 60);
       }
     };
 
+    // Fetch initial timer duration
     fetchTimerDuration();
 
-    // Set up real-time subscription to timer changes
+    // Set up real-time subscription for timer updates
     const channel = supabase
       .channel('settings_changes')
       .on(
@@ -51,17 +55,21 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
           filter: 'id=eq.global'
         },
         (payload) => {
-          const newDuration = payload.new.timer_duration;
-          setTimeLeft(newDuration * 60);
-          toast({
-            title: "Timer Updated",
-            description: `Session time updated to ${newDuration} minutes`,
-          });
+          if (isMounted) {
+            const newDuration = payload.new.timer_duration;
+            console.log('Received new timer duration:', newDuration);
+            setTimeLeft(newDuration * 60);
+            toast({
+              title: "Timer Updated",
+              description: `Session time updated to ${newDuration} minutes`,
+            });
+          }
         }
       )
       .subscribe();
 
     return () => {
+      isMounted = false;
       supabase.removeChannel(channel);
     };
   }, [toast]);
@@ -159,7 +167,11 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
 
   // Show loading state if timer hasn't been fetched yet
   if (timeLeft === null) {
-    return <div className="flex items-center justify-center h-screen">Loading timer...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl">Loading timer settings...</div>
+      </div>
+    );
   }
 
   return (
