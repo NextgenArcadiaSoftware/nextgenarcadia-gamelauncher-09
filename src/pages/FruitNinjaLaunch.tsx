@@ -83,6 +83,9 @@ export default function FruitNinjaLaunch() {
           {/* Start Button */}
           <div className="flex flex-col items-center gap-4 mt-8">
             <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
+              PRESS F TO START
+            </div>
+            <div className="text-white/60 text-lg">
               Your Dojo Awaits
             </div>
             <button
