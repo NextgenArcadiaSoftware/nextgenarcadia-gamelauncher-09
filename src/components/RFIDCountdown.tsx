@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface RFIDCountdownProps {
   onExit: () => void;
+  duration?: number;
   activeGame?: string | null;
 }
 
