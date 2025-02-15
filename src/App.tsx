@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,15 @@ import Index from "./pages/Index";
 import Library from "./pages/Library";
 import NotFound from "./pages/NotFound";
 import FruitNinjaLaunch from "./pages/FruitNinjaLaunch";
+import ElvenAssassinLaunch from "./pages/ElvenAssassinLaunch";
+import CrisBrigadeLaunch from "./pages/CrisBrigadeLaunch";
+import SportsLaunch from "./pages/SportsLaunch";
+import PlankLaunch from "./pages/PlankLaunch";
+import CricketLaunch from "./pages/CricketLaunch";
+import UndeadCitadelLaunch from "./pages/UndeadCitadelLaunch";
+import ArizonaSunshineLaunch from "./pages/ArizonaSunshineLaunch";
+import SubsideLaunch from "./pages/SubsideLaunch";
+import PropagationLaunch from "./pages/PropagationLaunch";
 
 const queryClient = new QueryClient();
 
@@ -22,7 +32,15 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/library" element={<Library />} />
           <Route path="/fruitninjalaunch" element={<FruitNinjaLaunch />} />
-          {/* Other game launch screens will be added here as they're created */}
+          <Route path="/elvenassassinlaunch" element={<ElvenAssassinLaunch />} />
+          <Route path="/crisisbrigadelaunch" element={<CrisBrigadeLaunch />} />
+          <Route path="/sportslaunch" element={<SportsLaunch />} />
+          <Route path="/planklaunch" element={<PlankLaunch />} />
+          <Route path="/cricketlaunch" element={<CricketLaunch />} />
+          <Route path="/undeadcitadellaunch" element={<UndeadCitadelLaunch />} />
+          <Route path="/arizonalaunch" element={<ArizonaSunshineLaunch />} />
+          <Route path="/subsidelaunch" element={<SubsideLaunch />} />
+          <Route path="/propagationlaunch" element={<PropagationLaunch />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
