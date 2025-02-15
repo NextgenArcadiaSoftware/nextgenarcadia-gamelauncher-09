@@ -32,7 +32,8 @@ const ALL_IN_ONE_SPORTS = {
   thumbnail: "/lovable-uploads/9b088570-531a-47cf-b176-28bb534ba66f.png",
   executable_path: "steam://rungameid/2076590",
   launch_code: "SPORTS",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=PZ63kQzGnmY"
 } as const;
 
 const FRUIT_NINJA = {
@@ -43,7 +44,8 @@ const FRUIT_NINJA = {
   thumbnail: "/lovable-uploads/32039c8f-e15c-4555-9a7d-5bdfd0db596f.png",
   executable_path: "steam://rungameid/923360",
   launch_code: "NINJA",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=UvCz24ZvY2M"
 } as const;
 
 const RICHIES_PLANK = {
@@ -54,7 +56,8 @@ const RICHIES_PLANK = {
   thumbnail: "/lovable-uploads/bb8b5b5b-bf33-4e0c-b9af-a05408636bce.png",
   executable_path: "steam://rungameid/517160",
   launch_code: "PLANK",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=KB2GlRn-TrY"
 } as const;
 
 const ELVEN_ASSASSIN = {
@@ -65,7 +68,8 @@ const ELVEN_ASSASSIN = {
   thumbnail: "/lovable-uploads/c7421927-0f62-420f-87a6-2d35d6600141.png",
   executable_path: "steam://rungameid/503770",
   launch_code: "ELVEN",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=d1RnYfFZK2k"
 } as const;
 
 const UNDEAD_CITADEL = {
@@ -76,7 +80,8 @@ const UNDEAD_CITADEL = {
   thumbnail: "/lovable-uploads/22b9e9da-62e9-4f60-8f96-5f13916991f6.png",
   executable_path: "steam://rungameid/819190",
   launch_code: "CITADEL",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=V0kOqPM6h1Y"
 } as const;
 
 const ARIZONA_SUNSHINE = {
@@ -87,7 +92,8 @@ const ARIZONA_SUNSHINE = {
   thumbnail: "/lovable-uploads/4e2b1ea9-0729-4f84-b8c4-974e08cd8c30.png",
   executable_path: "steam://rungameid/2159470",
   launch_code: "ARIZONA",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=VUuKNtUwpYQ"
 } as const;
 
 const IB_CRICKET = {
@@ -98,7 +104,8 @@ const IB_CRICKET = {
   thumbnail: "/lovable-uploads/be53debf-e66a-4b71-8445-6a4694a2d95e.png",
   executable_path: "steam://rungameid/957950",
   launch_code: "CRICKET",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=CqZpFWJaCvg"
 } as const;
 
 const PROPAGATION = {
@@ -109,7 +116,8 @@ const PROPAGATION = {
   thumbnail: "/lovable-uploads/55ebaec7-e228-4b04-a2a3-c033d76bca1c.png",
   executable_path: "steam://rungameid/1363430",
   launch_code: "PROP",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=WWKqTyUobSQ"
 } as const;
 
 const SUBSIDE = {
@@ -120,7 +128,8 @@ const SUBSIDE = {
   thumbnail: "/lovable-uploads/1f22119b-c9b1-4260-8503-8bc42fdef5b8.png",
   executable_path: "steam://rungameid/1908810",
   launch_code: "SUBSIDE",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=JGjqt8TCxQU"
 } as const;
 
 const CRISIS_BRIGADE = {
@@ -131,7 +140,8 @@ const CRISIS_BRIGADE = {
   thumbnail: "/lovable-uploads/0c397672-8051-4e6f-bb5b-36548c8d7381.png",
   executable_path: "steam://rungameid/1900720",
   launch_code: "CRISIS",
-  status: "enabled"
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=7eMTJmXrQjg"
 } as const;
 
 const Index = () => {
