@@ -34,6 +34,22 @@ export function GameLaunchScreen({
     return () => window.removeEventListener('keypress', handleKeyPress);
   }, [game.title, showLaunchScreen, toast]);
 
+  const handleFPress = () => {
+    // Create and dispatch a keyboard event for 'f' key
+    const fKeyEvent = new KeyboardEvent('keydown', {
+      key: 'f',
+      code: 'KeyF',
+      keyCode: 70,
+      which: 70,
+      bubbles: true,
+      cancelable: true
+    });
+    document.dispatchEvent(fKeyEvent);
+    
+    // Then call the continue callback
+    onContinue();
+  };
+
   // RFID Detection Screen
   if (!showLaunchScreen) {
     return (
@@ -121,7 +137,7 @@ export function GameLaunchScreen({
               <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
                 Press F When Ready
               </div>
-              <button onClick={onContinue} className="w-32 h-32 text-6xl font-bold text-white bg-red-500 rounded-2xl hover:bg-red-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20">
+              <button onClick={handleFPress} className="w-32 h-32 text-6xl font-bold text-white bg-red-500 rounded-2xl hover:bg-red-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20">
                 F
               </button>
             </div>
@@ -165,7 +181,7 @@ export function GameLaunchScreen({
             <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
               Press F When Ready
             </div>
-            <button onClick={onContinue} className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20">
+            <button onClick={handleFPress} className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20">
               F
             </button>
           </div>
