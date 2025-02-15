@@ -5,16 +5,24 @@ import { useToast } from '@/components/ui/use-toast';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 
 export default function ElvenAssassinLaunch() {
-  const [showTimer, setShowTimer] = useState(false);
+  const [step, setStep] = useState<'rfid' | 'ready' | 'timer'>('rfid');
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    toast({
-      title: "✨ Game Ready",
-      description: "Elven Assassin is ready to launch"
-    });
-  }, [toast]);
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (/^\d$/.test(event.key) && step === 'rfid') {
+        toast({
+          title: "✨ RFID Detected",
+          description: "Elven Assassin is ready to launch"
+        });
+        setStep('ready');
+      }
+    };
+
+    window.addEventListener('keypress', handleKeyPress);
+    return () => window.removeEventListener('keypress', handleKeyPress);
+  }, [toast, step]);
 
   const handleFPress = () => {
     const fKeyEvent = new KeyboardEvent('keydown', {
@@ -26,10 +34,10 @@ export default function ElvenAssassinLaunch() {
       cancelable: true
     });
     document.dispatchEvent(fKeyEvent);
-    setShowTimer(true);
+    setStep('timer');
   };
 
-  if (showTimer) {
+  if (step === 'timer') {
     return <RFIDCountdown 
       onExit={() => navigate('/')} 
       duration={8}
@@ -39,7 +47,6 @@ export default function ElvenAssassinLaunch() {
 
   return (
     <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
-      {/* Fantasy forest background with magical elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0" style={{
           background: 'linear-gradient(225deg, #2D3436 0%, #000000 100%)',
@@ -68,20 +75,34 @@ export default function ElvenAssassinLaunch() {
             </div>
           </div>
 
-          <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
-            PRESS F TO START
-          </div>
-
-          <div className="flex justify-center">
-            <button
-              onClick={handleFPress}
-              className="w-32 h-32 text-6xl font-bold text-white bg-emerald-500 rounded-2xl hover:bg-emerald-600 
-                       transform transition-all duration-200 hover:scale-105 active:scale-95
-                       border-4 border-white/20 shadow-lg backdrop-blur-sm"
-            >
-              F
-            </button>
-          </div>
+          {step === 'rfid' ? (
+            <div className="space-y-8">
+              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
+                TAP RFID CARD TO START
+              </div>
+              <div className="flex justify-center">
+                <div className="w-32 h-32 flex items-center justify-center bg-emerald-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
+                  <span className="text-4xl text-white">🎮</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
+                PRESS F WHEN READY
+              </div>
+              <div className="flex justify-center">
+                <button
+                  onClick={handleFPress}
+                  className="w-32 h-32 text-6xl font-bold text-white bg-emerald-500 rounded-2xl hover:bg-emerald-600 
+                           transform transition-all duration-200 hover:scale-105 active:scale-95
+                           border-4 border-white/20 shadow-lg backdrop-blur-sm"
+                >
+                  F
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="text-center">
             <p className="text-white/90 text-xl leading-relaxed">
