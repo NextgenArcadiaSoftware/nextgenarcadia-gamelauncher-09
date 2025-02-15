@@ -18,17 +18,13 @@ export default function ElvenAssassinLaunch() {
         });
         setStep('ready');
       }
-      // Add F key detection
-      if (event.key.toLowerCase() === 'f' && step === 'ready') {
-        setStep('timer');
-      }
     };
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
   }, [toast, step]);
 
   const handleFPress = () => {
-    setStep('timer');
+    setStep('timer');  // Directly set to timer when F is pressed
   };
 
   if (step === 'timer') {
