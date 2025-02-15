@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from 'react';
 import { Delete } from 'lucide-react';
 import { Button } from '../ui/button';
 
@@ -8,7 +9,23 @@ interface TimerDisplayProps {
   onExit: () => void;
 }
 
-export function TimerDisplay({ timeLeft, activeGame, onExit }: TimerDisplayProps) {
+export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
+  const [timeLeft, setTimeLeft] = useState(initialTime);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
       <div className="text-9xl font-mono mb-8 text-white animate-pulse tracking-widest">
