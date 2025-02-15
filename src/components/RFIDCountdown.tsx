@@ -14,7 +14,7 @@ interface RFIDCountdownProps {
 export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showRating, setShowRating] = useState(false);
-  const [showLaunchScreen, setShowLaunchScreen] = useState(true);
+  const [showGameScreen, setShowGameScreen] = useState(true);
   const { toast } = useToast();
 
   // Initial timer duration fetch and subscription setup
@@ -39,9 +39,6 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
         console.error('Error fetching timer duration:', error);
       }
     };
-
-    // Fetch initial timer duration
-    fetchTimerDuration();
 
     // Set up real-time subscription for timer updates
     const channel = supabase
@@ -98,7 +95,7 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
   const targetWord = getGameCode(activeGame);
 
   useEffect(() => {
-    if (!showLaunchScreen && timeLeft !== null) {
+    if (!showGameScreen && timeLeft !== null) {
       const interval = setInterval(() => {
         setTimeLeft((prev) => {
           if (!prev || prev <= 1) {
@@ -121,7 +118,7 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
 
       return () => clearInterval(interval);
     }
-  }, [showLaunchScreen, targetWord, timeLeft]);
+  }, [showGameScreen, targetWord, timeLeft]);
 
   const handleRatingSubmit = (rating: number) => {
     // When exiting, send the stop command to the Python backend
@@ -147,11 +144,11 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
     return <RatingScreen activeGame={activeGame} onSubmit={handleRatingSubmit} />;
   }
 
-  if (showLaunchScreen) {
+  if (showGameScreen) {
     return (
       <GameLaunchScreen 
         game={gameData}
-        onContinue={() => setShowLaunchScreen(false)}
+        onContinue={() => setShowGameScreen(false)}
       />
     );
   }
