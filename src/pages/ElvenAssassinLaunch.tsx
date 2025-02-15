@@ -16,25 +16,12 @@ export default function ElvenAssassinLaunch() {
           title: "✨ RFID Detected",
           description: "Elven Assassin is ready to launch"
         });
-        setStep('ready');
+        setStep('timer');  // Changed from 'ready' to 'timer' to skip the F press screen
       }
     };
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
   }, [toast, step]);
-
-  const handleFPress = () => {
-    const fKeyEvent = new KeyboardEvent('keydown', {
-      key: 'f',
-      code: 'KeyF',
-      keyCode: 70,
-      which: 70,
-      bubbles: true,
-      cancelable: true
-    });
-    document.dispatchEvent(fKeyEvent);
-    setStep('timer');
-  };
 
   if (step === 'timer') {
     return <RFIDCountdown 
@@ -74,31 +61,16 @@ export default function ElvenAssassinLaunch() {
             </div>
           </div>
 
-          {step === 'rfid' ? (
-            <div className="space-y-8">
-              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
-                TAP RFID CARD TO START
-              </div>
-              <div className="flex justify-center">
-                <div className="w-32 h-32 flex items-center justify-center bg-emerald-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
-                  <span className="text-4xl text-white">🎮</span>
-                </div>
+          <div className="space-y-8">
+            <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
+              TAP RFID CARD TO START
+            </div>
+            <div className="flex justify-center">
+              <div className="w-32 h-32 flex items-center justify-center bg-emerald-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
+                <span className="text-4xl text-white">🎮</span>
               </div>
             </div>
-          ) : (
-            <div className="space-y-8">
-              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
-                PRESS F WHEN READY
-              </div>
-              <div className="flex justify-center">
-                <button onClick={handleFPress} className="w-32 h-32 text-6xl font-bold text-white bg-emerald-500 rounded-2xl hover:bg-emerald-600 
-                           transform transition-all duration-200 hover:scale-105 active:scale-95
-                           border-4 border-white/20 shadow-lg backdrop-blur-sm">
-                  F
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
 
           <div className="text-center">
             <p className="text-white/90 text-xl leading-relaxed">
