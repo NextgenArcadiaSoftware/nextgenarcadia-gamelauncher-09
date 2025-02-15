@@ -4,6 +4,7 @@ import path from 'path';
 import { exec } from 'child_process';
 import { SerialPort } from 'serialport';
 import { ReadlineParser } from '@serialport/parser-readline';
+import fetch from 'node-fetch';
 
 let mainWindow: BrowserWindow;
 
@@ -73,42 +74,45 @@ app.on('activate', () => {
   }
 });
 
-// Handle game launch requests
-ipcMain.on('launch-game', (event, executablePath) => {
-  console.log('Launching game:', executablePath);
-  exec(executablePath, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error launching game: ${error}`);
-      event.reply('launch-game-error', error.message);
-      return;
-    }
-    event.reply('launch-game-success');
-  });
-});
-
 // Add IPC handler for key press simulation
-ipcMain.on('simulate-keypress', (event, key) => {
+ipcMain.on('simulate-keypress', async (event, key) => {
   console.log('Received key press in main process:', key);
-  
-  // Create a Python command to simulate the key press using the keyboard module
-  const pythonScript = `
+
+  try {
+    // Send key press to Python server
+    const response = await fetch('http://localhost:5001/keypress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Key press simulation response:', data);
+  } catch (error) {
+    console.error('Error sending key press to Python server:', error);
+    
+    // Fallback to direct Python script execution if HTTP request fails
+    const pythonScript = `
 import keyboard
 import time
 
-# Press and hold the key
 keyboard.press('${key}')
-time.sleep(0.1)  # Hold for a short duration
+time.sleep(0.1)
 keyboard.release('${key}')
-  `;
-  
-  // Execute the Python script
-  exec(`python -c "${pythonScript}"`, (error, stdout, stderr) => {
-    if (error) {
-      console.error('Error simulating key press:', error);
-      return;
-    }
-    console.log('Key press simulated successfully:', key);
-  });
+    `;
+    
+    exec(`python -c "${pythonScript}"`, (error, stdout, stderr) => {
+      if (error) {
+        console.error('Error in fallback key simulation:', error);
+        return;
+      }
+      console.log('Fallback key simulation successful');
+    });
+  }
 });
 
 // Add IPC handler for exiting kiosk mode

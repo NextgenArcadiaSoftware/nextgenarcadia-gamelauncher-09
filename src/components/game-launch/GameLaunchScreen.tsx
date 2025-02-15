@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -30,7 +29,6 @@ export function GameLaunchScreen({
         setShowLaunchScreen(true);
       }
 
-      // Handle F key press directly in the event listener
       if (event.key.toLowerCase() === 'f') {
         console.log('F key pressed through keyboard event');
         simulateFPress();
@@ -41,55 +39,35 @@ export function GameLaunchScreen({
     return () => window.removeEventListener('keypress', handleKeyPress);
   }, [game.title, showLaunchScreen, toast]);
 
-  const simulateFPress = () => {
+  const simulateFPress = async () => {
     console.log('Simulating F key press');
     
-    // Create a temporary input field
+    // Create a temporary input field for DOM event simulation
     const inputField = document.createElement('input');
     document.body.appendChild(inputField);
     inputField.focus();
     
-    // Simulate keydown event
-    const keyDownEvent = new KeyboardEvent('keydown', {
-      key: 'f',
-      code: 'KeyF',
-      keyCode: 70,
-      which: 70,
-      bubbles: true,
-      cancelable: true
+    // Simulate DOM events
+    ['keydown', 'keypress', 'keyup'].forEach(eventType => {
+      const event = new KeyboardEvent(eventType, {
+        key: 'f',
+        code: 'KeyF',
+        keyCode: 70,
+        which: 70,
+        bubbles: true,
+        cancelable: true
+      });
+      inputField.dispatchEvent(event);
     });
-    inputField.dispatchEvent(keyDownEvent);
     
-    // Simulate keypress event
-    const keyPressEvent = new KeyboardEvent('keypress', {
-      key: 'f',
-      code: 'KeyF',
-      keyCode: 70,
-      which: 70,
-      bubbles: true,
-      cancelable: true
-    });
-    inputField.dispatchEvent(keyPressEvent);
-    
-    // Set the value and trigger input event
+    // Set value and trigger input event
     inputField.value = 'f';
     inputField.dispatchEvent(new Event('input', { bubbles: true }));
-    
-    // Simulate keyup event
-    const keyUpEvent = new KeyboardEvent('keyup', {
-      key: 'f',
-      code: 'KeyF',
-      keyCode: 70,
-      which: 70,
-      bubbles: true,
-      cancelable: true
-    });
-    inputField.dispatchEvent(keyUpEvent);
     
     // Clean up
     document.body.removeChild(inputField);
     
-    // Also send via Electron IPC if available
+    // Send to Electron/Python backend
     if (window.electron) {
       console.log('Sending F key press to electron main process');
       window.electron.ipcRenderer.send('simulate-keypress', 'f');
