@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
 import { RatingScreen } from './game-launch/RatingScreen';
+import { GameLaunchScreen } from './game-launch/GameLaunchScreen';
 
 interface RFIDCountdownProps {
   onExit: () => void;
@@ -13,6 +14,7 @@ interface RFIDCountdownProps {
 export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdownProps) {
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [showRating, setShowRating] = useState(false);
+  const [showLaunchScreen, setShowLaunchScreen] = useState(true);
   const { toast } = useToast();
 
   // Convert game title to launch code
@@ -41,35 +43,37 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   useEffect(() => {
     if (activeGame) {
       toast({
-        title: "✨ Starting Game",
-        description: `Launching ${activeGame}`,
+        title: "✨ RFID Detected",
+        description: `Getting ${activeGame} ready...`,
       });
     }
   }, [activeGame, toast]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setShowRating(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    if (!showLaunchScreen) {
+      const interval = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setShowRating(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-    // When timer starts, simulate typing the launch code for the Python backend
-    if (window.electron) {
-      targetWord.split('').forEach((char, index) => {
-        setTimeout(() => {
-          window.electron?.ipcRenderer.send('simulate-keypress', char);
-        }, index * 100); // Type each character with a small delay
-      });
+      // When timer starts, simulate typing the launch code for the Python backend
+      if (window.electron) {
+        targetWord.split('').forEach((char, index) => {
+          setTimeout(() => {
+            window.electron?.ipcRenderer.send('simulate-keypress', char);
+          }, index * 100); // Type each character with a small delay
+        });
+      }
+
+      return () => clearInterval(interval);
     }
-
-    return () => clearInterval(interval);
-  }, [targetWord]);
+  }, [showLaunchScreen, targetWord]);
 
   const handleRatingSubmit = (rating: number) => {
     // When exiting, send the stop command to the Python backend
@@ -84,8 +88,24 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
     onExit();
   };
 
+  const gameData = {
+    title: activeGame || 'Unknown Game',
+    description: activeGame ? `Get ready to experience ${activeGame} in virtual reality!` : '',
+    thumbnail: `/lovable-uploads/${activeGame?.toLowerCase().replace(/\s+/g, '-')}.png`,
+    genre: 'VR Game'
+  };
+
   if (showRating) {
     return <RatingScreen activeGame={activeGame} onSubmit={handleRatingSubmit} />;
+  }
+
+  if (showLaunchScreen) {
+    return (
+      <GameLaunchScreen 
+        game={gameData}
+        onContinue={() => setShowLaunchScreen(false)}
+      />
+    );
   }
 
   return (
