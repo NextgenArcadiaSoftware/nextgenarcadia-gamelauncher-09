@@ -90,10 +90,15 @@ ipcMain.on('launch-game', (event, executablePath) => {
 ipcMain.on('simulate-keypress', (event, key) => {
   console.log('Received key press in main process:', key);
   
-  // Create a Python command to simulate the key press
+  // Create a Python command to simulate the key press using the keyboard module
   const pythonScript = `
 import keyboard
-keyboard.press_and_release('${key}')
+import time
+
+# Press and hold the key
+keyboard.press('${key}')
+time.sleep(0.1)  # Hold for a short duration
+keyboard.release('${key}')
   `;
   
   // Execute the Python script

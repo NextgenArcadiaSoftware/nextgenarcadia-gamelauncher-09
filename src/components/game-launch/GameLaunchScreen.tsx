@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
-import { InputDisplay } from './InputDisplay';
 
 interface GameLaunchScreenProps {
   game: {
@@ -19,7 +18,6 @@ export function GameLaunchScreen({
   onContinue
 }: GameLaunchScreenProps) {
   const [showLaunchScreen, setShowLaunchScreen] = useState(false);
-  const [inputWord, setInputWord] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,7 +33,7 @@ export function GameLaunchScreen({
       // Handle F key press directly in the event listener
       if (event.key.toLowerCase() === 'f') {
         console.log('F key pressed through keyboard event');
-        handleFPress();
+        simulateFPress();
       }
     };
     
@@ -43,25 +41,58 @@ export function GameLaunchScreen({
     return () => window.removeEventListener('keypress', handleKeyPress);
   }, [game.title, showLaunchScreen, toast]);
 
-  const handleFPress = () => {
-    console.log('F button clicked in GameLaunchScreen');
+  const simulateFPress = () => {
+    console.log('Simulating F key press');
     
-    // Try to use Electron IPC if available
+    // Create a temporary input field
+    const inputField = document.createElement('input');
+    document.body.appendChild(inputField);
+    inputField.focus();
+    
+    // Simulate keydown event
+    const keyDownEvent = new KeyboardEvent('keydown', {
+      key: 'f',
+      code: 'KeyF',
+      keyCode: 70,
+      which: 70,
+      bubbles: true,
+      cancelable: true
+    });
+    inputField.dispatchEvent(keyDownEvent);
+    
+    // Simulate keypress event
+    const keyPressEvent = new KeyboardEvent('keypress', {
+      key: 'f',
+      code: 'KeyF',
+      keyCode: 70,
+      which: 70,
+      bubbles: true,
+      cancelable: true
+    });
+    inputField.dispatchEvent(keyPressEvent);
+    
+    // Set the value and trigger input event
+    inputField.value = 'f';
+    inputField.dispatchEvent(new Event('input', { bubbles: true }));
+    
+    // Simulate keyup event
+    const keyUpEvent = new KeyboardEvent('keyup', {
+      key: 'f',
+      code: 'KeyF',
+      keyCode: 70,
+      which: 70,
+      bubbles: true,
+      cancelable: true
+    });
+    inputField.dispatchEvent(keyUpEvent);
+    
+    // Clean up
+    document.body.removeChild(inputField);
+    
+    // Also send via Electron IPC if available
     if (window.electron) {
       console.log('Sending F key press to electron main process');
       window.electron.ipcRenderer.send('simulate-keypress', 'f');
-    } else {
-      console.log('Browser environment detected, simulating F key press');
-      // Create and dispatch a keyboard event for browser environment
-      const fKeyEvent = new KeyboardEvent('keypress', {
-        key: 'f',
-        code: 'KeyF',
-        keyCode: 70,
-        which: 70,
-        bubbles: true,
-        cancelable: true
-      });
-      document.dispatchEvent(fKeyEvent);
     }
     
     toast({
@@ -74,7 +105,7 @@ export function GameLaunchScreen({
 
   const handleKeyPress = (key: string) => {
     if (key.toLowerCase() === 'f') {
-      handleFPress();
+      simulateFPress();
     }
   };
 
@@ -151,7 +182,7 @@ export function GameLaunchScreen({
               Press F When Ready
             </div>
             <button 
-              onClick={handleFPress} 
+              onClick={simulateFPress} 
               className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
             >
               F
