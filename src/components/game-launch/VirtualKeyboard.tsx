@@ -19,16 +19,49 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
 
   const isInputComplete = inputWord.length === 3;
 
-  const handleKeyPress = (key: string) => {
-    // Send the keypress to the Python backend through electron
+  const simulateKeyPress = (key: string) => {
+    // Create and dispatch keydown event
+    const keydownEvent = new KeyboardEvent('keydown', {
+      key: key,
+      code: `Key${key}`,
+      keyCode: key.charCodeAt(0),
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(keydownEvent);
+
+    // Create and dispatch keyup event
+    const keyupEvent = new KeyboardEvent('keyup', {
+      key: key,
+      code: `Key${key}`,
+      keyCode: key.charCodeAt(0),
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(keyupEvent);
+
+    // Also send to electron for the Python backend
     if (window.electron) {
       window.electron.ipcRenderer.send('simulate-keypress', key);
     }
+  };
+
+  const handleKeyPress = (key: string) => {
+    simulateKeyPress(key);
     onKeyPress(key);
   };
 
   const handleBackspace = () => {
     // Simulate backspace key press
+    const backspaceEvent = new KeyboardEvent('keydown', {
+      key: 'Backspace',
+      code: 'Backspace',
+      keyCode: 8,
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(backspaceEvent);
+    
     if (window.electron) {
       window.electron.ipcRenderer.send('simulate-keypress', 'backspace');
     }
@@ -37,6 +70,15 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
 
   const handleEnter = () => {
     // Simulate enter key press
+    const enterEvent = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      code: 'Enter',
+      keyCode: 13,
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(enterEvent);
+    
     if (window.electron) {
       window.electron.ipcRenderer.send('simulate-keypress', 'enter');
     }
