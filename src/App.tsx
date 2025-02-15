@@ -9,7 +9,6 @@ import Index from "./pages/Index";
 import Library from "./pages/Library";
 import NotFound from "./pages/NotFound";
 import FruitNinjaLaunch from "./pages/FruitNinjaLaunch";
-import ElvenAssassinLaunch from "./pages/ElvenAssassinLaunch";
 import CrisBrigadeLaunch from "./pages/CrisBrigadeLaunch";
 import SportsLaunch from "./pages/SportsLaunch";
 import PlankLaunch from "./pages/PlankLaunch";
@@ -32,7 +31,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/library" element={<Library />} />
           <Route path="/fruitninjalaunch" element={<FruitNinjaLaunch />} />
-          <Route path="/elvenassassinlaunch" element={<ElvenAssassinLaunch />} />
           <Route path="/crisisbrigadelaunch" element={<CrisBrigadeLaunch />} />
           <Route path="/sportslaunch" element={<SportsLaunch />} />
           <Route path="/planklaunch" element={<PlankLaunch />} />
