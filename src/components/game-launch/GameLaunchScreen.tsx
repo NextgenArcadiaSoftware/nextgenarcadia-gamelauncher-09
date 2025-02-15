@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 
 interface GameLaunchScreenProps {
@@ -16,38 +16,80 @@ export function GameLaunchScreen({
   game,
   onContinue
 }: GameLaunchScreenProps) {
-  const {
-    toast
-  } = useToast();
-  
-  useEffect(() => {
-    toast({
-      title: "✨ Game Ready",
-      description: `${game.title} is ready to launch`
-    });
-  }, [game.title, toast]);
+  const [showLaunchScreen, setShowLaunchScreen] = useState(false);
+  const { toast } = useToast();
 
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (/^\d$/.test(event.key) && !showLaunchScreen) {
+        toast({
+          title: "✨ RFID Detected",
+          description: `${game.title} is ready to launch`
+        });
+        setShowLaunchScreen(true);
+      }
+    };
+    
+    window.addEventListener('keypress', handleKeyPress);
+    return () => window.removeEventListener('keypress', handleKeyPress);
+  }, [game.title, showLaunchScreen, toast]);
+
+  // RFID Detection Screen
+  if (!showLaunchScreen) {
+    return (
+      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80" />
+          <div className="absolute inset-0 mix-blend-overlay opacity-30">
+            <img src={game.thumbnail} alt={`${game.title} Background`} className="w-full h-full object-cover" />
+          </div>
+        </div>
+
+        <div className="relative z-10 max-w-4xl w-full mx-auto p-8">
+          <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-white/20">
+            <div className="text-center">
+              <h1 className="text-6xl font-bold text-white mb-4 font-display" style={{
+                textShadow: '0 0 20px rgba(59,130,246,0.5), 0 0 40px rgba(59,130,246,0.3)'
+              }}>
+                {game.title}
+              </h1>
+            </div>
+
+            <div className="space-y-8">
+              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
+                TAP RFID CARD TO START
+              </div>
+              <div className="flex justify-center">
+                <div className="w-32 h-32 flex items-center justify-center bg-blue-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
+                  <span className="text-4xl text-white">🎮</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Fruit Ninja specific launch screen
   if (game.title === "Fruit Ninja VR") {
     return <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
-        {/* Animated fruit slicing background */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0" style={{
-          background: 'linear-gradient(225deg, #FF4800 0%, #FF0000 100%)',
-          opacity: 0.8
-        }} />
+            background: 'linear-gradient(225deg, #FF4800 0%, #FF0000 100%)',
+            opacity: 0.8
+          }} />
           <div className="absolute inset-0 mix-blend-overlay opacity-30">
             <img src={game.thumbnail} alt="Fruit Ninja Background" className="w-full h-full object-cover" />
           </div>
         </div>
 
-        {/* Content */}
         <div className="relative z-10 max-w-4xl w-full mx-auto p-8">
           <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-white/20">
-            {/* Game Logo/Title */}
             <div className="text-center">
               <h1 className="text-6xl font-bold text-white mb-4 font-display" style={{
-              textShadow: '0 0 20px rgba(255,0,0,0.5), 0 0 40px rgba(255,0,0,0.3)'
-            }}>
+                textShadow: '0 0 20px rgba(255,0,0,0.5), 0 0 40px rgba(255,0,0,0.3)'
+              }}>
                 FRUIT NINJA VR
               </h1>
               <div className="flex justify-center gap-4">
@@ -60,7 +102,6 @@ export function GameLaunchScreen({
               </div>
             </div>
 
-            {/* Game Description */}
             <div className="text-center">
               <p className="text-white/90 text-xl leading-relaxed">
                 Become a fruit-slicing master in VR! Slice and dice your way through waves of juicy fruits, 
@@ -68,20 +109,20 @@ export function GameLaunchScreen({
               </p>
             </div>
 
-            {/* Game Features */}
             <div className="grid grid-cols-3 gap-4 text-center">
-              {['Classic Mode', 'Zen Mode', 'Arcade Mode'].map(feature => <div key={feature} className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
+              {['Classic Mode', 'Zen Mode', 'Arcade Mode'].map(feature => (
+                <div key={feature} className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
                   <span className="text-white font-semibold">{feature}</span>
-                </div>)}
+                </div>
+              ))}
             </div>
 
-            {/* Start Button */}
             <div className="flex flex-col items-center gap-4 mt-8">
               <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
-                Your Dojo Awaits
+                Press F When Ready
               </div>
-              <button onClick={onContinue} className="px-12 py-4 bg-red-500 hover:bg-red-600 rounded-full text-white font-bold text-lg transition-all transform hover:scale-105 active:scale-95">
-                Begin Training
+              <button onClick={onContinue} className="w-32 h-32 text-6xl font-bold text-white bg-red-500 rounded-2xl hover:bg-red-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20">
+                F
               </button>
             </div>
           </div>
@@ -89,7 +130,7 @@ export function GameLaunchScreen({
       </div>;
   }
 
-  // For other games, use a generic launch screen
+  // Generic launch screen for other games
   return (
     <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
       <div className="absolute inset-0 overflow-hidden">
@@ -122,10 +163,10 @@ export function GameLaunchScreen({
 
           <div className="flex flex-col items-center gap-4 mt-8">
             <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
-              Ready to Begin
+              Press F When Ready
             </div>
-            <button onClick={onContinue} className="px-12 py-4 bg-blue-500 hover:bg-blue-600 rounded-full text-white font-bold text-lg transition-all transform hover:scale-105 active:scale-95">
-              Start Game
+            <button onClick={onContinue} className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20">
+              F
             </button>
           </div>
         </div>
