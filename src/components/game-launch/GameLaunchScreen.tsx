@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 
@@ -27,6 +28,12 @@ export function GameLaunchScreen({
         });
         setShowLaunchScreen(true);
       }
+
+      // Handle F key press directly in the event listener
+      if (event.key.toLowerCase() === 'f') {
+        console.log('F key pressed through keyboard event');
+        handleFPress();
+      }
     };
     
     window.addEventListener('keypress', handleKeyPress);
@@ -36,18 +43,28 @@ export function GameLaunchScreen({
   const handleFPress = () => {
     console.log('F button clicked in GameLaunchScreen');
     
+    // Try to use Electron IPC if available
     if (window.electron) {
       console.log('Sending F key press to electron main process');
       window.electron.ipcRenderer.send('simulate-keypress', 'f');
-      
-      // Add a toast to confirm the key press was sent
-      toast({
-        title: "Key Press Sent",
-        description: "F key press sent to system"
-      });
     } else {
-      console.warn('Electron is not available');
+      console.log('Browser environment detected, simulating F key press');
+      // Create and dispatch a keyboard event for browser environment
+      const fKeyEvent = new KeyboardEvent('keypress', {
+        key: 'f',
+        code: 'KeyF',
+        keyCode: 70,
+        which: 70,
+        bubbles: true,
+        cancelable: true
+      });
+      document.dispatchEvent(fKeyEvent);
     }
+    
+    toast({
+      title: "Key Press Sent",
+      description: "F key press registered"
+    });
     
     onContinue();
   };
@@ -90,7 +107,8 @@ export function GameLaunchScreen({
   }
 
   // Game launch screen
-  return <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+  return (
+    <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80" />
         <div className="absolute inset-0 mix-blend-overlay opacity-30">
@@ -123,11 +141,15 @@ export function GameLaunchScreen({
             <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
               Press F When Ready
             </div>
-            <button onClick={handleFPress} className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20">
+            <button 
+              onClick={handleFPress} 
+              className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
+            >
               F
             </button>
           </div>
         </div>
       </div>
-    </div>;
-}
+    </div>
+  );
+};
