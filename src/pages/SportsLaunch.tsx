@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
@@ -9,7 +8,23 @@ export default function SportsLaunch() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    toast({
+      title: "✨ Game Ready",
+      description: "All-in-One Sports VR is ready to launch"
+    });
+  }, [toast]);
+
   const handleFPress = () => {
+    const fKeyEvent = new KeyboardEvent('keydown', {
+      key: 'f',
+      code: 'KeyF',
+      keyCode: 70,
+      which: 70,
+      bubbles: true,
+      cancelable: true
+    });
+    document.dispatchEvent(fKeyEvent);
     setShowTimer(true);
   };
 
@@ -51,13 +66,18 @@ export default function SportsLaunch() {
           </div>
 
           <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
-            TAP RFID TO START
+            PRESS F TO START
           </div>
 
           <div className="flex justify-center">
-            <div className="w-32 h-32 flex items-center justify-center bg-green-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
-              <span className="text-4xl text-white">🎮</span>
-            </div>
+            <button
+              onClick={handleFPress}
+              className="w-32 h-32 text-6xl font-bold text-white bg-green-500 rounded-2xl hover:bg-green-600 
+                       transform transition-all duration-200 hover:scale-105 active:scale-95
+                       border-4 border-white/20 shadow-lg backdrop-blur-sm"
+            >
+              F
+            </button>
           </div>
 
           <div className="text-center">
