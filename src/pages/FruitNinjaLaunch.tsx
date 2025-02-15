@@ -1,21 +1,19 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
-
 export default function FruitNinjaLaunch() {
   const [showTimer, setShowTimer] = useState(false);
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-
   useEffect(() => {
     toast({
       title: "✨ Game Ready",
       description: "Fruit Ninja VR is ready to launch"
     });
   }, [toast]);
-
   const handleFPress = () => {
     // Simulate F key press
     const fKeyEvent = new KeyboardEvent('keydown', {
@@ -31,15 +29,9 @@ export default function FruitNinjaLaunch() {
     // Start timer
     setShowTimer(true);
   };
-
   if (showTimer) {
-    return <RFIDCountdown 
-      onExit={() => navigate('/')} 
-      duration={8}
-      activeGame="Fruit Ninja VR"
-    />;
+    return <RFIDCountdown onExit={() => navigate('/')} duration={8} activeGame="Fruit Ninja VR" />;
   }
-
   return <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
       {/* Animated fruit slicing background */}
       <div className="absolute inset-0 overflow-hidden">
@@ -79,12 +71,9 @@ export default function FruitNinjaLaunch() {
 
           {/* Big F Button */}
           <div className="flex justify-center">
-            <button
-              onClick={handleFPress}
-              className="w-32 h-32 text-6xl font-bold text-white bg-red-500 rounded-2xl hover:bg-red-600 
+            <button onClick={handleFPress} className="w-32 h-32 text-6xl font-bold text-white bg-red-500 rounded-2xl hover:bg-red-600 
                        transform transition-all duration-200 hover:scale-105 active:scale-95
-                       border-4 border-white/20 shadow-lg backdrop-blur-sm"
-            >
+                       border-4 border-white/20 shadow-lg backdrop-blur-sm">
               F
             </button>
           </div>
@@ -99,11 +88,7 @@ export default function FruitNinjaLaunch() {
 
           {/* Game Features */}
           <div className="grid grid-cols-3 gap-4 text-center">
-            {['Classic Mode', 'Zen Mode', 'Arcade Mode'].map(feature => 
-              <div key={feature} className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
-                <span className="text-white font-semibold">{feature}</span>
-              </div>
-            )}
+            {['Classic Mode', 'Zen Mode', 'Arcade Mode'].map(feature => {})}
           </div>
         </div>
       </div>
