@@ -24,24 +24,11 @@ export default function CrisBrigadeLaunch() {
   }, [toast, step]);
 
   const handleFPress = () => {
-    // Simulate F key press
-    const fKeyEvent = new KeyboardEvent('keypress', {
-      key: 'f',
-      code: 'KeyF',
-      keyCode: 70,
-      charCode: 70,
-      which: 70,
-      bubbles: true,
-      cancelable: true,
-    });
-    document.dispatchEvent(fKeyEvent);
-
-    // Also send to electron for the Python backend
+    // Send to electron for the Python backend
     if (window.electron) {
       console.log('Sending F keypress to electron');
       window.electron.ipcRenderer.send('simulate-keypress', 'f');
     }
-
     setStep('timer');
   };
 
