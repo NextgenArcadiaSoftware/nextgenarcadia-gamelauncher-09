@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -5,9 +6,7 @@ import { RFIDCountdown } from '@/components/RFIDCountdown';
 
 export default function ElvenAssassinLaunch() {
   const [step, setStep] = useState<'rfid' | 'ready' | 'timer'>('rfid');
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,9 +48,9 @@ export default function ElvenAssassinLaunch() {
     <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0" style={{
-        background: 'linear-gradient(225deg, #2D3436 0%, #000000 100%)',
-        opacity: 0.9
-      }} />
+          background: 'linear-gradient(225deg, #2D3436 0%, #000000 100%)',
+          opacity: 0.9
+        }} />
         <div className="absolute inset-0 mix-blend-overlay opacity-40">
           <img src="/lovable-uploads/elven-assassin.png" alt="Elven Assassin Background" className="w-full h-full object-cover" />
         </div>
@@ -61,8 +60,8 @@ export default function ElvenAssassinLaunch() {
         <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-emerald-500/20">
           <div className="text-center">
             <h1 className="text-6xl font-bold text-white mb-4 font-display" style={{
-            textShadow: '0 0 20px rgba(16,185,129,0.5), 0 0 40px rgba(16,185,129,0.3)'
-          }}>
+              textShadow: '0 0 20px rgba(16,185,129,0.5), 0 0 40px rgba(16,185,129,0.3)'
+            }}>
               ELVEN ASSASSIN
             </h1>
             <div className="flex justify-center gap-4">
@@ -109,7 +108,11 @@ export default function ElvenAssassinLaunch() {
           </div>
 
           <div className="grid grid-cols-3 gap-4 text-center">
-            {['Solo Defense', 'Multiplayer', 'Custom Maps'].map((feature, index) => {})}
+            {['Solo Defense', 'Multiplayer', 'Custom Maps'].map((feature, index) => (
+              <div key={index} className="p-4 rounded-xl bg-emerald-500/10 backdrop-blur-sm">
+                <span className="text-white font-semibold">{feature}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
