@@ -1,3 +1,4 @@
+
 import { Button } from "./ui/button";
 import { Settings } from "lucide-react";
 import { useState } from "react";
@@ -5,6 +6,10 @@ import { OwnerDashboard } from "./OwnerDashboard";
 
 export function Header() {
   const [showOwnerDashboard, setShowOwnerDashboard] = useState(false);
+
+  const handleAddGame = (game: any) => {
+    console.log('Game added:', game);
+  };
 
   return (
     <div className="w-full flex items-center justify-between">
@@ -25,14 +30,7 @@ export function Header() {
       {showOwnerDashboard && (
         <OwnerDashboard
           onClose={() => setShowOwnerDashboard(false)}
-          onTimerDurationChange={(duration) => {
-            // This will be handled by the parent component
-            console.log('Timer duration changed:', duration);
-          }}
-          onAddGame={(game) => {
-            // This will be handled by the parent component
-            console.log('Game added:', game);
-          }}
+          onAddGame={handleAddGame}
         />
       )}
     </div>
