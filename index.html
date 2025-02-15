@@ -21,7 +21,7 @@
         console.log("Button Clicked! Sending 'F' to server...");
 
         // Send key press to Flask server
-        fetch("http://127.0.0.1:5000/keypress", {
+        fetch("http://127.0.0.1:5001/keypress", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ key: key })
@@ -34,7 +34,7 @@
 
       // Also detect actual keypress (works with real & on-screen keyboard)
       document.addEventListener("keydown", function(event) {
-        fetch("http://127.0.0.1:5000/keypress", {
+        fetch("http://127.0.0.1:5001/keypress", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ key: event.key })
