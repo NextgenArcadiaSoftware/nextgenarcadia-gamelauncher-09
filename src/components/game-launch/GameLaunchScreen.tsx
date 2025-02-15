@@ -1,5 +1,8 @@
+
 import { useEffect } from 'react';
 import { useToast } from '../ui/use-toast';
+import { TimerDisplay } from './TimerDisplay';
+
 interface GameLaunchScreenProps {
   game: {
     title: string;
@@ -9,6 +12,7 @@ interface GameLaunchScreenProps {
   };
   onContinue: () => void;
 }
+
 export function GameLaunchScreen({
   game,
   onContinue
@@ -16,12 +20,14 @@ export function GameLaunchScreen({
   const {
     toast
   } = useToast();
+  
   useEffect(() => {
     toast({
       title: "✨ Game Ready",
       description: `${game.title} is ready to launch`
     });
   }, [game.title, toast]);
+
   if (game.title === "Fruit Ninja VR") {
     return <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
         {/* Animated fruit slicing background */}
@@ -84,11 +90,10 @@ export function GameLaunchScreen({
       </div>;
   }
 
-  // Default launch screen for other games
-  return <div className="fixed inset-0 animate-gradient flex flex-col items-center justify-center z-50 p-6" style={{
-    background: 'linear-gradient(225deg, #F97316 0%, #D946EF 50%, #8B5CF6 100%)',
-    backgroundSize: '400% 400%'
-  }}>
-      
-    </div>;
+  // Default launch screen shows timer for other games
+  return <TimerDisplay 
+    timeLeft={8 * 60} 
+    activeGame={game.title}
+    onExit={onContinue}
+  />;
 }
