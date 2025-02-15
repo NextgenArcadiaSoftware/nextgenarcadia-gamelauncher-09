@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -32,7 +31,6 @@ export default function SportsLaunch() {
   if (showTimer) {
     return <RFIDCountdown 
       onExit={() => navigate('/')} 
-      duration={8}
       activeGame="All-in-One Sports VR"
     />;
   }

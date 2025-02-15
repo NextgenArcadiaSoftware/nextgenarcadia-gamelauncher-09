@@ -429,7 +429,6 @@ const Index = () => {
       {showRFIDCountdown ? (
         <RFIDCountdown 
           onExit={handleExitSession}
-          duration={sessionDuration}
           activeGame={activeGame}
         />
       ) : (

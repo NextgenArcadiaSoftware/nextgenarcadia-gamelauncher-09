@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -30,7 +29,6 @@ export default function ElvenAssassinLaunch() {
   if (step === 'timer') {
     return <RFIDCountdown 
       onExit={() => navigate('/')} 
-      duration={8}
       activeGame="Elven Assassin"
     />;
   }
