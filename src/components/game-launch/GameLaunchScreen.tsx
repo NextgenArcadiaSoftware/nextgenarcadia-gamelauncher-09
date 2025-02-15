@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -42,43 +43,35 @@ export function GameLaunchScreen({
   const simulateFPress = async () => {
     console.log('Simulating F key press');
     
-    // Create a temporary input field for DOM event simulation
-    const inputField = document.createElement('input');
-    document.body.appendChild(inputField);
-    inputField.focus();
-    
-    // Simulate DOM events
-    ['keydown', 'keypress', 'keyup'].forEach(eventType => {
-      const event = new KeyboardEvent(eventType, {
-        key: 'f',
-        code: 'KeyF',
-        keyCode: 70,
-        which: 70,
-        bubbles: true,
-        cancelable: true
+    try {
+      // Send key press directly to Python server
+      const response = await fetch('http://localhost:5001/keypress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'f' })
       });
-      inputField.dispatchEvent(event);
-    });
-    
-    // Set value and trigger input event
-    inputField.value = 'f';
-    inputField.dispatchEvent(new Event('input', { bubbles: true }));
-    
-    // Clean up
-    document.body.removeChild(inputField);
-    
-    // Send to Electron/Python backend
-    if (window.electron) {
-      console.log('Sending F key press to electron main process');
-      window.electron.ipcRenderer.send('simulate-keypress', 'f');
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Key press simulation response:', data);
+      
+      toast({
+        title: "Key Press Sent",
+        description: "F key press registered"
+      });
+      
+      onContinue();
+    } catch (error) {
+      console.error('Error sending key press to Python server:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send key press. Is the Python server running?",
+        variant: "destructive"
+      });
     }
-    
-    toast({
-      title: "Key Press Sent",
-      description: "F key press registered"
-    });
-    
-    onContinue();
   };
 
   const handleKeyPress = (key: string) => {
