@@ -40,6 +40,8 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
       }
     };
 
+    fetchTimerDuration(); // Make sure to call the function
+
     // Set up real-time subscription for timer updates
     const channel = supabase
       .channel('settings_changes')
