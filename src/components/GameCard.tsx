@@ -1,14 +1,9 @@
 
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import placeholderImage from "../assets/placeholder.svg";
 
 const getImageUrl = (path: string) => {
@@ -42,28 +37,31 @@ export function GameCard({
   onPlay,
   canPlayGames,
 }: GameCardProps) {
-  const [showTapCard, setShowTapCard] = useState(false);
-  const [showTapToStart, setShowTapToStart] = useState(false);
   const [imageSrc, setImageSrc] = useState(getImageUrl(thumbnail));
-
-  const gameCodeMap: Record<string, string> = {
-    "Elven Assassin": "EAX",
-    "Fruit Ninja VR": "FNJ",
-    "Crisis Brigade 2 Reloaded": "CBR",
-    "All-in-One Sports VR": "AIO",
-    "Richies Plank Experience": "RPE",
-    "iB Cricket": "IBC",
-    "Undead Citadel": "UDC",
-    "Arizona Sunshine": "ARS",
-    "Subside": "SBS",
-    "Propagation VR": "PVR"
-  };
+  const navigate = useNavigate();
 
   const handlePlayButtonClick = () => {
-    if (!canPlayGames) {
-      setShowTapCard(true);
+    // Map of games to their launch screen routes
+    const launchScreenRoutes: Record<string, string> = {
+      "Fruit Ninja VR": "/fruitninjalaunch",
+      // Add other games' launch screen routes here as they're created
+      "Elven Assassin": "/elvenassassinlaunch",
+      "Crisis Brigade 2 Reloaded": "/crisisbrigadelaunch",
+      "All-in-One Sports VR": "/sportslaunch",
+      "Richies Plank Experience": "/planklaunch",
+      "iB Cricket": "/cricketlaunch",
+      "Undead Citadel": "/undeadcitadellaunch",
+      "Arizona Sunshine": "/arizonalaunch",
+      "Subside": "/subsidelaunch",
+      "Propagation VR": "/propagationlaunch"
+    };
+
+    const route = launchScreenRoutes[title];
+    if (route) {
+      navigate(route);
     } else {
-      setShowTapToStart(true);
+      // Fallback to default behavior for games without launch screens
+      onPlay();
     }
   };
 
@@ -83,67 +81,8 @@ export function GameCard({
     setImageSrc(`https://source.unsplash.com/random/800x600/?${encodeURIComponent(genre.toLowerCase())}`);
   };
 
-  const launchCode = gameCodeMap[title];
-
   return (
     <div className="nintendo-card group">
-      {showTapCard && !canPlayGames ? (
-        <div 
-          className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-50 animate-fade-in rounded-[2rem] overflow-hidden"
-          style={{
-            background: 'linear-gradient(-45deg, #22c55e, #16a34a, #15803d, #166534)',
-            backgroundSize: '400% 400%',
-            animation: 'gradient 15s ease infinite',
-          }}
-        >
-          <style>
-            {`
-              @keyframes gradient {
-                0% { background-position: 0% 50%; }
-                50% { background-position: 100% 50%; }
-                100% { background-position: 0% 50%; }
-              }
-            `}
-          </style>
-          <div className="backdrop-blur-xl w-full h-full flex flex-col items-center justify-center gap-4">
-            <div className="flex flex-col items-center gap-4 text-center px-6">
-              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold drop-shadow-lg">
-                TAP CARD TO START
-              </div>
-              <p className="text-white text-sm drop-shadow">
-                Present your RFID card
-              </p>
-              <Button
-                variant="outline"
-                className="mt-2 bg-white/10 hover:bg-white/20 text-white border-0"
-                onClick={() => setShowTapCard(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-      
-      {showTapToStart && canPlayGames ? (
-        <div 
-          className="absolute inset-0 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center z-50 cursor-pointer animate-fade-in rounded-[2rem]"
-          onClick={() => {
-            onPlay();
-            setShowTapToStart(false);
-          }}
-        >
-          <div className="flex flex-col items-center gap-4">
-            <div className="animate-[pulse_1s_ease-in-out_infinite] text-white text-2xl font-bold">
-              ENTER CODE: {launchCode}
-            </div>
-            <div className="text-white/60 text-sm">
-              Click anywhere to continue
-            </div>
-          </div>
-        </div>
-      ) : null}
-      
       <div className="relative h-[280px] overflow-hidden rounded-[2rem]">
         <img 
           src={imageSrc}

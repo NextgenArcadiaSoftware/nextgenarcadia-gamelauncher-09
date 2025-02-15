@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/library" element={<Library />} />
           <Route path="/fruitninjalaunch" element={<FruitNinjaLaunch />} />
+          {/* Other game launch screens will be added here as they're created */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
