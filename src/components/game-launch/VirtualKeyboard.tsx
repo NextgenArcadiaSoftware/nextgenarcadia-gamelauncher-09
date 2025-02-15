@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Delete, CornerDownLeft } from 'lucide-react';
-import { KeyboardButton } from './KeyboardButton';
 
 interface VirtualKeyboardProps {
   onKeyPress: (key: string) => void;
@@ -11,115 +10,79 @@ interface VirtualKeyboardProps {
 }
 
 export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }: VirtualKeyboardProps) {
-  const keys = [
+  const rows = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
     ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   ];
 
-  const isInputComplete = inputWord.length === 3;
+  const handleKeyClick = (key: string) => {
+    // First trigger the hidden button for Python backend
+    const button = document.getElementById('myButton');
+    if (button) {
+      button.click();
+    }
 
-  const simulateKeyPress = (key: string) => {
-    console.log('Simulating keypress for:', key);
-    
-    // Create and dispatch keydown event
+    // Then dispatch DOM events for frontend
     const keydownEvent = new KeyboardEvent('keydown', {
-      key: key,
-      code: `Key${key}`,
+      key: key.toLowerCase(),
+      code: `Key${key.toUpperCase()}`,
       keyCode: key.charCodeAt(0),
       bubbles: true,
-      cancelable: true,
+      cancelable: true
     });
     document.dispatchEvent(keydownEvent);
 
-    // Create and dispatch keyup event
-    const keyupEvent = new KeyboardEvent('keyup', {
-      key: key,
-      code: `Key${key}`,
-      keyCode: key.charCodeAt(0),
-      bubbles: true,
-      cancelable: true,
-    });
-    document.dispatchEvent(keyupEvent);
-
-    // Also send to electron for the Python backend
-    if (window.electron) {
-      console.log('Sending to electron:', key);
-      window.electron.ipcRenderer.send('simulate-keypress', key);
-    }
-  };
-
-  const handleKeyPress = (key: string) => {
-    simulateKeyPress(key);
+    // Call the provided callback
     onKeyPress(key);
   };
 
-  const handleBackspace = () => {
-    console.log('Simulating backspace');
-    // Simulate backspace key press
-    const backspaceEvent = new KeyboardEvent('keydown', {
-      key: 'Backspace',
-      code: 'Backspace',
-      keyCode: 8,
-      bubbles: true,
-      cancelable: true,
-    });
-    document.dispatchEvent(backspaceEvent);
-    
-    if (window.electron) {
-      window.electron.ipcRenderer.send('simulate-keypress', 'backspace');
-    }
-    onBackspace();
-  };
-
-  const handleEnter = () => {
-    console.log('Simulating enter');
-    // Simulate enter key press
-    const enterEvent = new KeyboardEvent('keydown', {
-      key: 'Enter',
-      code: 'Enter',
-      keyCode: 13,
-      bubbles: true,
-      cancelable: true,
-    });
-    document.dispatchEvent(enterEvent);
-    
-    if (window.electron) {
-      window.electron.ipcRenderer.send('simulate-keypress', 'enter');
-    }
-    onEnter();
-  };
-
   return (
-    <div className="glass p-6 rounded-3xl w-full max-w-3xl">
-      <div className="space-y-2">
-        {keys.map((row, rowIndex) => (
+    <div className="p-4 bg-black/20 backdrop-blur-sm rounded-lg">
+      <div className="grid gap-2">
+        {rows.map((row, rowIndex) => (
           <div key={rowIndex} className="flex justify-center gap-1">
-            {rowIndex === 2 && <div className="w-8" />} {/* Shift spacing */}
             {row.map((key) => (
-              <KeyboardButton
+              <button
                 key={key}
-                onClick={() => handleKeyPress(key)}
-                disabled={isInputComplete}
+                onClick={() => handleKeyClick(key)}
+                className="w-12 h-12 rounded-lg bg-white/10 hover:bg-white/20 
+                          text-white font-bold text-lg transition-colors 
+                          duration-200 flex items-center justify-center
+                          border border-white/10 backdrop-blur-sm
+                          active:scale-95 transform"
               >
                 {key}
-              </KeyboardButton>
+              </button>
             ))}
-            {rowIndex === 2 && (
-              <KeyboardButton onClick={handleBackspace}>
-                <Delete className="w-4 h-4" />
-              </KeyboardButton>
-            )}
           </div>
         ))}
-        <div className="flex justify-between gap-1 mt-1">
-          <KeyboardButton onClick={() => {}} disabled>123</KeyboardButton>
-          <KeyboardButton onClick={() => {}} disabled>🌐</KeyboardButton>
-          <KeyboardButton variant="wide" onClick={() => {}} disabled>space</KeyboardButton>
-          <KeyboardButton onClick={() => {}} disabled>.</KeyboardButton>
-          <KeyboardButton onClick={handleEnter} disabled={!isInputComplete}>
-            Go
-          </KeyboardButton>
+        <div className="flex justify-center gap-1 mt-2">
+          <button
+            onClick={onBackspace}
+            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 
+                     text-white transition-colors duration-200
+                     border border-white/10 backdrop-blur-sm"
+          >
+            <Delete className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => handleKeyClick(' ')}
+            className="px-16 py-2 rounded-lg bg-white/10 hover:bg-white/20 
+                     text-white transition-colors duration-200
+                     border border-white/10 backdrop-blur-sm"
+          >
+            Space
+          </button>
+          <button
+            onClick={onEnter}
+            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 
+                     text-white transition-colors duration-200
+                     border border-white/10 backdrop-blur-sm"
+          >
+            <CornerDownLeft className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </div>
