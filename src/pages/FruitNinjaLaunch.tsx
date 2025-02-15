@@ -6,14 +6,24 @@ import { RFIDCountdown } from '@/components/RFIDCountdown';
 
 export default function FruitNinjaLaunch() {
   const [showTimer, setShowTimer] = useState(false);
+  const [showLaunchScreen, setShowLaunchScreen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    toast({
-      title: "✨ Game Ready",
-      description: "Fruit Ninja VR is ready to launch"
-    });
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // When any numeric key is pressed (simulating RFID scan)
+      if (/^\d$/.test(event.key)) {
+        setShowLaunchScreen(true);
+        toast({
+          title: "✨ RFID Detected",
+          description: "Access granted for Fruit Ninja VR"
+        });
+      }
+    };
+
+    window.addEventListener('keypress', handleKeyPress);
+    return () => window.removeEventListener('keypress', handleKeyPress);
   }, [toast]);
 
   const handleFPress = () => {
@@ -38,6 +48,20 @@ export default function FruitNinjaLaunch() {
       duration={8}
       activeGame="Fruit Ninja VR"
     />;
+  }
+
+  if (!showLaunchScreen) {
+    return (
+      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+        <div className="absolute inset-0" style={{
+          background: 'linear-gradient(225deg, #FF4800 0%, #FF0000 100%)',
+          opacity: 0.8
+        }} />
+        <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold text-center px-4">
+          TAP CARD TO START
+        </div>
+      </div>
+    );
   }
 
   return <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
