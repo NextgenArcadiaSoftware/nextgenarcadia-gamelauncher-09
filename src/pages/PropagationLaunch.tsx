@@ -1,32 +1,19 @@
-import { useEffect, useState } from 'react';
+
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 
 export default function PropagationLaunch() {
-  const [step, setStep] = useState<'rfid' | 'ready' | 'timer'>('rfid');
+  const [showTimer, setShowTimer] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (/^\d$/.test(event.key) && step === 'rfid') {
-        toast({
-          title: "✨ RFID Detected",
-          description: "Propagation VR is ready to launch"
-        });
-        setStep('ready');
-      }
-    };
-    window.addEventListener('keypress', handleKeyPress);
-    return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [toast, step]);
-
   const handleFPress = () => {
-    setStep('timer');
+    setShowTimer(true);
   };
 
-  if (step === 'timer') {
+  if (showTimer) {
     return <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Propagation VR"
@@ -63,31 +50,15 @@ export default function PropagationLaunch() {
             </div>
           </div>
 
-          {step === 'rfid' ? (
-            <div className="space-y-8">
-              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
-                TAP RFID CARD TO START
-              </div>
-              <div className="flex justify-center">
-                <div className="w-32 h-32 flex items-center justify-center bg-neutral-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
-                  <span className="text-4xl text-white">🎮</span>
-                </div>
-              </div>
+          <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
+            TAP RFID TO START
+          </div>
+
+          <div className="flex justify-center">
+            <div className="w-32 h-32 flex items-center justify-center bg-neutral-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
+              <span className="text-4xl text-white">🎮</span>
             </div>
-          ) : (
-            <div className="space-y-8">
-              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
-                PRESS F WHEN READY
-              </div>
-              <div className="flex justify-center">
-                <button onClick={handleFPress} className="w-32 h-32 text-6xl font-bold text-white bg-neutral-500 rounded-2xl hover:bg-neutral-600 
-                           transform transition-all duration-200 hover:scale-105 active:scale-95
-                           border-4 border-white/20 shadow-lg backdrop-blur-sm">
-                  F
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
 
           <div className="text-center">
             <p className="text-white/90 text-xl leading-relaxed">
