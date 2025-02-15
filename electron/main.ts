@@ -12,9 +12,10 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      webSecurity: false
+      nodeIntegration: false,
+      contextIsolation: true,
+      webSecurity: false,
+      preload: path.join(__dirname, 'preload.js')
     },
     kiosk: true,
     fullscreen: true,
@@ -24,7 +25,6 @@ function createWindow() {
 
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-    // Open DevTools for debugging
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
@@ -34,7 +34,6 @@ function createWindow() {
     e.preventDefault();
   });
 
-  // Initialize RFID reader
   initRFIDReader();
 }
 
