@@ -34,10 +34,21 @@ export function GameLaunchScreen({
   }, [game.title, showLaunchScreen, toast]);
 
   const handleFPress = () => {
+    console.log('F button clicked in GameLaunchScreen');
+    
     if (window.electron) {
-      console.log('Sending F key press to Python backend');
+      console.log('Sending F key press to electron main process');
       window.electron.ipcRenderer.send('simulate-keypress', 'f');
+      
+      // Add a toast to confirm the key press was sent
+      toast({
+        title: "Key Press Sent",
+        description: "F key press sent to system"
+      });
+    } else {
+      console.warn('Electron is not available');
     }
+    
     onContinue();
   };
 

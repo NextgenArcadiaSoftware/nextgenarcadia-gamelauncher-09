@@ -13,23 +13,23 @@ function createWindow() {
     height: 800,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      webSecurity: false
     },
-    kiosk: true, // Enable kiosk mode
-    fullscreen: true, // Force fullscreen
-    autoHideMenuBar: true, // Hide the menu bar
-    frame: false, // Remove window frame
+    kiosk: true,
+    fullscreen: true,
+    autoHideMenuBar: true,
+    frame: false,
   });
 
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-    // Only show DevTools in development if specifically needed
-    // mainWindow.webContents.openDevTools();
+    // Open DevTools for debugging
+    mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
-  // Prevent the window from being closed with Alt+F4 or similar shortcuts
   mainWindow.on('close', (e) => {
     e.preventDefault();
   });
@@ -39,9 +39,8 @@ function createWindow() {
 }
 
 function initRFIDReader() {
-  // Note: You'll need to update the port based on your Arduino's connection
   const port = new SerialPort({
-    path: 'COM3', // Windows example - adjust for your system
+    path: 'COM3',
     baudRate: 9600,
   });
 
@@ -52,15 +51,12 @@ function initRFIDReader() {
   });
 
   parser.on('data', (data: string) => {
-    // When RFID tag is detected, send to renderer
     if (data.trim()) {
       mainWindow.webContents.send('rfid-detected', data.trim());
     }
   });
 }
 
-// Add a command line switch to disable hardware acceleration
-// This can help with performance in kiosk mode
 app.commandLine.appendSwitch('disable-gpu-vsync');
 app.commandLine.appendSwitch('disable-frame-rate-limit');
 
@@ -80,6 +76,7 @@ app.on('activate', () => {
 
 // Handle game launch requests
 ipcMain.on('launch-game', (event, executablePath) => {
+  console.log('Launching game:', executablePath);
   exec(executablePath, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error launching game: ${error}`);
@@ -90,7 +87,27 @@ ipcMain.on('launch-game', (event, executablePath) => {
   });
 });
 
-// Add IPC handler for exiting kiosk mode (requires owner authentication)
+// Add IPC handler for key press simulation
+ipcMain.on('simulate-keypress', (event, key) => {
+  console.log('Received key press in main process:', key);
+  
+  // Create a Python command to simulate the key press
+  const pythonScript = `
+import keyboard
+keyboard.press_and_release('${key}')
+  `;
+  
+  // Execute the Python script
+  exec(`python -c "${pythonScript}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error('Error simulating key press:', error);
+      return;
+    }
+    console.log('Key press simulated successfully:', key);
+  });
+});
+
+// Add IPC handler for exiting kiosk mode
 ipcMain.on('exit-kiosk', () => {
   app.quit();
 });
