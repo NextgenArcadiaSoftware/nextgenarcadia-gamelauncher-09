@@ -33,7 +33,7 @@ const ALL_IN_ONE_SPORTS = {
   executable_path: "steam://rungameid/2076590",
   launch_code: "SPORTS",
   status: "enabled",
-  trailer: "https://www.youtube.com/watch?v=PZ63kQzGnmY"
+  trailer: "https://www.youtube.com/watch?v=LNRD5qxDhHY"
 } as const;
 
 const FRUIT_NINJA = {
@@ -45,7 +45,7 @@ const FRUIT_NINJA = {
   executable_path: "steam://rungameid/923360",
   launch_code: "NINJA",
   status: "enabled",
-  trailer: "https://www.youtube.com/watch?v=UvCz24ZvY2M"
+  trailer: "https://www.youtube.com/watch?v=hX_ohz6pP_I"
 } as const;
 
 const RICHIES_PLANK = {
@@ -57,7 +57,7 @@ const RICHIES_PLANK = {
   executable_path: "steam://rungameid/517160",
   launch_code: "PLANK",
   status: "enabled",
-  trailer: "https://www.youtube.com/watch?v=KB2GlRn-TrY"
+  trailer: "https://www.youtube.com/watch?v=8pFz-DqWZq0"
 } as const;
 
 const ELVEN_ASSASSIN = {
@@ -69,7 +69,7 @@ const ELVEN_ASSASSIN = {
   executable_path: "steam://rungameid/503770",
   launch_code: "ELVEN",
   status: "enabled",
-  trailer: "https://www.youtube.com/watch?v=d1RnYfFZK2k"
+  trailer: "https://www.youtube.com/watch?v=N7nX9nZlvx4"
 } as const;
 
 const UNDEAD_CITADEL = {
@@ -81,7 +81,7 @@ const UNDEAD_CITADEL = {
   executable_path: "steam://rungameid/819190",
   launch_code: "CITADEL",
   status: "enabled",
-  trailer: "https://www.youtube.com/watch?v=V0kOqPM6h1Y"
+  trailer: "https://www.youtube.com/watch?v=5QI8cPCAO9Q"
 } as const;
 
 const ARIZONA_SUNSHINE = {
@@ -93,7 +93,7 @@ const ARIZONA_SUNSHINE = {
   executable_path: "steam://rungameid/2159470",
   launch_code: "ARIZONA",
   status: "enabled",
-  trailer: "https://www.youtube.com/watch?v=VUuKNtUwpYQ"
+  trailer: "https://www.youtube.com/watch?v=eZ65ppbWuAE"
 } as const;
 
 const IB_CRICKET = {
@@ -129,7 +129,7 @@ const SUBSIDE = {
   executable_path: "steam://rungameid/1908810",
   launch_code: "SUBSIDE",
   status: "enabled",
-  trailer: "https://www.youtube.com/watch?v=JGjqt8TCxQU"
+  trailer: "https://www.youtube.com/watch?v=8mJj4M_ZuBc"
 } as const;
 
 const CRISIS_BRIGADE = {
@@ -141,7 +141,7 @@ const CRISIS_BRIGADE = {
   executable_path: "steam://rungameid/1900720",
   launch_code: "CRISIS",
   status: "enabled",
-  trailer: "https://www.youtube.com/watch?v=7eMTJmXrQjg"
+  trailer: "https://www.youtube.com/watch?v=7iiMxGrcHXU"
 } as const;
 
 const Index = () => {
