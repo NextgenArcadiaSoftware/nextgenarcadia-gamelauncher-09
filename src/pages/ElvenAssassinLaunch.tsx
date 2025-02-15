@@ -76,8 +76,8 @@ export default function ElvenAssassinLaunch() {
           </div>
 
           {step === 'rfid' ? (
-            <div className="space-y-8">
-              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
+            <div className="space-y-6">
+              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
                 TAP RFID CARD TO START
               </div>
               <div className="flex justify-center">
