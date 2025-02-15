@@ -29,55 +29,15 @@ export function GameLaunchScreen({
         });
         setShowLaunchScreen(true);
       }
-
-      if (event.key.toLowerCase() === 'f') {
-        console.log('F key pressed through keyboard event');
-        simulateFPress();
-      }
     };
     
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
   }, [game.title, showLaunchScreen, toast]);
 
-  const simulateFPress = async () => {
-    console.log('Simulating F key press');
-    
-    try {
-      // Send key press directly to Python server
-      const response = await fetch('http://localhost:5001/keypress', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: 'f' })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Key press simulation response:', data);
-      
-      toast({
-        title: "Key Press Sent",
-        description: "F key press registered"
-      });
-      
-      onContinue();
-    } catch (error) {
-      console.error('Error sending key press to Python server:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send key press. Is the Python server running?",
-        variant: "destructive"
-      });
-    }
-  };
-
   const handleKeyPress = (key: string) => {
-    if (key.toLowerCase() === 'f') {
-      simulateFPress();
-    }
+    // Key press handler will be implemented later
+    console.log('Key pressed:', key);
   };
 
   // RFID Detection Screen
@@ -153,7 +113,7 @@ export function GameLaunchScreen({
               Press F When Ready
             </div>
             <button 
-              onClick={simulateFPress} 
+              onClick={() => console.log('F button clicked')} 
               className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
             >
               F
