@@ -18,6 +18,35 @@ export function RFIDCountdown({ onExit, duration = 8, activeGame }: RFIDCountdow
   const [showLaunchScreen, setShowLaunchScreen] = useState(true);
   const { toast } = useToast();
 
+  // Set up real-time subscription to timer changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('settings_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'settings',
+          filter: 'id=eq.global'
+        },
+        (payload) => {
+          const newDuration = payload.new.timer_duration;
+          setTimeLeft(newDuration * 60);
+          toast({
+            title: "Timer Updated",
+            description: `Session time updated to ${newDuration} minutes`,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast]);
+
+  // Initial timer duration fetch
   useEffect(() => {
     const fetchTimerDuration = async () => {
       const { data, error } = await supabase
