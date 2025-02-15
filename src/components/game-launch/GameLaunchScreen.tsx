@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 
@@ -35,16 +34,47 @@ export function GameLaunchScreen({
   }, [game.title, showLaunchScreen, toast]);
 
   const handleFPress = () => {
-    // Create and dispatch a keyboard event for 'f' key
-    const fKeyEvent = new KeyboardEvent('keydown', {
+    // Simulate the complete keyboard event sequence
+    
+    // 1. KeyDown event
+    const keyDownEvent = new KeyboardEvent('keydown', {
       key: 'f',
       code: 'KeyF',
       keyCode: 70,
       which: 70,
       bubbles: true,
-      cancelable: true
+      cancelable: true,
+      composed: true
     });
-    document.dispatchEvent(fKeyEvent);
+    document.dispatchEvent(keyDownEvent);
+
+    // 2. KeyPress event
+    const keyPressEvent = new KeyboardEvent('keypress', {
+      key: 'f',
+      code: 'KeyF',
+      keyCode: 70,
+      which: 70,
+      charCode: 102, // ASCII code for 'f'
+      bubbles: true,
+      cancelable: true,
+      composed: true
+    });
+    document.dispatchEvent(keyPressEvent);
+
+    // 3. KeyUp event
+    const keyUpEvent = new KeyboardEvent('keyup', {
+      key: 'f',
+      code: 'KeyF',
+      keyCode: 70,
+      which: 70,
+      bubbles: true,
+      cancelable: true,
+      composed: true
+    });
+    document.dispatchEvent(keyUpEvent);
+
+    // Log the event for debugging
+    console.log('Simulated F key press events');
     
     // Then call the continue callback
     onContinue();
