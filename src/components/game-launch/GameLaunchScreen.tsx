@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -50,15 +49,11 @@ export function GameLaunchScreen({
 
   const simulateKeyPress = (key: string) => {
     try {
-      // Create and dispatch keydown event
-      const keydownEvent = new KeyboardEvent('keypress', {
-        key: key.toLowerCase(),
-        code: `Key${key.toUpperCase()}`,
-        keyCode: key.toUpperCase().charCodeAt(0),
-        bubbles: true,
-        cancelable: true,
-      });
-      document.dispatchEvent(keydownEvent);
+      // Trigger the hidden button click to simulate a real key press
+      const button = document.getElementById('myButton');
+      if (button) {
+        button.click();
+      }
 
       if (key.toLowerCase() === 'f' && showLaunchScreen) {
         handleGameStart();
