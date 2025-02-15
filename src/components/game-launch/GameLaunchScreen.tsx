@@ -1,7 +1,6 @@
 
 import { useEffect } from 'react';
 import { useToast } from '../ui/use-toast';
-import { TimerDisplay } from './TimerDisplay';
 
 interface GameLaunchScreenProps {
   game: {
@@ -90,10 +89,47 @@ export function GameLaunchScreen({
       </div>;
   }
 
-  // Default launch screen shows timer for other games
-  return <TimerDisplay 
-    timeLeft={8 * 60} 
-    activeGame={game.title}
-    onExit={onContinue}
-  />;
+  // For other games, use a generic launch screen
+  return (
+    <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80" />
+        <div className="absolute inset-0 mix-blend-overlay opacity-30">
+          <img src={game.thumbnail} alt={`${game.title} Background`} className="w-full h-full object-cover" />
+        </div>
+      </div>
+
+      <div className="relative z-10 max-w-4xl w-full mx-auto p-8">
+        <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-white/20">
+          <div className="text-center">
+            <h1 className="text-6xl font-bold text-white mb-4 font-display" style={{
+              textShadow: '0 0 20px rgba(59,130,246,0.5), 0 0 40px rgba(59,130,246,0.3)'
+            }}>
+              {game.title}
+            </h1>
+            <div className="flex justify-center gap-4">
+              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-blue-500/30 backdrop-blur-sm border border-blue-500/30">
+                Virtual Reality
+              </span>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <p className="text-white/90 text-xl leading-relaxed">
+              {game.description}
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-4 mt-8">
+            <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
+              Ready to Begin
+            </div>
+            <button onClick={onContinue} className="px-12 py-4 bg-blue-500 hover:bg-blue-600 rounded-full text-white font-bold text-lg transition-all transform hover:scale-105 active:scale-95">
+              Start Game
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

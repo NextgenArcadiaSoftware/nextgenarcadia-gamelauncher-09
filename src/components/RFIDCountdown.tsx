@@ -33,7 +33,7 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
 
         if (data && isMounted) {
           console.log('Setting initial timer duration:', data.timer_duration);
-          setTimeLeft(data.timer_duration * 60);
+          setTimeLeft(data.timer_duration * 60); // Convert minutes to seconds
         }
       } catch (error) {
         console.error('Error fetching timer duration:', error);
@@ -58,7 +58,7 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
           if (isMounted) {
             const newDuration = payload.new.timer_duration;
             console.log('Received new timer duration:', newDuration);
-            setTimeLeft(newDuration * 60);
+            setTimeLeft(newDuration * 60); // Convert minutes to seconds
             toast({
               title: "Timer Updated",
               description: `Session time updated to ${newDuration} minutes`,
