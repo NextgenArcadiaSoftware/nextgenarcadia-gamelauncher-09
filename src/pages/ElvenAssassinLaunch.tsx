@@ -87,7 +87,7 @@ export default function ElvenAssassinLaunch() {
             </div>
           ) : (
             <div className="space-y-8">
-              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
+              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
                 PRESS F WHEN READY
               </div>
               <div className="flex justify-center">
