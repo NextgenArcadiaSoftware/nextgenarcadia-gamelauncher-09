@@ -98,15 +98,6 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
   const targetWord = getGameCode(activeGame);
 
   useEffect(() => {
-    if (activeGame) {
-      toast({
-        title: "✨ RFID Detected",
-        description: `Getting ${activeGame} ready...`,
-      });
-    }
-  }, [activeGame, toast]);
-
-  useEffect(() => {
     if (!showLaunchScreen && timeLeft !== null) {
       const interval = setInterval(() => {
         setTimeLeft((prev) => {
