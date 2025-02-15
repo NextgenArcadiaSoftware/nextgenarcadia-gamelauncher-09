@@ -8,6 +8,7 @@ import { Screensaver } from "./components/Screensaver";
 import Index from "./pages/Index";
 import Library from "./pages/Library";
 import NotFound from "./pages/NotFound";
+import FruitNinjaLaunch from "./pages/FruitNinjaLaunch";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/library" element={<Library />} />
+          <Route path="/fruitninjalaunch" element={<FruitNinjaLaunch />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
