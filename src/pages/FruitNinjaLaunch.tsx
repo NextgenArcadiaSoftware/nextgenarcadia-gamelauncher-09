@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -47,6 +48,11 @@ export default function FruitNinjaLaunch() {
             </div>
           </div>
 
+          {/* Press F to Start */}
+          <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-7xl font-bold py-8">
+            PRESS F TO START
+          </div>
+
           {/* Game Description */}
           <div className="text-center">
             <p className="text-white/90 text-xl leading-relaxed">
@@ -57,14 +63,11 @@ export default function FruitNinjaLaunch() {
 
           {/* Game Features */}
           <div className="grid grid-cols-3 gap-4 text-center">
-            {['Classic Mode', 'Zen Mode', 'Arcade Mode'].map(feature => {})}
-          </div>
-
-          {/* Start Button */}
-          <div className="flex flex-col items-center gap-4 mt-8">
-            <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">PRESS F TO START</div>
-            
-            
+            {['Classic Mode', 'Zen Mode', 'Arcade Mode'].map(feature => 
+              <div key={feature} className="p-4 rounded-xl bg-white/10 backdrop-blur-sm">
+                <span className="text-white font-semibold">{feature}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
