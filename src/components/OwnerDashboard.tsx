@@ -1,119 +1,102 @@
-
-import { useState, useEffect } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { AddGameDialog } from "./AddGameDialog";
-import { Link } from "react-router-dom";
-import { Library, Timer, ActivitySquare, LucideIcon } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { useToast } from "./ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
+import { PlusCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import type { Game } from "@/types/game";
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { supabase } from "@/integrations/supabase/client";
 
-interface Session {
-  startTime: string;
-  duration: number;
-}
+const formSchema = z.object({
+  title: z.string().min(2, {
+    message: "Title must be at least 2 characters.",
+  }),
+  genre: z.string().min(2, {
+    message: "Genre must be at least 2 characters.",
+  }),
+  release_date: z.string().min(2, {
+    message: "Release date must be at least 2 characters.",
+  }),
+  thumbnail: z.string().url({ message: "Invalid URL." }),
+  executable_path: z.string().min(2, {
+    message: "Executable path must be at least 2 characters.",
+  }),
+  launch_code: z.string().min(2, {
+    message: "Launch code must be at least 2 characters.",
+  }),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }),
+})
 
-interface TabItem {
-  value: string;
-  label: string;
-  icon: LucideIcon;
-}
-
-export function OwnerDashboard({ 
-  onClose, 
-  onTimerDurationChange,
-  onAddGame 
-}: { 
+interface OwnerDashboardProps {
   onClose: () => void;
-  onTimerDurationChange: (minutes: number) => void;
-  onAddGame: (game: Omit<Game, "id" | "status" | "created_at" | "updated_at">) => void;
-}) {
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [pin, setPin] = useState("");
-  const [sessions, setSessions] = useState<Session[]>([]);
+  onAddGame: (game: any) => void;
+}
+
+export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
+  const [selectedTab, setSelectedTab] = useState("timer");
   const [timerDuration, setTimerDuration] = useState(8);
   const { toast } = useToast();
 
-  const OWNER_PIN = "123456"; // This should be stored securely in a real application
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      genre: "",
+      release_date: "",
+      thumbnail: "",
+      executable_path: "",
+      launch_code: "",
+      description: "",
+    },
+  })
 
-  const tabs: TabItem[] = [
-    { value: "sessions", label: "Sessions", icon: ActivitySquare },
-    { value: "games", label: "Games", icon: Library },
-    { value: "settings", label: "Timer", icon: Timer },
-  ];
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    onAddGame(values);
+    toast({
+      title: "Success!",
+      description: "Game added successfully.",
+    })
+    form.reset();
+  }
 
-  // Fetch initial timer duration
-  useEffect(() => {
-    const fetchTimerDuration = async () => {
-      const { data, error } = await supabase
-        .from('settings')
-        .select('timer_duration')
-        .eq('id', 'global')
-        .single();
-
-      if (error) {
-        console.error('Error fetching timer duration:', error);
-        return;
-      }
-
-      if (data) {
-        setTimerDuration(data.timer_duration);
-        onTimerDurationChange(data.timer_duration);
-      }
-    };
-
-    fetchTimerDuration();
-  }, [onTimerDurationChange]);
-
-  useEffect(() => {
-    const savedSessions = localStorage.getItem("rfid_sessions");
-    if (savedSessions) {
-      setSessions(JSON.parse(savedSessions));
-    }
-  }, []);
-
-  const handlePinSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pin === OWNER_PIN) {
-      setIsAuthorized(true);
-      toast({
-        title: "Access Granted",
-        description: "Welcome to the owner dashboard",
-      });
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Access Denied",
-        description: "Incorrect PIN",
-      });
-    }
-  };
-
-  const handleTimerUpdate = async () => {
+  const handleTimerDurationChange = async (newDuration: number) => {
     try {
       const { error } = await supabase
         .from('settings')
-        .update({ timer_duration: timerDuration })
+        .update({ timer_duration: newDuration })
         .eq('id', 'global');
 
       if (error) throw error;
 
-      onTimerDurationChange(timerDuration);
+      setTimerDuration(newDuration);
       toast({
         title: "Timer Updated",
-        description: `Session duration set to ${timerDuration} minutes`,
+        description: `Session duration set to ${newDuration} minutes`,
       });
     } catch (error) {
-      console.error('Error updating timer:', error);
+      console.error('Error updating timer duration:', error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -122,122 +105,162 @@ export function OwnerDashboard({
     }
   };
 
-  if (!isAuthorized) {
-    return (
-      <Dialog open={true} onOpenChange={() => onClose()}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Owner Access</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Enter your 6-digit PIN to access the owner dashboard.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handlePinSubmit} className="space-y-4">
-            <Input
-              type="password"
-              placeholder="Enter 6-digit PIN"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              maxLength={6}
-              pattern="\d{6}"
-              required
-              className="text-center text-2xl tracking-widest"
-            />
-            <div className="flex gap-2">
-              <Button type="submit" className="w-full">
-                Login
-              </Button>
-              <Button variant="outline" onClick={onClose} className="w-full">
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
-    <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-[800px] max-h-[80vh] overflow-y-auto">
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Owner Dashboard</DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            Manage your arcade settings and view session history.
+          <DialogTitle>Owner Dashboard</DialogTitle>
+          <DialogDescription>
+            Manage settings and add new games to the platform.
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="sessions" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 gap-4">
-            {tabs.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="flex items-center gap-2 py-3"
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-              </TabsTrigger>
-            ))}
+        <Tabs defaultValue="timer" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="timer">Timer Settings</TabsTrigger>
+            <TabsTrigger value="add-game">Add Game</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="sessions" className="space-y-4 mt-6">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold">Session History</h3>
-              <div className="space-y-3">
-                {sessions.map((session, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center p-4 bg-card rounded-lg border border-border hover:border-primary/50 transition-colors"
-                  >
-                    <span className="text-sm">
-                      {new Date(session.startTime).toLocaleString()}
-                    </span>
-                    <span className="font-medium text-primary">
-                      {session.duration} minutes
-                    </span>
-                  </div>
-                ))}
-                {sessions.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">
-                    No sessions recorded yet.
-                  </p>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="games" className="space-y-4 mt-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-xl font-semibold">Game Management</h3>
-              <div className="flex gap-2">
-                <AddGameDialog onAddGame={onAddGame} />
-                <Link to="/library">
-                  <Button variant="outline" className="flex gap-2">
-                    <Library className="w-4 h-4" />
-                    Library
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="settings" className="space-y-4 mt-6">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold">Timer Settings</h3>
-              <div className="flex gap-4 items-center">
+          <TabsContent value="timer">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="timer-duration">Session Duration (minutes)</Label>
                 <Input
+                  id="timer-duration"
                   type="number"
-                  min="1"
-                  max="60"
-                  value={timerDuration}
-                  onChange={(e) => setTimerDuration(Number(e.target.value))}
-                  className="w-32"
+                  defaultValue={timerDuration}
+                  onChange={(e) => {
+                    const newDuration = parseInt(e.target.value);
+                    if (!isNaN(newDuration)) {
+                      handleTimerDurationChange(newDuration);
+                    }
+                  }}
                 />
-                <span className="text-muted-foreground">minutes</span>
-                <Button onClick={handleTimerUpdate}>Update Timer</Button>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="add-game">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter game title" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is the title of the game.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="genre"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Genre</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter game genre" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is the genre of the game.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="release_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Release Date</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This is the release date of the game.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="thumbnail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Thumbnail URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter thumbnail URL" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is the URL of the game thumbnail.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="executable_path"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Executable Path</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter executable path" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is the path to the game executable.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="launch_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Launch Code</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter launch code" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is the launch code for the game.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter game description" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is the description of the game.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit">Add Game</Button>
+              </form>
+            </Form>
           </TabsContent>
         </Tabs>
       </DialogContent>

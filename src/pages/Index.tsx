@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -139,7 +140,6 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [showRFIDCountdown, setShowRFIDCountdown] = useState(false);
   const [showOwnerDashboard, setShowOwnerDashboard] = useState(false);
-  const [sessionDuration, setSessionDuration] = useState(8);
   const [canPlayGames, setCanPlayGames] = useState(false);
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const { toast } = useToast();
@@ -303,7 +303,7 @@ const Index = () => {
       
       toast({
         title: "RFID Card Detected",
-        description: `Starting ${sessionDuration} minute session...`,
+        description: "Starting session...",
       });
     };
 
@@ -415,7 +415,7 @@ const Index = () => {
       console.log('Removing RFID key press listener');
       window.removeEventListener('keypress', handleKeyPress);
     };
-  }, [toast, sessionDuration]);
+  }, [toast]);
 
   const filteredGames = selectedCategory === "All" 
     ? games 
@@ -436,7 +436,15 @@ const Index = () => {
           <div className="flex flex-col space-y-8">
             <div className="glass p-4 flex justify-between items-center rounded-3xl transition-all duration-300">
               <Header />
+              <Button
+                variant="ghost"
+                className="text-white hover:text-white/80"
+                onClick={() => setShowOwnerDashboard(true)}
+              >
+                <Settings className="w-6 h-6" />
+              </Button>
             </div>
+
             <div className="transform hover:scale-[1.02] transition-transform duration-300">
               <GameShowcase 
                 games={games.slice(0, 3)} 
@@ -444,6 +452,7 @@ const Index = () => {
                 canPlayGames={canPlayGames}
               />
             </div>
+
             <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
               <h2 className="text-2xl font-bold text-white next-gen-title">VR Games</h2>
               <CategoryBar 
@@ -464,7 +473,6 @@ const Index = () => {
       {showOwnerDashboard && (
         <OwnerDashboard
           onClose={() => setShowOwnerDashboard(false)}
-          onTimerDurationChange={setSessionDuration}
           onAddGame={handleAddGame}
         />
       )}
