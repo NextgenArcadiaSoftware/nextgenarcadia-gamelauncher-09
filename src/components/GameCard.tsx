@@ -40,11 +40,16 @@ export function GameCard({
   const [imageSrc, setImageSrc] = useState(getImageUrl(thumbnail));
   const navigate = useNavigate();
 
-  const handlePlayButtonClick = () => {
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Prevent default touch behavior to avoid conflicts
+    e.stopPropagation();
+  };
+
+  const handlePlayButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation(); // Prevent event bubbling
     // Map of games to their launch screen routes
     const launchScreenRoutes: Record<string, string> = {
       "Fruit Ninja VR": "/fruitninjalaunch",
-      // Add other games' launch screen routes here as they're created
       "Elven Assassin": "/elvenassassinlaunch",
       "Crisis Brigade 2 Reloaded": "/crisisbrigadelaunch",
       "All-in-One Sports VR": "/sportslaunch",
@@ -60,7 +65,6 @@ export function GameCard({
     if (route) {
       navigate(route);
     } else {
-      // Fallback to default behavior for games without launch screens
       onPlay();
     }
   };
@@ -82,7 +86,10 @@ export function GameCard({
   };
 
   return (
-    <div className="nintendo-card group">
+    <div 
+      className="nintendo-card group"
+      onTouchStart={handleTouchStart}
+    >
       <div className="relative h-[280px] overflow-hidden rounded-[2rem]">
         <img 
           src={imageSrc}
@@ -107,12 +114,12 @@ export function GameCard({
                   <DialogTrigger asChild>
                     <Button 
                       size="icon"
-                      className="rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                      className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm"
                     >
-                      <Video className="w-4 h-4" />
+                      <Video className="w-6 h-6" />
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="glass">
+                  <DialogContent className="glass max-w-4xl w-full">
                     <DialogHeader>
                       <DialogTitle>{title} - Trailer</DialogTitle>
                     </DialogHeader>
@@ -129,10 +136,10 @@ export function GameCard({
               )}
               <Button 
                 size="icon"
-                className="rounded-full bg-white hover:bg-white/90 text-black"
+                className="w-12 h-12 rounded-full bg-white hover:bg-white/90 text-black"
                 onClick={handlePlayButtonClick}
               >
-                <Play className="w-4 h-4" />
+                <Play className="w-6 h-6" />
               </Button>
             </div>
           </div>
