@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,7 +57,7 @@ interface OwnerDashboardProps {
 
 export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
   const [selectedTab, setSelectedTab] = useState("timer");
-  const [timerDuration, setTimerDuration] = useState(8);
+  const [timerDuration, setTimerDuration] = useState<number | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -71,6 +72,33 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
       description: "",
     },
   })
+
+  useEffect(() => {
+    const fetchTimerDuration = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('settings')
+          .select('timer_duration')
+          .eq('id', 'global')
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setTimerDuration(data.timer_duration);
+        }
+      } catch (error) {
+        console.error('Error fetching timer duration:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch timer duration",
+        });
+      }
+    };
+
+    fetchTimerDuration();
+  }, [toast]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onAddGame(values);
@@ -128,13 +156,15 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
                 <Input
                   id="timer-duration"
                   type="number"
-                  defaultValue={timerDuration}
+                  value={timerDuration ?? ''}
                   onChange={(e) => {
                     const newDuration = parseInt(e.target.value);
                     if (!isNaN(newDuration)) {
                       handleTimerDurationChange(newDuration);
                     }
                   }}
+                  placeholder="Loading..."
+                  disabled={timerDuration === null}
                 />
               </div>
             </div>
