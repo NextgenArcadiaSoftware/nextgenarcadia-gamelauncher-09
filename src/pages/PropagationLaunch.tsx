@@ -67,3 +67,46 @@ export default function PropagationLaunch() {
 
           {step === 'rfid' ? (
             <div className="space-y-8">
+              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
+                TAP RFID CARD TO START
+              </div>
+              <div className="flex justify-center">
+                <div className="w-32 h-32 flex items-center justify-center bg-neutral-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
+                  <span className="text-4xl text-white">🎮</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
+                PRESS F WHEN READY
+              </div>
+              <div className="flex justify-center">
+                <button onClick={handleFPress} className="w-32 h-32 text-6xl font-bold text-white bg-neutral-500 rounded-2xl hover:bg-neutral-600 
+                           transform transition-all duration-200 hover:scale-105 active:scale-95
+                           border-4 border-white/20 shadow-lg backdrop-blur-sm">
+                  F
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="text-center">
+            <p className="text-white/90 text-xl leading-relaxed">
+              Survive a terrifying outbreak in this intense VR horror experience. 
+              Face your fears and fight for survival in a world overrun by infected creatures.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 text-center">
+            {['Story Mode', 'Survival', 'Co-op'].map((feature, index) => (
+              <div key={index} className="p-4 rounded-xl bg-neutral-500/10 backdrop-blur-sm">
+                <span className="text-white font-semibold">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
