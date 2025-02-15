@@ -87,7 +87,7 @@ export function GameCard({
 
   return (
     <div 
-      className="nintendo-card group h-full"
+      className="nintendo-card group"
       onTouchStart={handleTouchStart}
     >
       <div className="relative h-[280px] overflow-hidden rounded-[2rem]">
@@ -103,7 +103,7 @@ export function GameCard({
         <div className="absolute bottom-0 left-0 p-6 w-full">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold text-white mb-2 line-clamp-1">{title}</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
               <span className="inline-block px-3 py-1 rounded-full text-xs text-white/90 bg-white/20 backdrop-blur-sm">
                 {genre}
               </span>
@@ -114,9 +114,9 @@ export function GameCard({
                   <DialogTrigger asChild>
                     <Button 
                       size="icon"
-                      className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm"
+                      className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm"
                     >
-                      <Video className="w-5 h-5" />
+                      <Video className="w-6 h-6" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="glass max-w-4xl w-full">
@@ -136,10 +136,10 @@ export function GameCard({
               )}
               <Button 
                 size="icon"
-                className="w-10 h-10 rounded-full bg-white hover:bg-white/90 text-black"
+                className="w-12 h-12 rounded-full bg-white hover:bg-white/90 text-black"
                 onClick={handlePlayButtonClick}
               >
-                <Play className="w-5 h-5" />
+                <Play className="w-6 h-6" />
               </Button>
             </div>
           </div>

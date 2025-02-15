@@ -13,24 +13,24 @@ interface GameShowcaseProps {
 }
 
 export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcaseProps) {
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
-
-  const gamesPerPage = 3;
-  const totalPages = Math.ceil(games.length / gamesPerPage);
-  const startIndex = currentPage * gamesPerPage;
 
   const handleNext = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
-    setCurrentPage((prev) => (prev + 1) % totalPages);
+    setCurrentIndex((prevIndex) => 
+      prevIndex + 1 >= games.length ? 0 : prevIndex + 1
+    );
   };
 
   const handlePrevious = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
-    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+    setCurrentIndex((prevIndex) => 
+      prevIndex - 1 < 0 ? games.length - 1 : prevIndex - 1
+    );
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -62,14 +62,14 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
       setIsTransitioning(false);
     }, 300);
     return () => clearTimeout(timer);
-  }, [currentPage]);
+  }, [currentIndex]);
 
   if (!games.length) {
     return null;
   }
 
-  const visibleGames = games.slice(startIndex, startIndex + gamesPerPage);
-  const progress = ((currentPage + 1) / totalPages) * 100;
+  const currentGame = games[currentIndex];
+  const progress = ((currentIndex + 1) / games.length) * 100;
 
   return (
     <div 
@@ -79,29 +79,18 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
       onTouchEnd={handleTouchEnd}
     >
       <div className="glass p-8 rounded-3xl relative overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {visibleGames.map((game) => (
-            <div
-              key={game.id}
-              className={cn(
-                "transition-all duration-300",
-                isTransitioning ? "opacity-0" : "opacity-100"
-              )}
-            >
-              <GameCard
-                title={game.title}
-                thumbnail={game.thumbnail}
-                description={game.description}
-                genre={game.genre}
-                release_date={game.release_date}
-                trailer={game.trailer}
-                launch_code={game.launch_code}
-                onPlay={() => game.executable_path && onPlayGame(game.title, game.executable_path)}
-                canPlayGames={canPlayGames}
-              />
-            </div>
-          ))}
-        </div>
+        <GameCard
+          key={currentGame.id}
+          title={currentGame.title}
+          thumbnail={currentGame.thumbnail}
+          description={currentGame.description}
+          genre={currentGame.genre}
+          release_date={currentGame.release_date}
+          trailer={currentGame.trailer}
+          launch_code={currentGame.launch_code}
+          onPlay={() => currentGame.executable_path && onPlayGame(currentGame.title, currentGame.executable_path)}
+          canPlayGames={canPlayGames}
+        />
 
         {/* Navigation Arrows - Always visible on touch devices */}
         <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20">
@@ -129,16 +118,16 @@ export function GameShowcase({ games, onPlayGame, canPlayGames }: GameShowcasePr
 
         {/* Progress Indicators */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-          {Array.from({ length: totalPages }).map((_, index) => (
+          {games.map((_, index) => (
             <button
               key={index}
               className={cn(
                 "w-3 h-3 rounded-full transition-all duration-300",
-                index === currentPage 
+                index === currentIndex 
                   ? "bg-white scale-125" 
                   : "bg-white/30 hover:bg-white/50"
               )}
-              onClick={() => setCurrentPage(index)}
+              onClick={() => setCurrentIndex(index)}
             />
           ))}
         </div>
