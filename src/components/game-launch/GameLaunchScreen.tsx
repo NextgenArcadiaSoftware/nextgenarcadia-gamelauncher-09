@@ -29,11 +29,24 @@ export function GameLaunchScreen({
         });
         setShowLaunchScreen(true);
       }
+
+      // Listen for F key press
+      if (event.key.toLowerCase() === 'f' && showLaunchScreen) {
+        handleGameStart();
+      }
     };
     
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [game.title, showLaunchScreen, toast]);
+  }, [game.title, showLaunchScreen, toast, onContinue]);
+
+  const handleGameStart = () => {
+    toast({
+      title: "🎮 Game Starting",
+      description: "Starting your VR session"
+    });
+    onContinue();
+  };
 
   const simulateKeyPress = (key: string) => {
     try {
@@ -46,6 +59,10 @@ export function GameLaunchScreen({
         cancelable: true,
       });
       document.dispatchEvent(keydownEvent);
+
+      if (key.toLowerCase() === 'f' && showLaunchScreen) {
+        handleGameStart();
+      }
 
       toast({
         title: "Key Pressed",
