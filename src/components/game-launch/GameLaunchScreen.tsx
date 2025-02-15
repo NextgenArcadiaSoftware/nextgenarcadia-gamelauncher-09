@@ -35,9 +35,34 @@ export function GameLaunchScreen({
     return () => window.removeEventListener('keypress', handleKeyPress);
   }, [game.title, showLaunchScreen, toast]);
 
+  const simulateKeyPress = (key: string) => {
+    try {
+      // Create and dispatch keydown event
+      const keydownEvent = new KeyboardEvent('keypress', {
+        key: key.toLowerCase(),
+        code: `Key${key.toUpperCase()}`,
+        keyCode: key.toUpperCase().charCodeAt(0),
+        bubbles: true,
+        cancelable: true,
+      });
+      document.dispatchEvent(keydownEvent);
+
+      toast({
+        title: "Key Pressed",
+        description: `${key.toUpperCase()} key press simulated`
+      });
+    } catch (error) {
+      console.error('Error simulating key press:', error);
+      toast({
+        title: "Error",
+        description: "Failed to simulate key press",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleKeyPress = (key: string) => {
-    // Key press handler will be implemented later
-    console.log('Key pressed:', key);
+    simulateKeyPress(key);
   };
 
   // RFID Detection Screen
@@ -113,7 +138,7 @@ export function GameLaunchScreen({
               Press F When Ready
             </div>
             <button 
-              onClick={() => console.log('F button clicked')} 
+              onClick={() => simulateKeyPress('F')} 
               className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
             >
               F
