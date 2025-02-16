@@ -20,6 +20,7 @@ export function GameLaunchScreen({
   const [showLaunchScreen, setShowLaunchScreen] = useState(false);
   const { toast } = useToast();
 
+  // Map game titles to their launch keys
   const gameLaunchKeys: Record<string, string> = {
     "Fruit Ninja VR": "f",
     "Crisis Brigade 2 Reloaded": "c",
@@ -37,8 +38,6 @@ export function GameLaunchScreen({
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      console.log('Key pressed:', event.key.toLowerCase());
-      
       if (/^\d$/.test(event.key) && !showLaunchScreen) {
         toast({
           title: "✨ RFID Detected",
@@ -47,8 +46,8 @@ export function GameLaunchScreen({
         setShowLaunchScreen(true);
       }
 
+      // Listen for the game-specific launch key
       if (event.key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
-        console.log('Launch key detected:', currentLaunchKey);
         handleGameStart();
       }
     };
@@ -58,7 +57,6 @@ export function GameLaunchScreen({
   }, [game.title, showLaunchScreen, toast, onContinue, currentLaunchKey]);
 
   const handleGameStart = () => {
-    console.log('Starting game:', game.title);
     toast({
       title: "🎮 Game Starting",
       description: "Starting your VR session"
@@ -67,31 +65,36 @@ export function GameLaunchScreen({
   };
 
   const simulateKeyPress = (key: string) => {
-    const lowerKey = key.toLowerCase();
-    console.log('Simulating key press:', lowerKey);
+    try {
+      // Trigger the hidden button click to simulate a real key press
+      const button = document.getElementById('myButton');
+      if (button) {
+        button.click();
+      }
 
-    // Send key press to Python backend
-    if (window.electron) {
-      window.electron.ipcRenderer.send('simulate-keypress', lowerKey);
-      console.log('Key press sent via electron:', lowerKey);
+      if (key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
+        handleGameStart();
+      }
+
+      toast({
+        title: "Key Pressed",
+        description: `${key.toUpperCase()} key press simulated`
+      });
+    } catch (error) {
+      console.error('Error simulating key press:', error);
+      toast({
+        title: "Error",
+        description: "Failed to simulate key press",
+        variant: "destructive"
+      });
     }
-
-    // Check if this is the launch key
-    if (lowerKey === currentLaunchKey && showLaunchScreen) {
-      console.log('Launch key matched:', lowerKey);
-      handleGameStart();
-    }
-
-    toast({
-      title: "Key Pressed",
-      description: `${key.toUpperCase()} key press simulated`
-    });
   };
 
   const handleKeyPress = (key: string) => {
     simulateKeyPress(key);
   };
 
+  // RFID Detection Screen
   if (!showLaunchScreen) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
@@ -128,6 +131,7 @@ export function GameLaunchScreen({
     );
   }
 
+  // Game launch screen
   return (
     <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
       <div className="absolute inset-0 overflow-hidden">
