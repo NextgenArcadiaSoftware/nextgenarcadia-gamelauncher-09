@@ -28,52 +28,39 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
 
   const handleExit = async () => {
     try {
-      console.log("Attempting to send '*' key to server...");
+      console.log("Attempting to send 'shift+8' key to server...");
       
-      // Send '*' key press to Flask server first
-      const response = await fetch("http://127.0.0.1:5001/keypress", {
+      // First send shift key
+      const shiftResponse = await fetch("http://127.0.0.1:5001/keypress", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
-        body: JSON.stringify({ key: '*' }),
+        body: JSON.stringify({ key: 'shift' }),
         mode: 'cors'
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!shiftResponse.ok) {
+        throw new Error(`HTTP error! status: ${shiftResponse.status}`);
       }
       
-      const data = await response.json();
-      console.log("Server response:", data);
-
-      // Simulate both Shift and 8 key presses for '*'
-      const shiftEvent = new KeyboardEvent('keydown', {
-        key: 'Shift',
-        code: 'ShiftLeft',
-        keyCode: 16,
-        shiftKey: true,
-        bubbles: true,
-        cancelable: true,
-        composed: true
+      // Then send 8 key while shift is pressed
+      const eightResponse = await fetch("http://127.0.0.1:5001/keypress", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ key: '8' }),
+        mode: 'cors'
       });
 
-      const asteriskEvent = new KeyboardEvent('keydown', {
-        key: '8',
-        code: 'Digit8',
-        keyCode: 56,
-        shiftKey: true,
-        bubbles: true,
-        cancelable: true,
-        composed: true
-      });
+      if (!eightResponse.ok) {
+        throw new Error(`HTTP error! status: ${eightResponse.status}`);
+      }
 
-      // Dispatch both events
-      document.dispatchEvent(shiftEvent);
-      document.dispatchEvent(asteriskEvent);
-      
-      console.log("Key events dispatched successfully");
+      console.log("Keys sent successfully to server");
       
       // Call the provided exit callback
       onExit();
