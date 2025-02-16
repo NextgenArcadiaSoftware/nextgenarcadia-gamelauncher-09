@@ -9,9 +9,10 @@ import { supabase } from '@/integrations/supabase/client';
 interface RFIDCountdownProps {
   onExit: () => void;
   activeGame?: string | null;
+  trailer?: string;  // Added this line to support the trailer prop
 }
 
-export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
+export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showRating, setShowRating] = useState(false);
   const [showGameScreen, setShowGameScreen] = useState(true);
@@ -139,7 +140,8 @@ export function RFIDCountdown({ onExit, activeGame }: RFIDCountdownProps) {
     title: activeGame || 'Unknown Game',
     description: activeGame ? `Get ready to experience ${activeGame} in virtual reality!` : '',
     thumbnail: `/lovable-uploads/${activeGame?.toLowerCase().replace(/\s+/g, '-')}.png`,
-    genre: 'VR Game'
+    genre: 'VR Game',
+    trailer: trailer // Pass the trailer to the game data
   };
 
   if (showRating) {
