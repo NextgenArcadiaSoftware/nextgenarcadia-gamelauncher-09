@@ -74,24 +74,32 @@ export function GameCard({
   const getYouTubeEmbedUrl = (url: string) => {
     if (!url) return '';
     
-    let videoId = '';
-    
-    // Handle youtu.be format
-    if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1];
-    } 
-    // Handle youtube.com format
-    else if (url.includes('youtube.com/watch')) {
-      const urlParams = new URLSearchParams(new URL(url).search);
-      videoId = urlParams.get('v') || '';
+    try {
+      let videoId = '';
+      
+      // Handle various YouTube URL formats
+      if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1];
+      } else if (url.includes('youtube.com/watch')) {
+        const urlParams = new URLSearchParams(new URL(url).search);
+        videoId = urlParams.get('v') || '';
+      } else if (url.includes('youtube.com/embed/')) {
+        videoId = url.split('youtube.com/embed/')[1];
+      }
+      
+      // Remove any additional parameters
+      videoId = videoId.split('&')[0];
+      videoId = videoId.split('?')[0];
+      videoId = videoId.split('/')[0];
+      
+      if (!videoId) return '';
+      
+      // Return the embed URL with additional parameters for better iframe behavior
+      return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+    } catch (error) {
+      console.error('Error parsing YouTube URL:', error);
+      return '';
     }
-    
-    // Remove any additional parameters
-    videoId = videoId.split('&')[0];
-    videoId = videoId.split('?')[0];
-    
-    if (!videoId) return '';
-    return `https://www.youtube.com/embed/${videoId}`;
   };
 
   const handleImageError = () => {
@@ -130,23 +138,23 @@ export function GameCard({
                       size="icon"
                       className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm"
                     >
-                      <Video className="w-6 h-6" />
+                      <Video className="w-6 h-6 text-white hover:text-orange-500 transition-colors" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="glass max-w-4xl w-full">
                     <DialogHeader>
                       <DialogTitle>{title} - Trailer</DialogTitle>
                     </DialogHeader>
-                    {isDialogOpen && (
-                      <div className="relative w-full h-0 pt-[56.25%] rounded-2xl overflow-hidden">
+                    <div className="relative w-full h-0 pt-[56.25%] rounded-2xl overflow-hidden">
+                      {isDialogOpen && (
                         <iframe
                           className="absolute top-0 left-0 w-full h-full"
                           src={getYouTubeEmbedUrl(trailer)}
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         ></iframe>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </DialogContent>
                 </Dialog>
               )}
