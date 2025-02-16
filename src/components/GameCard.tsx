@@ -108,7 +108,7 @@ export function GameCard({
   };
 
   const videoUrl = title === "Creed: Rise to Glory Championship Edition" 
-    ? "https://www.youtube.com/watch?v=EgbCMJ54xeM" 
+    ? "https://www.youtube.com/watch?v=pZHvTXD7QEw" 
     : trailer;
 
   return (
@@ -176,4 +176,3 @@ export function GameCard({
     </div>
   );
 }
-
