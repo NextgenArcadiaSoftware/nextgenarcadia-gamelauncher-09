@@ -38,6 +38,7 @@ export function GameCard({
   canPlayGames,
 }: GameCardProps) {
   const [imageSrc, setImageSrc] = useState(getImageUrl(thumbnail));
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -123,7 +124,7 @@ export function GameCard({
             </div>
             <div className="flex gap-2">
               {trailer && (
-                <Dialog>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
                       size="icon"
@@ -136,14 +137,16 @@ export function GameCard({
                     <DialogHeader>
                       <DialogTitle>{title} - Trailer</DialogTitle>
                     </DialogHeader>
-                    <div className="relative w-full h-0 pt-[56.25%] rounded-2xl overflow-hidden">
-                      <iframe
-                        className="absolute top-0 left-0 w-full h-full"
-                        src={getYouTubeEmbedUrl(trailer)}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
+                    {isDialogOpen && (
+                      <div className="relative w-full h-0 pt-[56.25%] rounded-2xl overflow-hidden">
+                        <iframe
+                          className="absolute top-0 left-0 w-full h-full"
+                          src={getYouTubeEmbedUrl(trailer)}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    )}
                   </DialogContent>
                 </Dialog>
               )}
