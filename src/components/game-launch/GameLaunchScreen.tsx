@@ -32,7 +32,8 @@ export function GameLaunchScreen({
     "Richies Plank Experience": "r",
     "All-in-One Sports VR": "v",
     "Creed: Rise to Glory Championship Edition": "g",
-    "Beat Saber": "w"
+    "Beat Saber": "w",
+    "RollerCoaster Legends": "p"
   };
 
   const currentLaunchKey = gameLaunchKeys[game.title] || "x";

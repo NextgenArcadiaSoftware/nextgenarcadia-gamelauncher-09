@@ -57,7 +57,8 @@ export function GameCard({
       "Subside": "/subsidelaunch",
       "Propagation VR": "/propagationlaunch",
       "Creed: Rise to Glory Championship Edition": "/creedlaunch",
-      "Beat Saber": "/beatlaunch"
+      "Beat Saber": "/beatlaunch",
+      "RollerCoaster Legends": "/rollerlaunch"
     };
 
     const route = launchScreenRoutes[title];

@@ -22,7 +22,21 @@ const GAME_TRIGGERS: Record<string, string> = {
   "Arizona Sunshine": "start_arizona",
   "Subside": "start_subside",
   "Propagation VR": "start_prop",
-  "Creed: Rise to Glory Championship Edition": "start_creed"
+  "Creed: Rise to Glory Championship Edition": "start_creed",
+  "Beat Saber": "start_beat",
+  "RollerCoaster Legends": "start_roller"
+};
+
+const ROLLERCOASTER_LEGENDS = {
+  title: "RollerCoaster Legends",
+  description: "Experience thrilling virtual reality roller coaster rides through breathtaking environments. Feel the rush of excitement as you twist, turn, and dive through incredible landscapes in this immersive VR adventure.",
+  genre: "Simulation",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/b2c65729-f024-40c7-9c6e-dc2b75f1c789.png",
+  executable_path: "steam://rungameid/701060",
+  launch_code: "ROLLER",
+  status: "enabled" as const,
+  trailer: "https://www.youtube.com/watch?v=8VU6fH_vS_U"
 };
 
 const BEAT_SABER = {
@@ -222,7 +236,8 @@ const Index = () => {
           SUBSIDE,
           CRISIS_BRIGADE,
           CREED,
-          BEAT_SABER
+          BEAT_SABER,
+          ROLLERCOASTER_LEGENDS
         ] as Game[];
         setGames(defaultGames);
         toast({
@@ -250,7 +265,8 @@ const Index = () => {
         SUBSIDE,
         CRISIS_BRIGADE,
         CREED,
-        BEAT_SABER
+        BEAT_SABER,
+        ROLLERCOASTER_LEGENDS
       ] as Game[];
       setGames(defaultGames);
     }
