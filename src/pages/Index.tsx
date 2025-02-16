@@ -176,23 +176,29 @@ const Index = () => {
       console.log('Raw games data:', data);
 
       if (data && data.length > 0) {
-        // Validate and transform the data to ensure it matches the Game type
-        const validatedGames = data.map(game => ({
-          ...game,
-          status: game.status === 'enabled' ? 'enabled' : 'disabled'
-        } as Game));
-
-        console.log('Number of games fetched:', validatedGames.length);
-        setGames(validatedGames);
-        console.log('Games state updated with:', validatedGames);
+        console.log('Number of games fetched:', data.length);
+        setGames(data);
+        console.log('Games state updated with:', data);
       } else {
         console.log('No games found in the database');
+        // Set default games if no games are found in the database
+        const defaultGames = [
+          ALL_IN_ONE_SPORTS,
+          FRUIT_NINJA,
+          RICHIES_PLANK,
+          ELVEN_ASSASSIN,
+          UNDEAD_CITADEL,
+          ARIZONA_SUNSHINE,
+          IB_CRICKET,
+          PROPAGATION,
+          SUBSIDE,
+          CRISIS_BRIGADE
+        ] as Game[];
+        setGames(defaultGames);
         toast({
-          variant: "destructive",
-          title: "No Games Found",
-          description: "No games are currently available in the library",
+          title: "Using Default Games",
+          description: "No games found in database, using default game list",
         });
-        setGames([]);
       }
     } catch (error) {
       console.error('Error fetching games:', error);
@@ -201,7 +207,20 @@ const Index = () => {
         title: "Error",
         description: "Failed to fetch games from the database",
       });
-      setGames([]);
+      // Set default games on error
+      const defaultGames = [
+        ALL_IN_ONE_SPORTS,
+        FRUIT_NINJA,
+        RICHIES_PLANK,
+        ELVEN_ASSASSIN,
+        UNDEAD_CITADEL,
+        ARIZONA_SUNSHINE,
+        IB_CRICKET,
+        PROPAGATION,
+        SUBSIDE,
+        CRISIS_BRIGADE
+      ] as Game[];
+      setGames(defaultGames);
     }
   };
 
@@ -215,12 +234,7 @@ const Index = () => {
       if (error) throw error;
 
       if (data && data[0]) {
-        const validatedGame = {
-          ...data[0],
-          status: data[0].status === 'enabled' ? 'enabled' : 'disabled'
-        } as Game;
-
-        setGames(prevGames => [validatedGame, ...prevGames]);
+        setGames(prevGames => [data[0] as Game, ...prevGames]);
         toast({
           title: "Game Added",
           description: "The game has been added to your library",
