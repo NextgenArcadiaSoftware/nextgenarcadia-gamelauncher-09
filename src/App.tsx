@@ -19,6 +19,7 @@ import ArizonaSunshineLaunch from "./pages/ArizonaSunshineLaunch";
 import SubsideLaunch from "./pages/SubsideLaunch";
 import PropagationLaunch from "./pages/PropagationLaunch";
 import CreedLaunch from "./pages/CreedLaunch";
+import BeatSaberLaunch from "./pages/BeatSaberLaunch";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/subsidelaunch" element={<SubsideLaunch />} />
           <Route path="/propagationlaunch" element={<PropagationLaunch />} />
           <Route path="/creedlaunch" element={<CreedLaunch />} />
+          <Route path="/beatlaunch" element={<BeatSaberLaunch />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

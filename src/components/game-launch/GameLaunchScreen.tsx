@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -32,7 +31,8 @@ export function GameLaunchScreen({
     "Elven Assassin": "e",
     "Richies Plank Experience": "r",
     "All-in-One Sports VR": "v",
-    "Creed: Rise to Glory Championship Edition": "g"
+    "Creed: Rise to Glory Championship Edition": "g",
+    "Beat Saber": "w"
   };
 
   const currentLaunchKey = gameLaunchKeys[game.title] || "x";

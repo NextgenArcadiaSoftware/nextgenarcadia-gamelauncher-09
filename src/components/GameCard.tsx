@@ -1,4 +1,3 @@
-
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -57,7 +56,8 @@ export function GameCard({
       "Arizona Sunshine": "/arizonalaunch",
       "Subside": "/subsidelaunch",
       "Propagation VR": "/propagationlaunch",
-      "Creed: Rise to Glory Championship Edition": "/creedlaunch"
+      "Creed: Rise to Glory Championship Edition": "/creedlaunch",
+      "Beat Saber": "/beatlaunch"
     };
 
     const route = launchScreenRoutes[title];
