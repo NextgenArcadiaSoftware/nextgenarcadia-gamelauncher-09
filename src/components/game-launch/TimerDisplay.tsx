@@ -28,26 +28,52 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
 
   const handleExit = async () => {
     try {
-      // Send '*' key press to Flask server
-      await fetch("http://127.0.0.1:5001/keypress", {
+      console.log("Attempting to send '*' key to server...");
+      
+      // Send '*' key press to Flask server first
+      const response = await fetch("http://127.0.0.1:5001/keypress", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: '*' })
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ key: '*' }),
+        mode: 'cors'
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
-      console.log("Sent '*' key to server");
-      
-      // Create and dispatch keyboard event for '*'
-      const keyboardEvent = new KeyboardEvent('keydown', {
-        key: '*',
-        code: 'Digit8',
-        keyCode: '*'.charCodeAt(0),
+      const data = await response.json();
+      console.log("Server response:", data);
+
+      // Simulate both Shift and 8 key presses for '*'
+      const shiftEvent = new KeyboardEvent('keydown', {
+        key: 'Shift',
+        code: 'ShiftLeft',
+        keyCode: 16,
+        shiftKey: true,
         bubbles: true,
         cancelable: true,
-        composed: true,
-        shiftKey: true // Since '*' requires Shift key
+        composed: true
       });
-      document.dispatchEvent(keyboardEvent);
+
+      const asteriskEvent = new KeyboardEvent('keydown', {
+        key: '8',
+        code: 'Digit8',
+        keyCode: 56,
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+        composed: true
+      });
+
+      // Dispatch both events
+      document.dispatchEvent(shiftEvent);
+      document.dispatchEvent(asteriskEvent);
+      
+      console.log("Key events dispatched successfully");
       
       // Call the provided exit callback
       onExit();
