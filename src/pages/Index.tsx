@@ -11,7 +11,7 @@ const defaultGames = [{
   release_date: "2024-03-14",
   thumbnail: "/lovable-uploads/bb8b5b5b-bf33-4e0c-b9af-a05408636bce.png",
   trailer: "https://www.youtube.com/watch?v=EgbCMJ54xeM",
-  status: "enabled"
+  status: "enabled" as const
 }];
 
 export default function Index() {
@@ -32,4 +32,3 @@ export default function Index() {
     </div>
   );
 }
-
