@@ -24,9 +24,26 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 def on_key_event(event):
-    print(f"Key Pressed: {event.name}")
-    if event.name.lower() == "f":
-        print("F key detected, ready to launch game")
+    key = event.name.lower()
+    print(f"Key detected: {key}")
+    
+    # Map keys to game codes
+    key_to_game = {
+        'f': 'FNJ',  # Fruit Ninja
+        'c': 'CBR',  # Crisis Brigade
+        's': 'SBS',  # Subside
+        'p': 'PVR',  # Propagation
+        'i': 'IBC',  # iB Cricket
+        'a': 'ARS',  # Arizona Sunshine
+        'u': 'UDC',  # Undead Citadel
+        'e': 'EAX',  # Elven Assassin
+        'r': 'RPE',  # Richie's Plank
+        'v': 'AIO'   # All-in-One Sports
+    }
+    
+    if key in key_to_game:
+        game_code = key_to_game[key]
+        print(f"Matched game code: {game_code}")
 
 @app.route('/keypress', methods=['POST'])
 def handle_keypress():
@@ -38,13 +55,15 @@ def handle_keypress():
         key = data.get('key', '').lower()
         print(f"Received key from web app: {key}")
         
-        # Simulate the key press
+        # Simulate the key press with a small delay to ensure proper registration
         keyboard.press_and_release(key)
         
         return jsonify({
             "status": "success",
-            "message": f"Key {key} received and processed"
+            "message": f"Key {key} received and processed",
+            "key": key
         }), 200
+        
     except Exception as e:
         print(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -59,8 +78,19 @@ if __name__ == "__main__":
         keyboard.on_press(on_key_event)
         
         print("=== Game Launcher Server ===")
-        print(f"Starting server on http://localhost:5001")
-        print("Press Ctrl+C to exit")
+        print("Starting server on http://localhost:5001")
+        print("Key mappings:")
+        print("F -> Fruit Ninja VR")
+        print("C -> Crisis Brigade 2")
+        print("S -> Subside")
+        print("P -> Propagation VR")
+        print("I -> iB Cricket")
+        print("A -> Arizona Sunshine")
+        print("U -> Undead Citadel")
+        print("E -> Elven Assassin")
+        print("R -> Richie's Plank")
+        print("V -> All-in-One Sports VR")
+        print("\nPress Ctrl+C to exit")
         
         # Run the Flask app
         app.run(host='localhost', port=5001, debug=True)
