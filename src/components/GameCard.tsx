@@ -9,7 +9,7 @@ import placeholderImage from "../assets/placeholder.svg";
 const getImageUrl = (path: string) => {
   if (!path) return placeholderImage;
   if (path.startsWith('data:')) return path;
-  if (path === 'placeholder.svg') return placeholderImage;
+  if (path.startsWith('placeholder.svg') || path === '/placeholder.svg') return placeholderImage;
   if (path.startsWith('http')) return path;
   return path.startsWith('/') ? path : `/${path}`;
 };
@@ -101,7 +101,7 @@ export function GameCard({
 
   const handleImageError = () => {
     console.log('Image failed to load:', thumbnail);
-    setImageSrc(`https://source.unsplash.com/random/800x600/?${encodeURIComponent(genre.toLowerCase())}`);
+    setImageSrc(placeholderImage);
   };
 
   const videoUrl = title === "Creed: Rise to Glory Championship Edition"
