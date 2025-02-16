@@ -69,7 +69,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Face your fears in VR! Walk a narrow plank 80 stories high above a bustling city.",
     genre: "Simulation",
     release_date: "2016-12-21",
-    thumbnail: "/placeholder.svg",
+    thumbnail: "/lovable-uploads/af1a36b9-7e7b-4f03-814d-ea2c073181e0.png",
     trailer: "https://www.youtube.com/watch?v=faNsP7ExSt0",
     executable_path: "steam://rungameid/517160",
     status: "enabled"

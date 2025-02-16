@@ -92,7 +92,7 @@ const RICHIES_PLANK = {
   description: "Face your fears in VR! Walk a narrow plank 80 stories high above a bustling city. A unique VR experience that puts your courage to the test.",
   genre: "Simulation",
   release_date: "2023-12-01",
-  thumbnail: "/placeholder.svg",
+  thumbnail: "/lovable-uploads/af1a36b9-7e7b-4f03-814d-ea2c073181e0.png",
   executable_path: "steam://rungameid/517160",
   launch_code: "PLANK",
   status: "enabled",
