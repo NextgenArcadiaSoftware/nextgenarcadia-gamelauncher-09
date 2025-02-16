@@ -23,14 +23,8 @@ GAMES = {
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-def simulate_key_press(key):
-    try:
-        print(f"Simulating key press for: {key}")
-        keyboard.press_and_release(key)
-        return True
-    except Exception as e:
-        print(f"Error simulating key press: {str(e)}")
-        return False
+def on_key_event(event):
+    print(f"Key Pressed: {event.name}")
 
 @app.route('/keypress', methods=['POST'])
 def handle_keypress():
@@ -42,20 +36,13 @@ def handle_keypress():
         key = data.get('key', '').lower()
         print(f"Received key from web app: {key}")
         
-        # Simulate the key press
-        success = simulate_key_press(key)
+        # Direct key press simulation
+        keyboard.press_and_release(key)
         
-        if success:
-            return jsonify({
-                "status": "success",
-                "message": f"Key {key} pressed successfully"
-            }), 200
-        else:
-            return jsonify({
-                "status": "error",
-                "message": f"Failed to press key {key}"
-            }), 500
-            
+        return jsonify({
+            "status": "success",
+            "message": f"Key {key} received and processed"
+        }), 200
     except Exception as e:
         print(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -66,12 +53,15 @@ def health_check():
 
 if __name__ == "__main__":
     try:
+        # Register the keyboard listener
+        keyboard.on_press(on_key_event)
+        
         print("=== Game Launcher Server ===")
         print(f"Starting server on http://localhost:5001")
         print("Press Ctrl+C to exit")
         
         # Run the Flask app
-        app.run(host='localhost', port=5001)
+        app.run(host='localhost', port=5001, debug=True)
         
     except Exception as e:
         print(f"Error starting server: {str(e)}")
