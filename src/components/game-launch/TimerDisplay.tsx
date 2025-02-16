@@ -28,23 +28,24 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
 
   const handleExit = async () => {
     try {
-      // Send 'x' key press to Flask server
+      // Send '*' key press to Flask server
       await fetch("http://127.0.0.1:5001/keypress", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: 'x' })
+        body: JSON.stringify({ key: '*' })
       });
       
-      console.log("Sent 'x' key to server");
+      console.log("Sent '*' key to server");
       
-      // Create and dispatch keyboard event for 'x'
+      // Create and dispatch keyboard event for '*'
       const keyboardEvent = new KeyboardEvent('keydown', {
-        key: 'x',
-        code: 'KeyX',
-        keyCode: 'X'.charCodeAt(0),
+        key: '*',
+        code: 'Digit8',
+        keyCode: '*'.charCodeAt(0),
         bubbles: true,
         cancelable: true,
-        composed: true
+        composed: true,
+        shiftKey: true // Since '*' requires Shift key
       });
       document.dispatchEvent(keyboardEvent);
       
