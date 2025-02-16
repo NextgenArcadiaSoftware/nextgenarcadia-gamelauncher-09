@@ -9,6 +9,7 @@ export default function ElvenAssassinLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Elven Assassin"
+      trailer="https://www.youtube.com/watch?v=eBOD4yqxQnY"
     />
   );
 }

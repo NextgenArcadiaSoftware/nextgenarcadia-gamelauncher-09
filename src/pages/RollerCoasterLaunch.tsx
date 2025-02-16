@@ -9,6 +9,7 @@ export default function RollerCoasterLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="RollerCoaster Legends"
+      trailer="https://www.youtube.com/watch?v=2rI6_ArUDyE"
     />
   );
 }

@@ -9,6 +9,7 @@ export default function SubsideLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Subside"
+      trailer="https://www.youtube.com/watch?v=ZLpIGWcCuYw"
     />
   );
 }

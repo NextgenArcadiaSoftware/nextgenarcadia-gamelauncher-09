@@ -9,6 +9,7 @@ export default function ArizonaSunshineLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Arizona Sunshine II"
+      trailer="https://www.youtube.com/watch?v=V0IdVLowEqc"
     />
   );
 }

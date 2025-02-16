@@ -9,6 +9,7 @@ export default function CricketLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="iB Cricket"
+      trailer="https://www.youtube.com/watch?v=CJElM1v0xBw"
     />
   );
 }

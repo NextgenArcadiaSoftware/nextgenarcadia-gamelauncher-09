@@ -9,6 +9,7 @@ export default function PropagationLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Propagation VR"
+      trailer="https://www.youtube.com/watch?v=wwj_5R3eEYM"
     />
   );
 }

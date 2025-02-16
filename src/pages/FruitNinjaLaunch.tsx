@@ -9,6 +9,7 @@ export default function FruitNinjaLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Fruit Ninja VR"
+      trailer="https://www.youtube.com/watch?v=gV6_2NhRPUo"
     />
   );
 }

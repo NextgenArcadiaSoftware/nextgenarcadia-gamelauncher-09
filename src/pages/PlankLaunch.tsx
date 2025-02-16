@@ -9,6 +9,7 @@ export default function PlankLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Richies Plank Experience"
+      trailer="https://www.youtube.com/watch?v=xwNF8MvZLZE"
     />
   );
 }

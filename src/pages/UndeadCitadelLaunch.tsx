@@ -9,6 +9,7 @@ export default function UndeadCitadelLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Undead Citadel"
+      trailer="https://www.youtube.com/watch?v=tGbXCtxSFCM"
     />
   );
 }
