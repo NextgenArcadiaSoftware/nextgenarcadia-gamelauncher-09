@@ -10,7 +10,7 @@ import keyboard
 from typing import Dict, Optional
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"]}})
 
 # Set up logging
 logging.basicConfig(
@@ -20,85 +20,62 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Global variable to track the current game process
-CURRENT_PROCESS: Optional[subprocess.Popen] = None
-GAME_TIMER = None
+# Dictionary mapping game codes to their executable paths
+GAMES = {
+    "FNJ": r"C:\Program Files (x86)\Steam\steamapps\common\Fruit Ninja VR\FruitNinja.exe",
+    "EAX": r"C:\Program Files (x86)\Steam\steamapps\common\Elven Assassin\ElvenAssassin.exe",
+    "CBR": r"C:\Program Files (x86)\Steam\steamapps\common\Crisis Brigade 2\CrisisBrigade2.exe",
+    "AIO": r"C:\Program Files (x86)\Steam\steamapps\common\All-In-One Sports VR\AIO_Sports.exe",
+    "RPE": r"C:\Program Files (x86)\Steam\steamapps\common\Richie's Plank Experience\PlankExperience.exe",
+    "IBC": r"C:\Program Files (x86)\Steam\steamapps\common\iB Cricket\iB Cricket.exe",
+    "UDC": r"C:\Program Files (x86)\Steam\steamapps\common\Undead Citadel\UndeadCitadel.exe",
+    "ARS": r"C:\Program Files (x86)\Steam\steamapps\common\Arizona Sunshine\ArizonaSunshine.exe",
+    "SBS": r"C:\Program Files (x86)\Steam\steamapps\common\Subside\Subside.exe",
+    "PVR": r"C:\Program Files (x86)\Steam\steamapps\common\Propagation VR\PropagationVR.exe"
+}
 
-def stop_current_game():
-    global CURRENT_PROCESS
-    if CURRENT_PROCESS:
-        try:
-            CURRENT_PROCESS.terminate()
-            CURRENT_PROCESS = None
-            logger.info("Game process terminated")
-        except Exception as e:
-            logger.error(f"Error terminating game: {str(e)}")
-
-@app.before_request
-def log_request_info():
-    logger.info(f'Headers: {request.headers}')
-    logger.info(f'Body: {request.get_data()}')
-    logger.info(f'Route: {request.path}')
-
-@app.route('/health', methods=['GET', 'OPTIONS'])
-def health_check():
-    """Health check endpoint to verify server is running"""
-    logger.info("Health check endpoint hit")
-    if request.method == 'OPTIONS':
-        response = jsonify({"status": "healthy"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
-        return response, 200
-    return jsonify({"status": "healthy"}), 200
-
-@app.route('/api/launch', methods=['POST'])
-def launch_game():
-    global CURRENT_PROCESS
-    
-    try:
-        data = request.get_json()
-        
-        if not data:
-            logger.error("No data provided in request")
-            return jsonify({'error': 'No data provided'}), 400
-
-        command = data.get('command')
-        
-        if command == 'stop_game':
-            stop_current_game()
-            return jsonify({'status': 'Game stopped successfully'}), 200
-            
-        path = data.get('path')
-        if not path:
-            logger.error("No path provided in request")
-            return jsonify({'error': 'No path provided'}), 400
-            
-        # Stop any currently running game
-        stop_current_game()
-        
-        # Launch the new game
-        logger.info(f"Launching game: {path}")
-        CURRENT_PROCESS = subprocess.Popen(path, shell=True)
-        
-        return jsonify({'status': 'Game launched successfully'}), 200
-        
-    except Exception as e:
-        logger.error(f"Error launching game: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/keypress', methods=['POST'])
+@app.route('/keypress', methods=['POST', 'OPTIONS'])
 def handle_keypress():
+    if request.method == 'OPTIONS':
+        response = jsonify({"status": "ok"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'POST')
+        return response
+
     try:
+        print("Received keypress request") # Debug print
         data = request.get_json()
+        
         if not data:
+            print("No data received in request") # Debug print
             return jsonify({"error": "No data received"}), 400
         
         key = data.get('key', '').lower()
-        logger.info(f"Received key from web app: {key}")
+        print(f"Processing key: {key}") # Debug print
         
+        # Map keys to game codes
+        key_to_game = {
+            'f': 'FNJ',  # Fruit Ninja
+            'c': 'CBR',  # Crisis Brigade
+            's': 'SBS',  # Subside
+            'p': 'PVR',  # Propagation
+            'i': 'IBC',  # iB Cricket
+            'a': 'ARS',  # Arizona Sunshine
+            'u': 'UDC',  # Undead Citadel
+            'e': 'EAX',  # Elven Assassin
+            'r': 'RPE',  # Richie's Plank
+            'v': 'AIO'   # All-in-One Sports
+        }
+
         # Simulate the key press
+        print(f"Simulating keypress for: {key}") # Debug print
         keyboard.press_and_release(key)
+        
+        # Check if this key maps to a game code
+        if key in key_to_game:
+            game_code = key_to_game[key]
+            print(f"Matched game code: {game_code}") # Debug print
         
         return jsonify({
             "status": "success",
@@ -107,23 +84,26 @@ def handle_keypress():
         }), 200
         
     except Exception as e:
-        logger.error(f"Error processing request: {str(e)}")
+        print(f"Error processing keypress: {str(e)}") # Debug print
         return jsonify({"error": str(e)}), 500
 
-@app.errorhandler(404)
-def not_found(e):
-    return jsonify({'error': 'Resource not found'}), 404
-
-@app.errorhandler(500)
-def internal_error(e):
-    return jsonify({'error': 'Internal server error'}), 500
+@app.route('/health', methods=['GET', 'OPTIONS'])
+def health_check():
+    """Health check endpoint to verify server is running"""
+    print("Health check endpoint hit") # Debug print
+    if request.method == 'OPTIONS':
+        response = jsonify({"status": "healthy"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', '*')
+        return response, 200
+    return jsonify({"status": "healthy"}), 200
 
 if __name__ == '__main__':
     print("\n=== Game Launcher Server ===")
-    print("\nServer Configuration:")
-    print("- Logging enabled: check game_launcher.log for details")
+    print("Server Configuration:")
+    print("- Debug prints enabled")
     print("- Server running on: http://localhost:5001")
     print("\nStarting server...")
     
-    # Start the server
     app.run(host='localhost', port=5001, debug=True, threaded=True)
