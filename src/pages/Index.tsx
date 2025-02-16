@@ -372,7 +372,7 @@ const Index = () => {
     : games.filter(game => game.genre === selectedCategory);
 
   return (
-    <div className="min-h-screen animate-gradient" style={{
+    <div className="min-h-screen w-screen animate-gradient overflow-x-hidden" style={{
       background: 'linear-gradient(225deg, #F97316 0%, #D946EF 50%, #8B5CF6 100%)',
       backgroundSize: '400% 400%'
     }}>
@@ -382,17 +382,10 @@ const Index = () => {
           activeGame={activeGame}
         />
       ) : (
-        <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
+        <div className="max-w-7xl mx-auto p-8 space-y-8 animate-fade-in">
           <div className="flex flex-col space-y-8">
             <div className="glass p-4 flex justify-between items-center rounded-3xl transition-all duration-300">
               <Header />
-              <Button
-                variant="ghost"
-                className="text-white hover:text-white/80"
-                onClick={() => setShowOwnerDashboard(true)}
-              >
-                <Settings className="w-6 h-6" />
-              </Button>
             </div>
 
             <div className="transform hover:scale-[1.02] transition-transform duration-300">
