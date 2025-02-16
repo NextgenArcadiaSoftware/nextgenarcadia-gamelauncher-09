@@ -43,6 +43,46 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     trailer: "https://www.youtube.com/watch?v=pZHvTXD7QEw",
     executable_path: "steam://rungameid/1294750",
     status: "enabled"
+  },
+  {
+    title: "Creed: Rise to Glory Championship Edition",
+    description: "Step into the ring in this intense VR boxing experience featuring iconic characters from the Creed and Rocky universe.",
+    genre: "Sports",
+    release_date: "2023-04-04",
+    thumbnail: "/lovable-uploads/bc68ce11-8b89-4f5f-8ee0-8e7ccdc6e409.png",
+    trailer: "https://www.youtube.com/watch?v=EgbCMJ54xeM",
+    executable_path: "steam://rungameid/804490",
+    status: "enabled"
+  },
+  {
+    title: "Beat Saber",
+    description: "The ultimate VR rhythm game. Slash the beats, move to the music, and play the way you want to play.",
+    genre: "Rhythm",
+    release_date: "2019-05-21",
+    thumbnail: "/lovable-uploads/f23f2e23-477b-4ede-bce1-7dbcfc1b2131.png",
+    trailer: "https://www.youtube.com/watch?v=vL39Sg2AqWg",
+    executable_path: "steam://rungameid/620980",
+    status: "enabled"
+  },
+  {
+    title: "RollerCoaster Legends",
+    description: "Experience thrilling roller coaster rides in stunning virtual environments.",
+    genre: "Adventure",
+    release_date: "2017-12-21",
+    thumbnail: "/lovable-uploads/59651183-1862-4bb1-8290-3008f0f81f16.png",
+    trailer: "https://www.youtube.com/watch?v=OpnTbOz_POE",
+    executable_path: "steam://rungameid/901520",
+    status: "enabled"
+  },
+  {
+    title: "Arizona Sunshine II",
+    description: "Face the zombie apocalypse in VR! Jump into the action-packed American Southwest.",
+    genre: "Action",
+    release_date: "2023-12-07",
+    thumbnail: "/lovable-uploads/afe010eb-d68b-4273-8efa-5d714d5ed85a.png",
+    trailer: "https://www.youtube.com/watch?v=kNaSe37rcG4",
+    executable_path: "steam://rungameid/1540210",
+    status: "enabled"
   }
 ];
 
