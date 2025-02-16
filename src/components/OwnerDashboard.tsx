@@ -19,7 +19,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Slice your way through a delicious lineup of fruits and compete for high scores.",
     genre: "Action",
     release_date: "2016-07-07",
-    thumbnail: "/lovable-uploads/32039c8f-e15c-4555-9a7d-5bdfd0db596f.png",
+    thumbnail: "/placeholder.svg",
     trailer: "https://www.youtube.com/watch?v=hPY4TRRHwZc",
     executable_path: "steam://rungameid/486780",
     status: "enabled"
@@ -29,7 +29,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Defend your castle from hordes of orcs with your bow and arrow.",
     genre: "Action",
     release_date: "2016-12-01",
-    thumbnail: "/lovable-uploads/c7421927-0f62-420f-87a6-2d35d6600141.png",
+    thumbnail: "/placeholder.svg",
     trailer: "https://www.youtube.com/watch?v=D94cNMNyMy4",
     executable_path: "steam://rungameid/503770",
     status: "enabled"
@@ -39,7 +39,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Fast-paced VR shooting gallery game inspired by classic light gun games.",
     genre: "Action",
     release_date: "2020-05-21",
-    thumbnail: "/lovable-uploads/0c397672-8051-4e6f-bb5b-36548c8d7381.png",
+    thumbnail: "/placeholder.svg",
     trailer: "https://www.youtube.com/watch?v=pZHvTXD7QEw",
     executable_path: "steam://rungameid/1294750",
     status: "enabled"
@@ -49,7 +49,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Step into the ring in this intense VR boxing experience featuring iconic characters from the Creed and Rocky universe.",
     genre: "Sports",
     release_date: "2023-04-04",
-    thumbnail: "/lovable-uploads/c0dc1325-10fa-4e8a-a560-20cbac287ba5.png",
+    thumbnail: "/placeholder.svg",
     trailer: "https://www.youtube.com/watch?v=EgbCMJ54xeM",
     executable_path: "steam://rungameid/804490",
     status: "enabled"
@@ -59,7 +59,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "The ultimate VR rhythm game. Slash the beats, move to the music, and play the way you want to play.",
     genre: "Rhythm",
     release_date: "2019-05-21",
-    thumbnail: "/lovable-uploads/b647b9b5-c6c6-4c53-8ae9-4f990eb7ec37.png",
+    thumbnail: "/placeholder.svg",
     trailer: "https://www.youtube.com/watch?v=vL39Sg2AqWg",
     executable_path: "steam://rungameid/620980",
     status: "enabled"
@@ -69,7 +69,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Face your fears in VR! Walk a narrow plank 80 stories high above a bustling city.",
     genre: "Simulation",
     release_date: "2016-12-21",
-    thumbnail: "/lovable-uploads/85469694-f6e4-42b2-b7fb-891c0cdc883a.png",
+    thumbnail: "/placeholder.svg",
     trailer: "https://www.youtube.com/watch?v=faNsP7ExSt0",
     executable_path: "steam://rungameid/517160",
     status: "enabled"
@@ -79,7 +79,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Experience thrilling roller coaster rides in stunning virtual environments.",
     genre: "Adventure",
     release_date: "2017-12-21",
-    thumbnail: "/lovable-uploads/59651183-1862-4bb1-8290-3008f0f81f16.png",
+    thumbnail: "/placeholder.svg",
     trailer: "https://www.youtube.com/watch?v=OpnTbOz_POE",
     executable_path: "steam://rungameid/901520",
     status: "enabled"
@@ -89,7 +89,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Face the zombie apocalypse in VR! Jump into the action-packed American Southwest.",
     genre: "Action",
     release_date: "2023-12-07",
-    thumbnail: "/lovable-uploads/afe010eb-d68b-4273-8efa-5d714d5ed85a.png",
+    thumbnail: "/placeholder.svg",
     trailer: "https://www.youtube.com/watch?v=kNaSe37rcG4",
     executable_path: "steam://rungameid/1540210",
     status: "enabled"
