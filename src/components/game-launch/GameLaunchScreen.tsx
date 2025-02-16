@@ -26,7 +26,7 @@ export function GameLaunchScreen({
     "Subside": "s",
     "Propagation VR": "p",
     "iB Cricket": "i",
-    "Arizona Sunshine": "a",
+    "Arizona Sunshine II": "a",
     "Undead Citadel": "u",
     "Elven Assassin": "e",
     "Richies Plank Experience": "r",

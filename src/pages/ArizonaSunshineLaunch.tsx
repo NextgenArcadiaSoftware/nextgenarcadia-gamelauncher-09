@@ -8,7 +8,7 @@ export default function ArizonaSunshineLaunch() {
   return (
     <RFIDCountdown 
       onExit={() => navigate('/')} 
-      activeGame="Arizona Sunshine"
+      activeGame="Arizona Sunshine II"
     />
   );
 }

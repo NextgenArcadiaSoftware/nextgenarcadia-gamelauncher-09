@@ -53,7 +53,7 @@ export function GameCard({
       "Richies Plank Experience": "/planklaunch",
       "iB Cricket": "/cricketlaunch",
       "Undead Citadel": "/undeadcitadellaunch",
-      "Arizona Sunshine": "/arizonalaunch",
+      "Arizona Sunshine II": "/arizonalaunch",
       "Subside": "/subsidelaunch",
       "Propagation VR": "/propagationlaunch",
       "Creed: Rise to Glory Championship Edition": "/creedlaunch",
