@@ -131,7 +131,7 @@ const ARIZONA_SUNSHINE = {
   thumbnail: "/lovable-uploads/4e2b1ea9-0729-4f84-b8c4-974e08cd8c30.png",
   executable_path: "steam://rungameid/2159470",
   launch_code: "ARIZONA",
-  status: "enabled",
+  status: "enabled" as const,
   trailer: "https://www.youtube.com/watch?v=eZ65ppbWuAE"
 };
 
