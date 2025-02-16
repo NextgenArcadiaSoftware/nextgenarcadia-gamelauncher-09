@@ -171,6 +171,7 @@ const Index = () => {
       }
 
       if (data) {
+        console.log('Fetched games:', data);
         setGames(data as Game[]);
       } else {
         console.error('No games found in the database');
@@ -197,16 +198,17 @@ const Index = () => {
       const { data, error } = await supabase
         .from('games')
         .insert([{ ...newGame, status: 'enabled' as const }])
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
 
-      setGames(prevGames => [data as Game, ...prevGames]);
-      toast({
-        title: "Game Added",
-        description: "The game has been added to your library",
-      });
+      if (data && data[0]) {
+        setGames(prevGames => [data[0] as Game, ...prevGames]);
+        toast({
+          title: "Game Added",
+          description: "The game has been added to your library",
+        });
+      }
     } catch (error) {
       console.error('Error adding game:', error);
       toast({
@@ -265,99 +267,6 @@ const Index = () => {
         window.electron.ipcRenderer.send('simulate-keypress', 'f');
       }
     };
-
-    const addInitialGames = async () => {
-      try {
-        await supabase
-          .from('games')
-          .delete()
-          .eq('title', FRUIT_NINJA.title);
-
-        await supabase
-          .from('games')
-          .delete()
-          .eq('title', RICHIES_PLANK.title);
-
-        await supabase
-          .from('games')
-          .delete()
-          .eq('title', ELVEN_ASSASSIN.title);
-
-        await supabase
-          .from('games')
-          .delete()
-          .eq('title', UNDEAD_CITADEL.title);
-
-        await supabase
-          .from('games')
-          .delete()
-          .eq('title', ARIZONA_SUNSHINE.title);
-
-        await supabase
-          .from('games')
-          .delete()
-          .eq('title', IB_CRICKET.title);
-
-        await supabase
-          .from('games')
-          .delete()
-          .eq('title', PROPAGATION.title);
-
-        await supabase
-          .from('games')
-          .delete()
-          .eq('title', SUBSIDE.title);
-
-        await supabase
-          .from('games')
-          .delete()
-          .eq('title', CRISIS_BRIGADE.title);
-
-        const { data: existingSportsGame } = await supabase
-          .from('games')
-          .select('title')
-          .eq('title', ALL_IN_ONE_SPORTS.title)
-          .single();
-
-        if (!existingSportsGame) {
-          await supabase.from('games').insert([ALL_IN_ONE_SPORTS]);
-          console.log('Added All-in-One Sports VR to the database');
-        }
-
-        await supabase.from('games').insert([FRUIT_NINJA]);
-        console.log('Added/Updated Fruit Ninja VR to the database');
-
-        await supabase.from('games').insert([RICHIES_PLANK]);
-        console.log('Added/Updated Richies Plank Experience to the database');
-
-        await supabase.from('games').insert([ELVEN_ASSASSIN]);
-        console.log('Added/Updated Elven Assassin to the database');
-
-        await supabase.from('games').insert([UNDEAD_CITADEL]);
-        console.log('Added/Updated Undead Citadel to the database');
-
-        await supabase.from('games').insert([ARIZONA_SUNSHINE]);
-        console.log('Added/Updated Arizona Sunshine II to the database');
-
-        await supabase.from('games').insert([IB_CRICKET]);
-        console.log('Added/Updated iB Cricket to the database');
-
-        await supabase.from('games').insert([PROPAGATION]);
-        console.log('Added/Updated Propagation VR to the database');
-
-        await supabase.from('games').insert([SUBSIDE]);
-        console.log('Added/Updated Subside to the database');
-
-        await supabase.from('games').insert([CRISIS_BRIGADE]);
-        console.log('Added/Updated Crisis Brigade 2 Reloaded to the database');
-
-        fetchGames(); // Refresh the games list
-      } catch (error) {
-        console.error('Error adding initial games:', error);
-      }
-    };
-
-    addInitialGames();
 
     window.addEventListener('keypress', handleKeyPress);
 
