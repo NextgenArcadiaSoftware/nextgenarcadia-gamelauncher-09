@@ -26,12 +26,34 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     return () => clearInterval(interval);
   }, []);
 
-  const handleExit = () => {
-    // Simulate X key press before exiting
-    if (window.electron) {
-      window.electron.ipcRenderer.send('simulate-keypress', 'x');
+  const handleExit = async () => {
+    try {
+      // Send 'x' key press to Flask server
+      await fetch("http://127.0.0.1:5001/keypress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: 'x' })
+      });
+      
+      console.log("Sent 'x' key to server");
+      
+      // Create and dispatch keyboard event for 'x'
+      const keyboardEvent = new KeyboardEvent('keydown', {
+        key: 'x',
+        code: 'KeyX',
+        keyCode: 'X'.charCodeAt(0),
+        bubbles: true,
+        cancelable: true,
+        composed: true
+      });
+      document.dispatchEvent(keyboardEvent);
+      
+      // Call the provided exit callback
+      onExit();
+    } catch (error) {
+      console.error('Error sending exit keystroke:', error);
+      onExit(); // Still exit even if key simulation fails
     }
-    onExit();
   };
 
   return (
