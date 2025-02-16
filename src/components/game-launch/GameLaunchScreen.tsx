@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -29,8 +30,8 @@ export function GameLaunchScreen({
         setShowLaunchScreen(true);
       }
 
-      // Listen for F key press
-      if (event.key.toLowerCase() === 'f' && showLaunchScreen) {
+      // Listen for C key press
+      if (event.key.toLowerCase() === 'c' && showLaunchScreen) {
         handleGameStart();
       }
     };
@@ -55,7 +56,7 @@ export function GameLaunchScreen({
         button.click();
       }
 
-      if (key.toLowerCase() === 'f' && showLaunchScreen) {
+      if (key.toLowerCase() === 'c' && showLaunchScreen) {
         handleGameStart();
       }
 
@@ -147,13 +148,13 @@ export function GameLaunchScreen({
 
           <div className="flex flex-col items-center gap-4 mt-8">
             <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
-              Press F When Ready
+              Press C When Ready
             </div>
             <button 
-              onClick={() => simulateKeyPress('F')} 
+              onClick={() => simulateKeyPress('C')} 
               className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
             >
-              F
+              C
             </button>
           </div>
 
