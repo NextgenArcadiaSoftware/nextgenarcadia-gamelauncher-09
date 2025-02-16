@@ -1,12 +1,11 @@
 
 import { Button } from "./ui/button";
-import { Settings, LogOut } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useState } from "react";
 import { OwnerDashboard } from "./OwnerDashboard";
 import { PinVerification } from "./PinVerification";
 import { useToast } from "./ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +17,6 @@ export function Header() {
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [showOwnerDashboard, setShowOwnerDashboard] = useState(false);
   const { toast } = useToast();
-  const { isAdmin, signOut } = useAuth();
 
   const handleAddGame = async (game: any) => {
     try {
@@ -56,35 +54,14 @@ export function Header() {
           NextGen Arcadia
         </h1>
       </div>
-      <div className="flex items-center gap-2">
-        {isAdmin ? (
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:border-white/30"
-            onClick={() => setShowOwnerDashboard(true)}
-          >
-            <Settings className="h-4 w-4 text-white" />
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            size="icon"
-            className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:border-white/30"
-            onClick={() => setShowPinDialog(true)}
-          >
-            <Settings className="h-4 w-4 text-white" />
-          </Button>
-        )}
-        <Button
-          variant="outline"
-          size="icon"
-          className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:border-white/30"
-          onClick={() => signOut()}
-        >
-          <LogOut className="h-4 w-4 text-white" />
-        </Button>
-      </div>
+      <Button
+        variant="outline"
+        size="icon"
+        className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 hover:border-white/30"
+        onClick={() => setShowPinDialog(true)}
+      >
+        <Settings className="h-4 w-4 text-white" />
+      </Button>
 
       <Dialog open={showPinDialog} onOpenChange={setShowPinDialog}>
         <DialogContent className="sm:max-w-[425px]">

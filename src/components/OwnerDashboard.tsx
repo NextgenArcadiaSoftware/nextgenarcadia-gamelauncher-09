@@ -115,9 +115,7 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
 
   const handleToggleGame = async (gameId: string) => {
     const game = games.find(g => g.id === gameId);
-    if (!game) return;
-    
-    const newStatus = game.status === 'enabled' ? 'disabled' as const : 'enabled' as const;
+    const newStatus = game?.status === 'enabled' ? 'disabled' as const : 'enabled' as const;
 
     try {
       const { error } = await supabase
@@ -137,14 +135,14 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
 
       toast({
         title: `Game ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`,
-        description: `${game.title} has been ${newStatus === 'enabled' ? 'enabled' : 'disabled'}.`,
+        description: `${game?.title} has been ${newStatus === 'enabled' ? 'enabled' : 'disabled'}.`,
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating game:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to update game status",
+        description: "Failed to update game status",
       });
     }
   };
@@ -163,12 +161,12 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
         title: "Game Deleted",
         description: "The game has been removed from your library",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting game:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to delete game",
+        description: "Failed to delete game",
       });
     }
   };
@@ -201,12 +199,12 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
         title: "Game Updated",
         description: "The game has been successfully updated.",
       });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating game:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to update game",
+        description: "Failed to update game",
       });
     }
   };
