@@ -19,7 +19,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Slice your way through a delicious lineup of fruits and compete for high scores.",
     genre: "Action",
     release_date: "2016-07-07",
-    thumbnail: "/lovable-uploads/09374846-fe58-4998-868a-5691a68042c5.png",
+    thumbnail: "/lovable-uploads/32039c8f-e15c-4555-9a7d-5bdfd0db596f.png",
     trailer: "https://www.youtube.com/watch?v=hPY4TRRHwZc",
     executable_path: "steam://rungameid/486780",
     status: "enabled"
@@ -29,7 +29,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Defend your castle from hordes of orcs with your bow and arrow.",
     genre: "Action",
     release_date: "2016-12-01",
-    thumbnail: "/lovable-uploads/0c397672-8051-4e6f-bb5b-36548c8d7381.png",
+    thumbnail: "/lovable-uploads/c7421927-0f62-420f-87a6-2d35d6600141.png",
     trailer: "https://www.youtube.com/watch?v=D94cNMNyMy4",
     executable_path: "steam://rungameid/503770",
     status: "enabled"
@@ -39,7 +39,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Fast-paced VR shooting gallery game inspired by classic light gun games.",
     genre: "Action",
     release_date: "2020-05-21",
-    thumbnail: "/lovable-uploads/1a1125bb-7f6a-42dd-a5f3-8a095ae5e5dd.png",
+    thumbnail: "/lovable-uploads/0c397672-8051-4e6f-bb5b-36548c8d7381.png",
     trailer: "https://www.youtube.com/watch?v=pZHvTXD7QEw",
     executable_path: "steam://rungameid/1294750",
     status: "enabled"
