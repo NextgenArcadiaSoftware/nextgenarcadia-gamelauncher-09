@@ -107,6 +107,10 @@ export function GameCard({
     setImageSrc(`https://source.unsplash.com/random/800x600/?${encodeURIComponent(genre.toLowerCase())}`);
   };
 
+  const videoUrl = title === "Creed: Rise to Glory Championship Edition" 
+    ? "https://www.youtube.com/watch?v=EgbCMJ54xeM" 
+    : trailer;
+
   return (
     <div 
       className="nintendo-card group"
@@ -131,7 +135,7 @@ export function GameCard({
               </span>
             </div>
             <div className="flex gap-2">
-              {trailer && (
+              {(videoUrl || trailer) && (
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
@@ -149,7 +153,7 @@ export function GameCard({
                       {isDialogOpen && (
                         <iframe
                           className="absolute top-0 left-0 w-full h-full"
-                          src={getYouTubeEmbedUrl(trailer)}
+                          src={getYouTubeEmbedUrl(videoUrl || trailer || '')}
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         ></iframe>
@@ -172,3 +176,4 @@ export function GameCard({
     </div>
   );
 }
+
