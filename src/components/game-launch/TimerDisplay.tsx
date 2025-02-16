@@ -28,39 +28,23 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
 
   const handleExit = async () => {
     try {
-      console.log("Attempting to send 'shift+8' key to server...");
+      console.log("Attempting to send 'z' key to server...");
       
-      // First send shift key
-      const shiftResponse = await fetch("http://127.0.0.1:5001/keypress", {
+      const response = await fetch("http://127.0.0.1:5001/keypress", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
-        body: JSON.stringify({ key: 'shift' }),
+        body: JSON.stringify({ key: 'z' }),
         mode: 'cors'
       });
 
-      if (!shiftResponse.ok) {
-        throw new Error(`HTTP error! status: ${shiftResponse.status}`);
-      }
-      
-      // Then send 8 key while shift is pressed
-      const eightResponse = await fetch("http://127.0.0.1:5001/keypress", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({ key: '8' }),
-        mode: 'cors'
-      });
-
-      if (!eightResponse.ok) {
-        throw new Error(`HTTP error! status: ${eightResponse.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      console.log("Keys sent successfully to server");
+      console.log("Key sent successfully to server");
       
       // Call the provided exit callback
       onExit();
