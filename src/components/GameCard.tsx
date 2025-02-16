@@ -1,4 +1,3 @@
-
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -77,7 +76,6 @@ export function GameCard({
     try {
       let videoId = '';
       
-      // Handle various YouTube URL formats
       if (url.includes('youtu.be/')) {
         videoId = url.split('youtu.be/')[1];
       } else if (url.includes('youtube.com/watch')) {
@@ -87,14 +85,12 @@ export function GameCard({
         videoId = url.split('youtube.com/embed/')[1];
       }
       
-      // Remove any additional parameters
       videoId = videoId.split('&')[0];
       videoId = videoId.split('?')[0];
       videoId = videoId.split('/')[0];
       
       if (!videoId) return '';
       
-      // Return the embed URL with additional parameters for better iframe behavior
       return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
     } catch (error) {
       console.error('Error parsing YouTube URL:', error);
@@ -107,8 +103,8 @@ export function GameCard({
     setImageSrc(`https://source.unsplash.com/random/800x600/?${encodeURIComponent(genre.toLowerCase())}`);
   };
 
-  const videoUrl = title === "Creed: Rise to Glory Championship Edition" 
-    ? "https://www.youtube.com/watch?v=pZHvTXD7QEw" 
+  const videoUrl = title === "Crisis Brigade 2 Reloaded"
+    ? "https://www.youtube.com/watch?v=pZHvTXD7QEw"
     : trailer;
 
   return (
