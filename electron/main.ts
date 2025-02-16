@@ -57,30 +57,6 @@ function initRFIDReader() {
   });
 }
 
-// Add direct keyboard event handling
-function simulateKeyPress(key: string) {
-  return new Promise((resolve, reject) => {
-    const pythonScript = `
-import keyboard
-import time
-
-keyboard.press('${key}')
-time.sleep(0.1)
-keyboard.release('${key}')
-    `;
-    
-    exec(`python -c "${pythonScript}"`, (error, stdout, stderr) => {
-      if (error) {
-        console.error('Error in key simulation:', error);
-        reject(error);
-        return;
-      }
-      console.log('Key simulation successful:', key);
-      resolve(true);
-    });
-  });
-}
-
 app.commandLine.appendSwitch('disable-gpu-vsync');
 app.commandLine.appendSwitch('disable-frame-rate-limit');
 
@@ -98,12 +74,11 @@ app.on('activate', () => {
   }
 });
 
-// Add IPC handler for key press simulation
+// Simplified key press handler
 ipcMain.on('simulate-keypress', async (event, key) => {
   console.log('Received key press in main process:', key);
 
   try {
-    // First try the HTTP endpoint
     const response = await fetch('http://localhost:5001/keypress', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -115,17 +90,9 @@ ipcMain.on('simulate-keypress', async (event, key) => {
     }
 
     const data = await response.json();
-    console.log('Key press simulation response:', data);
+    console.log('Key press response:', data);
   } catch (error) {
-    console.error('Error sending key press to Python server:', error);
-    
-    // Fallback to direct simulation
-    try {
-      await simulateKeyPress(key);
-      console.log('Fallback key simulation successful');
-    } catch (fallbackError) {
-      console.error('Fallback key simulation failed:', fallbackError);
-    }
+    console.error('Error sending key press:', error);
   }
 });
 
