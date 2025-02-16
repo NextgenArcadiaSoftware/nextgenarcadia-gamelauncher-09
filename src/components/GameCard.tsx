@@ -1,3 +1,4 @@
+
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -104,7 +105,7 @@ export function GameCard({
   };
 
   const videoUrl = title === "Creed: Rise to Glory Championship Edition"
-    ? "https://www.youtube.com/watch?v=pZHvTXD7QEw"
+    ? "https://www.youtube.com/watch?v=EgbCMJ54xeM"
     : trailer;
 
   return (
@@ -172,3 +173,4 @@ export function GameCard({
     </div>
   );
 }
+
