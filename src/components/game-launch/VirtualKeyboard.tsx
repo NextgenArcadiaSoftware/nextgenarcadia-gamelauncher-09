@@ -18,23 +18,12 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   ];
 
   const handleKeyClick = (key: string) => {
-    // First trigger the hidden button for Python backend
-    const button = document.getElementById('myButton');
-    if (button) {
-      button.click();
+    // First send key to Python backend via electron
+    if (window.electron) {
+      window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
     }
 
-    // Then dispatch DOM events for frontend
-    const keydownEvent = new KeyboardEvent('keydown', {
-      key: key.toLowerCase(),
-      code: `Key${key.toUpperCase()}`,
-      keyCode: key.charCodeAt(0),
-      bubbles: true,
-      cancelable: true
-    });
-    document.dispatchEvent(keydownEvent);
-
-    // Call the provided callback
+    // Then call the provided callback
     onKeyPress(key);
   };
 

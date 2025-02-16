@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -20,7 +19,6 @@ export function GameLaunchScreen({
   const [showLaunchScreen, setShowLaunchScreen] = useState(false);
   const { toast } = useToast();
 
-  // Map game titles to their launch keys
   const gameLaunchKeys: Record<string, string> = {
     "Fruit Ninja VR": "f",
     "Crisis Brigade 2 Reloaded": "c",
@@ -46,7 +44,6 @@ export function GameLaunchScreen({
         setShowLaunchScreen(true);
       }
 
-      // Listen for the game-specific launch key
       if (event.key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
         handleGameStart();
       }
@@ -65,36 +62,24 @@ export function GameLaunchScreen({
   };
 
   const simulateKeyPress = (key: string) => {
-    try {
-      // Trigger the hidden button click to simulate a real key press
-      const button = document.getElementById('myButton');
-      if (button) {
-        button.click();
-      }
-
-      if (key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
-        handleGameStart();
-      }
-
-      toast({
-        title: "Key Pressed",
-        description: `${key.toUpperCase()} key press simulated`
-      });
-    } catch (error) {
-      console.error('Error simulating key press:', error);
-      toast({
-        title: "Error",
-        description: "Failed to simulate key press",
-        variant: "destructive"
-      });
+    if (window.electron) {
+      window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
     }
+
+    if (key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
+      handleGameStart();
+    }
+
+    toast({
+      title: "Key Pressed",
+      description: `${key.toUpperCase()} key press simulated`
+    });
   };
 
   const handleKeyPress = (key: string) => {
     simulateKeyPress(key);
   };
 
-  // RFID Detection Screen
   if (!showLaunchScreen) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
@@ -131,7 +116,6 @@ export function GameLaunchScreen({
     );
   }
 
-  // Game launch screen
   return (
     <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
       <div className="absolute inset-0 overflow-hidden">
