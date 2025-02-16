@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import keyboard
@@ -17,7 +16,8 @@ GAMES = {
     "UDC": r"C:\Program Files (x86)\Steam\steamapps\common\Undead Citadel\UndeadCitadel.exe",
     "ARS": r"C:\Program Files (x86)\Steam\steamapps\common\Arizona Sunshine\ArizonaSunshine.exe",
     "SBS": r"C:\Program Files (x86)\Steam\steamapps\common\Subside\Subside.exe",
-    "PVR": r"C:\Program Files (x86)\Steam\steamapps\common\Propagation VR\PropagationVR.exe"
+    "PVR": r"C:\Program Files (x86)\Steam\steamapps\common\Propagation VR\PropagationVR.exe",
+    "CRD": r"C:\Program Files (x86)\Steam\steamapps\common\Creed Rise to Glory\Creed.exe"
 }
 
 app = Flask(__name__)
@@ -45,7 +45,8 @@ def on_key_event(event):
         'u': 'UDC',  # Undead Citadel
         'e': 'EAX',  # Elven Assassin
         'r': 'RPE',  # Richie's Plank
-        'v': 'AIO'   # All-in-One Sports
+        'v': 'AIO',  # All-in-One Sports
+        'g': 'CRD'   # Creed Rise to Glory
     }
     
     if key in key_to_game:
@@ -110,6 +111,7 @@ if __name__ == "__main__":
         print("E -> Elven Assassin")
         print("R -> Richie's Plank")
         print("V -> All-in-One Sports VR")
+        print("G -> Creed Rise to Glory")
         print("\nPress Ctrl+C to exit")
         
         # Run the Flask app with threaded=True for better handling of concurrent requests
