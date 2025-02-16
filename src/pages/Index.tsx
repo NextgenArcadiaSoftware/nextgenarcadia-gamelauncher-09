@@ -176,9 +176,15 @@ const Index = () => {
       console.log('Raw games data:', data);
 
       if (data && data.length > 0) {
-        console.log('Number of games fetched:', data.length);
-        setGames(data);
-        console.log('Games state updated with:', data);
+        // Validate and transform the data to ensure it matches the Game type
+        const validatedGames = data.map(game => ({
+          ...game,
+          status: game.status === 'enabled' ? 'enabled' : 'disabled'
+        } as Game));
+
+        console.log('Number of games fetched:', validatedGames.length);
+        setGames(validatedGames);
+        console.log('Games state updated with:', validatedGames);
       } else {
         console.log('No games found in the database');
         toast({
@@ -209,7 +215,12 @@ const Index = () => {
       if (error) throw error;
 
       if (data && data[0]) {
-        setGames(prevGames => [data[0] as Game, ...prevGames]);
+        const validatedGame = {
+          ...data[0],
+          status: data[0].status === 'enabled' ? 'enabled' : 'disabled'
+        } as Game;
+
+        setGames(prevGames => [validatedGame, ...prevGames]);
         toast({
           title: "Game Added",
           description: "The game has been added to your library",
