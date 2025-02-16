@@ -5,6 +5,10 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
 
@@ -99,6 +103,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
 export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [timerDuration, setTimerDuration] = useState(8);
+  const [editingGame, setEditingGame] = useState<Game | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -225,6 +230,48 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
     });
   };
 
+  const handleEditGame = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingGame) return;
+
+    const { error } = await supabase
+      .from('games')
+      .update({
+        title: editingGame.title,
+        description: editingGame.description,
+        genre: editingGame.genre,
+        release_date: editingGame.release_date,
+        thumbnail: editingGame.thumbnail,
+        trailer: editingGame.trailer,
+        executable_path: editingGame.executable_path,
+      })
+      .eq('id', editingGame.id);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update game"
+      });
+      return;
+    }
+
+    setGames(prev =>
+      prev.map(game =>
+        game.id === editingGame.id
+          ? editingGame
+          : game
+      )
+    );
+
+    toast({
+      title: "Success",
+      description: "Game updated successfully"
+    });
+
+    setEditingGame(null);
+  };
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[800px]">
@@ -267,10 +314,19 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
                       <p className="text-sm text-muted-foreground">{game.genre}</p>
                     </div>
                   </div>
-                  <Switch
-                    checked={game.status === 'enabled'}
-                    onCheckedChange={() => handleGameStatusToggle(game.id, game.status)}
-                  />
+                  <div className="flex items-center gap-4">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEditingGame(game)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Switch
+                      checked={game.status === 'enabled'}
+                      onCheckedChange={() => handleGameStatusToggle(game.id, game.status)}
+                    />
+                  </div>
                 </div>
               ))}
               {games.length === 0 && (
@@ -279,6 +335,109 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
             </div>
           </div>
         </div>
+
+        {/* Edit Game Dialog */}
+        {editingGame && (
+          <Dialog open={!!editingGame} onOpenChange={() => setEditingGame(null)}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Edit Game</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleEditGame} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={editingGame.title}
+                    onChange={(e) =>
+                      setEditingGame({ ...editingGame, title: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={editingGame.description}
+                    onChange={(e) =>
+                      setEditingGame({ ...editingGame, description: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="genre">Genre</Label>
+                    <Input
+                      id="genre"
+                      value={editingGame.genre}
+                      onChange={(e) =>
+                        setEditingGame({ ...editingGame, genre: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="release_date">Release Date</Label>
+                    <Input
+                      id="release_date"
+                      type="date"
+                      value={editingGame.release_date}
+                      onChange={(e) =>
+                        setEditingGame({ ...editingGame, release_date: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="thumbnail">Thumbnail URL</Label>
+                  <Input
+                    id="thumbnail"
+                    type="url"
+                    value={editingGame.thumbnail}
+                    onChange={(e) =>
+                      setEditingGame({ ...editingGame, thumbnail: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="trailer">Trailer URL (Optional)</Label>
+                  <Input
+                    id="trailer"
+                    type="url"
+                    value={editingGame.trailer || ''}
+                    onChange={(e) =>
+                      setEditingGame({ ...editingGame, trailer: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="executable_path">Steam Game ID or Executable Path</Label>
+                  <Input
+                    id="executable_path"
+                    type="text"
+                    placeholder="steam://rungameid/123456 or C:\Games\game.exe"
+                    value={editingGame.executable_path || ''}
+                    onChange={(e) =>
+                      setEditingGame({ ...editingGame, executable_path: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" type="button" onClick={() => setEditingGame(null)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
       </DialogContent>
     </Dialog>
   );
