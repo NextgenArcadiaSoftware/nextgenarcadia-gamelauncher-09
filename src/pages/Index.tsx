@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -268,6 +269,7 @@ const Index = () => {
 
     const addInitialGames = async () => {
       try {
+        // First, delete existing games to avoid duplicates
         await supabase
           .from('games')
           .delete()
@@ -313,43 +315,36 @@ const Index = () => {
           .delete()
           .eq('title', CRISIS_BRIGADE.title);
 
-        const { data: existingSportsGame } = await supabase
-          .from('games')
-          .select('title')
-          .eq('title', ALL_IN_ONE_SPORTS.title)
-          .single();
-
-        if (!existingSportsGame) {
-          await supabase.from('games').insert([ALL_IN_ONE_SPORTS]);
-          console.log('Added All-in-One Sports VR to the database');
-        }
+        // Now add all games
+        await supabase.from('games').insert([ALL_IN_ONE_SPORTS]);
+        console.log('Added All-in-One Sports VR to the database');
 
         await supabase.from('games').insert([FRUIT_NINJA]);
-        console.log('Added/Updated Fruit Ninja VR to the database');
+        console.log('Added Fruit Ninja VR to the database');
 
         await supabase.from('games').insert([RICHIES_PLANK]);
-        console.log('Added/Updated Richies Plank Experience to the database');
+        console.log('Added Richies Plank Experience to the database');
 
         await supabase.from('games').insert([ELVEN_ASSASSIN]);
-        console.log('Added/Updated Elven Assassin to the database');
+        console.log('Added Elven Assassin to the database');
 
         await supabase.from('games').insert([UNDEAD_CITADEL]);
-        console.log('Added/Updated Undead Citadel to the database');
+        console.log('Added Undead Citadel to the database');
 
         await supabase.from('games').insert([ARIZONA_SUNSHINE]);
-        console.log('Added/Updated Arizona Sunshine II to the database');
+        console.log('Added Arizona Sunshine II to the database');
 
         await supabase.from('games').insert([IB_CRICKET]);
-        console.log('Added/Updated iB Cricket to the database');
+        console.log('Added iB Cricket to the database');
 
         await supabase.from('games').insert([PROPAGATION]);
-        console.log('Added/Updated Propagation VR to the database');
+        console.log('Added Propagation VR to the database');
 
         await supabase.from('games').insert([SUBSIDE]);
-        console.log('Added/Updated Subside to the database');
+        console.log('Added Subside to the database');
 
         await supabase.from('games').insert([CRISIS_BRIGADE]);
-        console.log('Added/Updated Crisis Brigade 2 Reloaded to the database');
+        console.log('Added Crisis Brigade 2 Reloaded to the database');
 
         fetchGames(); // Refresh the games list
       } catch (error) {
@@ -358,7 +353,6 @@ const Index = () => {
     };
 
     addInitialGames();
-
     window.addEventListener('keypress', handleKeyPress);
 
     return () => {
@@ -386,6 +380,13 @@ const Index = () => {
           <div className="flex flex-col space-y-8">
             <div className="glass p-4 flex justify-between items-center rounded-3xl transition-all duration-300">
               <Header />
+              <Button
+                variant="ghost"
+                className="text-white hover:text-white/80"
+                onClick={() => setShowOwnerDashboard(true)}
+              >
+                <Settings className="w-6 h-6" />
+              </Button>
             </div>
 
             <div className="transform hover:scale-[1.02] transition-transform duration-300">
