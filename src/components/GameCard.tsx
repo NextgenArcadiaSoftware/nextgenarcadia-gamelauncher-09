@@ -108,6 +108,8 @@ export function GameCard({
     ? "https://www.youtube.com/watch?v=EgbCMJ54xeM"
     : title === "RollerCoaster Legends"
     ? "https://www.youtube.com/watch?v=OpnTbOz_POE"
+    : title === "Crisis Brigade 2 Reloaded"
+    ? "https://www.youtube.com/watch?v=pZHvTXD7QEw"
     : trailer;
 
   return (
