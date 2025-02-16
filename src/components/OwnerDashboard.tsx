@@ -49,7 +49,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "Step into the ring in this intense VR boxing experience featuring iconic characters from the Creed and Rocky universe.",
     genre: "Sports",
     release_date: "2023-04-04",
-    thumbnail: "/lovable-uploads/bc68ce11-8b89-4f5f-8ee0-8e7ccdc6e409.png",
+    thumbnail: "/lovable-uploads/3fd2feaf-924c-47d0-bd17-0284a7495991.png",
     trailer: "https://www.youtube.com/watch?v=EgbCMJ54xeM",
     executable_path: "steam://rungameid/804490",
     status: "enabled"
