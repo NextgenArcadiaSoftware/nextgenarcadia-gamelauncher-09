@@ -1,51 +1,58 @@
 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Screensaver } from "./components/Screensaver";
-import Index from "./pages/Index";
-import Library from "./pages/Library";
-import NotFound from "./pages/NotFound";
-import FruitNinjaLaunch from "./pages/FruitNinjaLaunch";
-import ElvenAssassinLaunch from "./pages/ElvenAssassinLaunch";
-import CrisBrigadeLaunch from "./pages/CrisBrigadeLaunch";
-import SportsLaunch from "./pages/SportsLaunch";
-import PlankLaunch from "./pages/PlankLaunch";
-import CricketLaunch from "./pages/CricketLaunch";
-import UndeadCitadelLaunch from "./pages/UndeadCitadelLaunch";
-import ArizonaSunshineLaunch from "./pages/ArizonaSunshineLaunch";
-import SubsideLaunch from "./pages/SubsideLaunch";
-import PropagationLaunch from "./pages/PropagationLaunch";
+import Index from "@/pages/Index";
+import Library from "@/pages/Library";
+import Auth from "@/pages/Auth";
+import NotFound from "@/pages/NotFound";
+import { AuthProvider } from "@/hooks/useAuth";
+import { AuthGuard } from "@/components/AuthGuard";
 
-const queryClient = new QueryClient();
+// Game Launch Pages
+import ArizonaSunshineLaunch from "@/pages/ArizonaSunshineLaunch";
+import CricketLaunch from "@/pages/CricketLaunch";
+import CrisBrigadeLaunch from "@/pages/CrisBrigadeLaunch";
+import ElvenAssassinLaunch from "@/pages/ElvenAssassinLaunch";
+import FruitNinjaLaunch from "@/pages/FruitNinjaLaunch";
+import PlankLaunch from "@/pages/PlankLaunch";
+import PropagationLaunch from "@/pages/PropagationLaunch";
+import SportsLaunch from "@/pages/SportsLaunch";
+import SubsideLaunch from "@/pages/SubsideLaunch";
+import UndeadCitadelLaunch from "@/pages/UndeadCitadelLaunch";
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Screensaver />
+import "./App.css";
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/fruitninjalaunch" element={<FruitNinjaLaunch />} />
-          <Route path="/elvenassassinlaunch" element={<ElvenAssassinLaunch />} />
-          <Route path="/crisisbrigadelaunch" element={<CrisBrigadeLaunch />} />
-          <Route path="/sportslaunch" element={<SportsLaunch />} />
-          <Route path="/planklaunch" element={<PlankLaunch />} />
-          <Route path="/cricketlaunch" element={<CricketLaunch />} />
-          <Route path="/undeadcitadellaunch" element={<UndeadCitadelLaunch />} />
-          <Route path="/arizonalaunch" element={<ArizonaSunshineLaunch />} />
-          <Route path="/subsidelaunch" element={<SubsideLaunch />} />
-          <Route path="/propagationlaunch" element={<PropagationLaunch />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route 
+            path="/library" 
+            element={
+              <AuthGuard requireAdmin>
+                <Library />
+              </AuthGuard>
+            } 
+          />
+          <Route path="/launch/arizona-sunshine" element={<ArizonaSunshineLaunch />} />
+          <Route path="/launch/cricket" element={<CricketLaunch />} />
+          <Route path="/launch/crisis-brigade" element={<CrisBrigadeLaunch />} />
+          <Route path="/launch/elven-assassin" element={<ElvenAssassinLaunch />} />
+          <Route path="/launch/fruit-ninja" element={<FruitNinjaLaunch />} />
+          <Route path="/launch/plank" element={<PlankLaunch />} />
+          <Route path="/launch/propagation" element={<PropagationLaunch />} />
+          <Route path="/launch/sports" element={<SportsLaunch />} />
+          <Route path="/launch/subside" element={<SubsideLaunch />} />
+          <Route path="/launch/undead-citadel" element={<UndeadCitadelLaunch />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </Router>
+      <Toaster />
+    </AuthProvider>
+  );
+}
 
 export default App;
