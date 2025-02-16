@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
@@ -8,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Pencil } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Pencil, Timer, GamepadIcon, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
 
@@ -104,12 +105,68 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [timerDuration, setTimerDuration] = useState(8);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
+  const [sessionStats, setSessionStats] = useState({
+    totalSessions: 0,
+    todaySessions: 0,
+    averageDuration: 0,
+    popularGames: [] as { title: string; count: number }[]
+  });
   const { toast } = useToast();
 
   useEffect(() => {
     fetchGames();
     fetchSettings();
+    fetchSessionStats();
   }, []);
+
+  const fetchSessionStats = async () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const { count: totalSessions } = await supabase
+      .from('game_sessions')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: todaySessions } = await supabase
+      .from('game_sessions')
+      .select('*', { count: 'exact', head: true })
+      .gte('started_at', today.toISOString());
+
+    const { data: durationData } = await supabase
+      .from('game_sessions')
+      .select('duration')
+      .not('duration', 'is', null);
+
+    const averageDuration = durationData?.length 
+      ? durationData.reduce((acc, curr) => acc + curr.duration, 0) / durationData.length 
+      : 0;
+
+    const { data: popularGamesData } = await supabase
+      .from('game_sessions')
+      .select(`
+        game_id,
+        games!inner(title)
+      `)
+      .limit(5);
+
+    const gamePlayCounts = popularGamesData?.reduce((acc: {[key: string]: number}, session: any) => {
+      const title = session.games.title;
+      acc[title] = (acc[title] || 0) + 1;
+      return acc;
+    }, {});
+
+    const popularGames = Object.entries(gamePlayCounts || {})
+      .map(([title, count]) => ({ title, count: count as number }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    setSessionStats({
+      totalSessions: totalSessions || 0,
+      todaySessions: todaySessions || 0,
+      averageDuration: Math.round(averageDuration),
+      popularGames
+    });
+  };
 
   const fetchGames = async () => {
     const { data, error } = await supabase
@@ -127,7 +184,6 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
     }
 
     if (!data || data.length === 0) {
-      // Insert default games if no games exist
       for (const game of defaultGames) {
         const { error: insertError } = await supabase
           .from('games')
@@ -142,7 +198,6 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
           });
         }
       }
-      // Fetch games again after inserting defaults
       const { data: updatedData } = await supabase
         .from('games')
         .select('*')
@@ -226,7 +281,7 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
 
     toast({
       title: "Success",
-      description: "Timer duration updated"
+      description: `Timer duration updated to ${value[0]} minutes`
     });
   };
 
@@ -274,32 +329,93 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Game Management</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Timer Settings</h3>
-            <div className="space-y-2">
-              <Label>Session Duration (minutes)</Label>
-              <div className="flex items-center space-x-4">
-                <Slider
-                  value={[timerDuration]}
-                  onValueChange={handleTimerUpdate}
-                  min={1}
-                  max={60}
-                  step={1}
-                  className="w-[300px]"
-                />
-                <span className="font-mono">{timerDuration} min</span>
-              </div>
-            </div>
-          </div>
+        <Tabs defaultValue="stats" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsTrigger value="stats">Statistics</TabsTrigger>
+            <TabsTrigger value="timer">Timer Settings</TabsTrigger>
+            <TabsTrigger value="games">Game Management</TabsTrigger>
+          </TabsList>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Game Visibility</h3>
+          <TabsContent value="stats" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Sessions</CardTitle>
+                  <History className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{sessionStats.totalSessions}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Today's Sessions</CardTitle>
+                  <GamepadIcon className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{sessionStats.todaySessions}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Avg. Duration</CardTitle>
+                  <Timer className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{sessionStats.averageDuration} min</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Popular Games</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {sessionStats.popularGames.map((game) => (
+                    <div key={game.title} className="flex items-center justify-between">
+                      <span>{game.title}</span>
+                      <span className="text-muted-foreground">{game.count} sessions</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="timer">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Session Duration</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Label>Session Duration (minutes)</Label>
+                    <div className="flex items-center space-x-4">
+                      <Slider
+                        value={[timerDuration]}
+                        onValueChange={handleTimerUpdate}
+                        min={1}
+                        max={60}
+                        step={1}
+                        className="w-[300px]"
+                      />
+                      <span className="font-mono">{timerDuration} min</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="games">
             <div className="space-y-4">
               {games.map((game) => (
                 <div key={game.id} className="flex items-center justify-between p-4 bg-card rounded-lg border">
@@ -333,8 +449,8 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
                 <p className="text-muted-foreground text-center py-4">No games found</p>
               )}
             </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Edit Game Dialog */}
         {editingGame && (

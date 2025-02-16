@@ -27,6 +27,41 @@ export type Database = {
         }
         Relationships: []
       }
+      game_sessions: {
+        Row: {
+          created_at: string | null
+          duration: number
+          ended_at: string | null
+          game_id: string | null
+          id: string
+          started_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          duration: number
+          ended_at?: string | null
+          game_id?: string | null
+          id?: string
+          started_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          duration?: number
+          ended_at?: string | null
+          game_id?: string | null
+          id?: string
+          started_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_sessions_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       games: {
         Row: {
           created_at: string | null

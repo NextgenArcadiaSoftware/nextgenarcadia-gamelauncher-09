@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
@@ -97,6 +96,41 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
 
   const targetWord = getGameCode(activeGame);
 
+  // Add session tracking
+  const recordGameSession = async (duration: number) => {
+    if (!activeGame) return;
+
+    try {
+      // Get game ID first
+      const { data: gameData } = await supabase
+        .from('games')
+        .select('id')
+        .eq('title', activeGame)
+        .single();
+
+      if (gameData) {
+        // Record the session
+        await supabase
+          .from('game_sessions')
+          .insert({
+            game_id: gameData.id,
+            duration: Math.ceil(duration / 60), // Convert seconds to minutes
+            ended_at: new Date().toISOString()
+          });
+      }
+    } catch (error) {
+      console.error('Error recording game session:', error);
+    }
+  };
+
+  const [initialTimeLeft, setInitialTimeLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (timeLeft !== null) {
+      setInitialTimeLeft(timeLeft);
+    }
+  }, [timeLeft]);
+
   useEffect(() => {
     if (!showGameScreen && timeLeft !== null) {
       const interval = setInterval(() => {
@@ -104,6 +138,9 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
           if (!prev || prev <= 1) {
             clearInterval(interval);
             setShowRating(true);
+            // Record the session when it ends
+            const duration = initialTimeLeft! - prev;
+            recordGameSession(duration);
             return 0;
           }
           return prev - 1;
@@ -121,7 +158,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
 
       return () => clearInterval(interval);
     }
-  }, [showGameScreen, targetWord, timeLeft]);
+  }, [showGameScreen, targetWord, timeLeft, initialTimeLeft]);
 
   const handleRatingSubmit = (rating: number) => {
     // When exiting, send the stop command to the Python backend
