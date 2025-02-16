@@ -18,13 +18,19 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   ];
 
   const handleKeyClick = (key: string) => {
-    // First trigger the hidden button for Python backend
-    const button = document.getElementById('myButton');
-    if (button) {
-      button.click();
-    }
+    console.log(`Sending key: ${key}`);
+    
+    // Send key press to Flask server
+    fetch("http://127.0.0.1:5001/keypress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: key.toLowerCase() })
+    })
+    .then(response => response.json())
+    .then(data => console.log('Server response:', data))
+    .catch(error => console.error('Error:', error));
 
-    // Then dispatch DOM events for frontend
+    // Dispatch DOM event for frontend
     const keydownEvent = new KeyboardEvent('keydown', {
       key: key.toLowerCase(),
       code: `Key${key.toUpperCase()}`,
