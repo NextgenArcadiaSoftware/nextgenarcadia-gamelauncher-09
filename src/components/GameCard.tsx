@@ -1,3 +1,4 @@
+
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -40,13 +41,11 @@ export function GameCard({
   const navigate = useNavigate();
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    // Prevent default touch behavior to avoid conflicts
     e.stopPropagation();
   };
 
   const handlePlayButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
-    e.stopPropagation(); // Prevent event bubbling
-    // Map of games to their launch screen routes
+    e.stopPropagation();
     const launchScreenRoutes: Record<string, string> = {
       "Fruit Ninja VR": "/fruitninjalaunch",
       "Elven Assassin": "/elvenassassinlaunch",
@@ -70,11 +69,23 @@ export function GameCard({
 
   const getYouTubeEmbedUrl = (url: string) => {
     if (!url) return '';
-    if (url.includes('youtu.be')) {
-      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
+    
+    let videoId = '';
+    
+    // Handle youtu.be format
+    if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1];
+    } 
+    // Handle youtube.com format
+    else if (url.includes('youtube.com/watch')) {
+      const urlParams = new URLSearchParams(new URL(url).search);
+      videoId = urlParams.get('v') || '';
     }
-    const videoId = url.split('v=')[1]?.split('&')[0];
+    
+    // Remove any additional parameters
+    videoId = videoId.split('&')[0];
+    videoId = videoId.split('?')[0];
+    
     if (!videoId) return '';
     return `https://www.youtube.com/embed/${videoId}`;
   };
