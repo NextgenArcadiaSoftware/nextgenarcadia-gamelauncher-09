@@ -26,6 +26,14 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     return () => clearInterval(interval);
   }, []);
 
+  const handleExit = () => {
+    // Simulate X key press before exiting
+    if (window.electron) {
+      window.electron.ipcRenderer.send('simulate-keypress', 'x');
+    }
+    onExit();
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
       <div className="text-9xl font-mono mb-8 text-white animate-pulse tracking-widest">
@@ -43,7 +51,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         size="lg"
         variant="destructive"
         className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in flex items-center gap-2"
-        onClick={onExit}
+        onClick={handleExit}
       >
         <Delete className="w-6 h-6" />
         Exit Session
