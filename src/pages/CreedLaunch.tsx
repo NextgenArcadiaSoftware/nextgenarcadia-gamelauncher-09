@@ -9,7 +9,7 @@ export default function CreedLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Creed: Rise to Glory Championship Edition"
-      trailer="https://www.youtube.com/watch?v=HumpoJxwjvU"
+      trailer="https://www.youtube.com/watch?v=EgbCMJ54xeM"
     />
   );
 }
