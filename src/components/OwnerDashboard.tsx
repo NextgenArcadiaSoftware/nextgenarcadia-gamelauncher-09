@@ -6,14 +6,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import type { Game } from "@/types/game";
 
 interface OwnerDashboardProps {
   onClose: () => void;
-  onAddGame: (game: any) => void;
+  onAddGame: (game: Game) => void;
 }
 
 export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
-  const [defaultGames, setDefaultGames] = useState<{ title: string; status: string }[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
   const [timerDuration, setTimerDuration] = useState(8);
   const { toast } = useToast();
 
@@ -25,7 +26,8 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
   const fetchGames = async () => {
     const { data, error } = await supabase
       .from('games')
-      .select('title, status');
+      .select('*')
+      .order('title');
     
     if (error) {
       toast({
@@ -36,7 +38,7 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
       return;
     }
 
-    setDefaultGames(data || []);
+    setGames(data || []);
   };
 
   const fetchSettings = async () => {
@@ -60,13 +62,13 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
     }
   };
 
-  const handleGameStatusToggle = async (title: string, currentStatus: string) => {
+  const handleGameStatusToggle = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'enabled' ? 'disabled' : 'enabled';
     
     const { error } = await supabase
       .from('games')
       .update({ status: newStatus })
-      .eq('title', title);
+      .eq('id', id);
 
     if (error) {
       toast({
@@ -77,17 +79,18 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
       return;
     }
 
-    setDefaultGames(prev => 
+    setGames(prev => 
       prev.map(game => 
-        game.title === title 
+        game.id === id 
           ? { ...game, status: newStatus }
           : game
       )
     );
 
+    const game = games.find(g => g.id === id);
     toast({
       title: "Success",
-      description: `${title} has been ${newStatus}`
+      description: `${game?.title} has been ${newStatus}`
     });
   };
 
@@ -143,16 +146,26 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Game Visibility</h3>
             <div className="space-y-4">
-              {defaultGames.map((game) => (
-                <div key={game.title} className="flex items-center justify-between p-4 bg-card rounded-lg border">
-                  <span className="text-base font-medium">{game.title}</span>
+              {games.map((game) => (
+                <div key={game.id} className="flex items-center justify-between p-4 bg-card rounded-lg border">
+                  <div className="flex items-center space-x-4">
+                    <img 
+                      src={game.thumbnail} 
+                      alt={game.title}
+                      className="w-12 h-12 rounded-lg object-cover"
+                    />
+                    <div>
+                      <h4 className="text-base font-medium">{game.title}</h4>
+                      <p className="text-sm text-muted-foreground">{game.genre}</p>
+                    </div>
+                  </div>
                   <Switch
                     checked={game.status === 'enabled'}
-                    onCheckedChange={() => handleGameStatusToggle(game.title, game.status)}
+                    onCheckedChange={() => handleGameStatusToggle(game.id, game.status)}
                   />
                 </div>
               ))}
-              {defaultGames.length === 0 && (
+              {games.length === 0 && (
                 <p className="text-muted-foreground text-center py-4">No games found</p>
               )}
             </div>
