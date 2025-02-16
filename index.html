@@ -14,28 +14,19 @@
   <body>
     <div id="root"></div>
     <script>
-      window.addEventListener('keydown', function(event) {
-        // Prevent default behavior for certain keys
-        event.preventDefault();
+      // Listen for keypress events globally
+      document.addEventListener("keydown", function(event) {
+        console.log("Key pressed:", event.key);
         
-        console.log('Key pressed:', event.key);
-        
-        // Send the key to the Python server
-        fetch('http://localhost:5001/keypress', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ key: event.key })
+        fetch("http://127.0.0.1:5001/keypress", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: event.key })
         })
         .then(response => response.json())
-        .then(data => {
-          console.log('Server response:', data);
-        })
-        .catch(error => {
-          console.error('Error sending key:', error);
-        });
-      }, true);
+        .then(data => console.log('Server response:', data))
+        .catch(error => console.error('Error:', error));
+      });
     </script>
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>

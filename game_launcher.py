@@ -2,10 +2,13 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import keyboard
+import threading
+import json
+import os
 import time
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/keypress', methods=['POST'])
 def handle_keypress():
@@ -14,28 +17,34 @@ def handle_keypress():
         if not data:
             return jsonify({"error": "No data received"}), 400
         
-        key = data.get('key', '')
-        print(f"Received key: {key}")  # Debug log
+        key = data.get('key', '').lower()
+        print(f"Received key from web app: {key}")
         
-        # Force lower case and handle special keys
-        key = key.lower()
-        if key == 'escape':
-            key = 'esc'
-        elif key == ' ':
-            key = 'space'
-            
-        # Simulate the key press
-        keyboard.press_and_release(key)
-        print(f"Pressed key: {key}")  # Debug log
+        # Use keyboard.write() for more reliable key simulation
+        keyboard.write(key)
+        print(f"Key {key} written successfully")
         
-        return jsonify({"status": "success", "key": key}), 200
-        
+        return jsonify({
+            "status": "success",
+            "message": f"Key {key} pressed",
+            "key": key
+        }), 200
     except Exception as e:
-        print(f"Error: {str(e)}")  # Debug log
+        print(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy"}), 200
+
 if __name__ == "__main__":
-    print("\n=== Keystroke Server ===")
-    print("Starting server on http://localhost:5001")
-    print("Ready to receive keystrokes...")
-    app.run(host='localhost', port=5001, threaded=True)
+    try:
+        print("=== Game Launcher Server ===")
+        print(f"Starting server on http://localhost:5001")
+        print("Press Ctrl+C to exit")
+        print("Ready to receive keystrokes...")
+        
+        app.run(host='localhost', port=5001, threaded=True)
+        
+    except Exception as e:
+        print(f"Error starting server: {str(e)}")
