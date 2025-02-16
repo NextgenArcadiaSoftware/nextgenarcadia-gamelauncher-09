@@ -20,6 +20,22 @@ export function GameLaunchScreen({
   const [showLaunchScreen, setShowLaunchScreen] = useState(false);
   const { toast } = useToast();
 
+  // Map game titles to their launch keys
+  const gameLaunchKeys: Record<string, string> = {
+    "Fruit Ninja VR": "f",
+    "Crisis Brigade 2 Reloaded": "c",
+    "Subside": "s",
+    "Propagation VR": "p",
+    "iB Cricket": "i",
+    "Arizona Sunshine": "a",
+    "Undead Citadel": "u",
+    "Elven Assassin": "e",
+    "Richies Plank Experience": "r",
+    "All-in-One Sports VR": "v"
+  };
+
+  const currentLaunchKey = gameLaunchKeys[game.title] || "x";
+
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (/^\d$/.test(event.key) && !showLaunchScreen) {
@@ -30,15 +46,15 @@ export function GameLaunchScreen({
         setShowLaunchScreen(true);
       }
 
-      // Listen for C key press
-      if (event.key.toLowerCase() === 'c' && showLaunchScreen) {
+      // Listen for the game-specific launch key
+      if (event.key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
         handleGameStart();
       }
     };
     
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [game.title, showLaunchScreen, toast, onContinue]);
+  }, [game.title, showLaunchScreen, toast, onContinue, currentLaunchKey]);
 
   const handleGameStart = () => {
     toast({
@@ -56,7 +72,7 @@ export function GameLaunchScreen({
         button.click();
       }
 
-      if (key.toLowerCase() === 'c' && showLaunchScreen) {
+      if (key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
         handleGameStart();
       }
 
@@ -148,13 +164,13 @@ export function GameLaunchScreen({
 
           <div className="flex flex-col items-center gap-4 mt-8">
             <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
-              Press C When Ready
+              Press {currentLaunchKey.toUpperCase()} When Ready
             </div>
             <button 
-              onClick={() => simulateKeyPress('C')} 
+              onClick={() => simulateKeyPress(currentLaunchKey)} 
               className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
             >
-              C
+              {currentLaunchKey.toUpperCase()}
             </button>
           </div>
 
