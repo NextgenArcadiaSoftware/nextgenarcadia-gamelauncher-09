@@ -18,12 +18,16 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   ];
 
   const handleKeyClick = (key: string) => {
-    // First send key to Python backend via electron
+    // Send key press to Python backend
+    const lowerKey = key.toLowerCase();
+    console.log('Sending key press to Python:', lowerKey);
+    
     if (window.electron) {
-      window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
+      window.electron.ipcRenderer.send('simulate-keypress', lowerKey);
+      console.log('Key press sent via electron:', lowerKey);
     }
 
-    // Then call the provided callback
+    // Call the provided callback
     onKeyPress(key);
   };
 

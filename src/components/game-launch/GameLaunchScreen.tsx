@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -36,6 +37,8 @@ export function GameLaunchScreen({
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
+      console.log('Key pressed:', event.key.toLowerCase());
+      
       if (/^\d$/.test(event.key) && !showLaunchScreen) {
         toast({
           title: "✨ RFID Detected",
@@ -45,6 +48,7 @@ export function GameLaunchScreen({
       }
 
       if (event.key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
+        console.log('Launch key detected:', currentLaunchKey);
         handleGameStart();
       }
     };
@@ -54,6 +58,7 @@ export function GameLaunchScreen({
   }, [game.title, showLaunchScreen, toast, onContinue, currentLaunchKey]);
 
   const handleGameStart = () => {
+    console.log('Starting game:', game.title);
     toast({
       title: "🎮 Game Starting",
       description: "Starting your VR session"
@@ -62,11 +67,18 @@ export function GameLaunchScreen({
   };
 
   const simulateKeyPress = (key: string) => {
+    const lowerKey = key.toLowerCase();
+    console.log('Simulating key press:', lowerKey);
+
+    // Send key press to Python backend
     if (window.electron) {
-      window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
+      window.electron.ipcRenderer.send('simulate-keypress', lowerKey);
+      console.log('Key press sent via electron:', lowerKey);
     }
 
-    if (key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
+    // Check if this is the launch key
+    if (lowerKey === currentLaunchKey && showLaunchScreen) {
+      console.log('Launch key matched:', lowerKey);
       handleGameStart();
     }
 
