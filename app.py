@@ -34,6 +34,24 @@ def stop_current_game():
         except Exception as e:
             logger.error(f"Error terminating game: {str(e)}")
 
+@app.before_request
+def log_request_info():
+    logger.info(f'Headers: {request.headers}')
+    logger.info(f'Body: {request.get_data()}')
+    logger.info(f'Route: {request.path}')
+
+@app.route('/health', methods=['GET', 'OPTIONS'])
+def health_check():
+    """Health check endpoint to verify server is running"""
+    logger.info("Health check endpoint hit")
+    if request.method == 'OPTIONS':
+        response = jsonify({"status": "healthy"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', '*')
+        return response, 200
+    return jsonify({"status": "healthy"}), 200
+
 @app.route('/api/launch', methods=['POST'])
 def launch_game():
     global CURRENT_PROCESS
@@ -63,15 +81,34 @@ def launch_game():
         logger.info(f"Launching game: {path}")
         CURRENT_PROCESS = subprocess.Popen(path, shell=True)
         
-        # Simulate keyboard input for the Python script
-        keyboard.write('start_game')
-        keyboard.press('enter')
-        
         return jsonify({'status': 'Game launched successfully'}), 200
         
     except Exception as e:
         logger.error(f"Error launching game: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+@app.route('/keypress', methods=['POST'])
+def handle_keypress():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data received"}), 400
+        
+        key = data.get('key', '').lower()
+        logger.info(f"Received key from web app: {key}")
+        
+        # Simulate the key press
+        keyboard.press_and_release(key)
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Key {key} received and processed",
+            "key": key
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error processing request: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.errorhandler(404)
 def not_found(e):
@@ -85,7 +122,8 @@ if __name__ == '__main__':
     print("\n=== Game Launcher Server ===")
     print("\nServer Configuration:")
     print("- Logging enabled: check game_launcher.log for details")
+    print("- Server running on: http://localhost:5001")
     print("\nStarting server...")
     
     # Start the server
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='localhost', port=5001, debug=True, threaded=True)
