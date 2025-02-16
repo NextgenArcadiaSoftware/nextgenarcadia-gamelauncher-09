@@ -112,6 +112,22 @@ export function GameCard({
     ? "https://www.youtube.com/watch?v=pZHvTXD7QEw"
     : title === "All-in-One Sports VR"
     ? "https://www.youtube.com/watch?v=Lva5G1a0kB0"
+    : title === "Fruit Ninja VR"
+    ? "https://www.youtube.com/watch?v=hPY4TRRHwZc"
+    : title === "Richies Plank Experience"
+    ? "https://www.youtube.com/watch?v=faNsP7ExSt0"
+    : title === "Elven Assassin"
+    ? "https://www.youtube.com/watch?v=D94cNMNyMy4"
+    : title === "Undead Citadel"
+    ? "https://www.youtube.com/watch?v=q-OlIIXZ3zk"
+    : title === "Arizona Sunshine II"
+    ? "https://www.youtube.com/watch?v=kNaSe37rcG4"
+    : title === "iB Cricket"
+    ? "https://www.youtube.com/watch?v=op7O-zLA71A"
+    : title === "Propagation VR"
+    ? "https://www.youtube.com/watch?v=TbTF1u6vHho"
+    : title === "Subside"
+    ? "https://www.youtube.com/watch?v=NIlqmYLAioM"
     : trailer;
 
   return (
