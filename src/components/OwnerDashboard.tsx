@@ -101,7 +101,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
   }
 ];
 
-export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
+export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [timerDuration, setTimerDuration] = useState(8);
   const [editingGame, setEditingGame] = useState<Game | null>(null);
@@ -176,21 +176,24 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
       .select('duration')
       .not('duration', 'is', null);
 
-    const averageDuration = durationData?.length 
-      ? durationData.reduce((acc, curr) => acc + curr.duration, 0) / durationData.length 
+    const averageDuration = durationData && durationData.length > 0
+      ? Math.round(durationData.reduce((acc, curr) => acc + (curr.duration || 0), 0) / durationData.length)
       : 0;
 
     const { data: popularGamesData } = await supabase
       .from('game_sessions')
       .select(`
-        game_id,
-        games!inner(title)
+        games:game_id (
+          title
+        )
       `)
-      .limit(5);
+      .not('game_id', 'is', null);
 
     const gamePlayCounts = popularGamesData?.reduce((acc: {[key: string]: number}, session: any) => {
-      const title = session.games.title;
-      acc[title] = (acc[title] || 0) + 1;
+      if (session.games?.title) {
+        const title = session.games.title;
+        acc[title] = (acc[title] || 0) + 1;
+      }
       return acc;
     }, {});
 
@@ -202,7 +205,7 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
     setSessionStats({
       totalSessions: totalSessions || 0,
       todaySessions: todaySessions || 0,
-      averageDuration: Math.round(averageDuration),
+      averageDuration,
       popularGames
     });
   };
