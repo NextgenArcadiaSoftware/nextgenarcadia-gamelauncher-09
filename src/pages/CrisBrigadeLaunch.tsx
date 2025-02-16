@@ -9,6 +9,7 @@ export default function CrisBrigadeLaunch() {
     <RFIDCountdown 
       onExit={() => navigate('/')} 
       activeGame="Crisis Brigade 2 Reloaded"
+      trailer="https://www.youtube.com/watch?v=pZHvTXD7QEw"
     />
   );
 }
