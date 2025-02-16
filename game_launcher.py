@@ -21,7 +21,8 @@ GAMES = {
 }
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Configure CORS to allow all origins and methods
+CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"]}})
 
 def on_key_event(event):
     key = event.name.lower()
@@ -68,9 +69,11 @@ def handle_keypress():
         print(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/health', methods=['GET'])
+@app.route('/health', methods=['GET', 'OPTIONS'])
 def health_check():
-    return jsonify({"status": "healthy"}), 200
+    """Health check endpoint to verify server is running"""
+    response = jsonify({"status": "healthy"})
+    return response, 200
 
 if __name__ == "__main__":
     try:
@@ -92,8 +95,8 @@ if __name__ == "__main__":
         print("V -> All-in-One Sports VR")
         print("\nPress Ctrl+C to exit")
         
-        # Run the Flask app
-        app.run(host='localhost', port=5001, debug=True)
+        # Run the Flask app with threaded=True for better handling of concurrent requests
+        app.run(host='localhost', port=5001, debug=True, threaded=True)
         
     except Exception as e:
         print(f"Error starting server: {str(e)}")
