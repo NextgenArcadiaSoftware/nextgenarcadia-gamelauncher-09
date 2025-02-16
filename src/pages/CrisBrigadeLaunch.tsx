@@ -1,15 +1,27 @@
 
 import { useNavigate } from 'react-router-dom';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export default function CrisBrigadeLaunch() {
   const navigate = useNavigate();
 
   return (
-    <RFIDCountdown 
-      onExit={() => navigate('/')} 
-      activeGame="Crisis Brigade 2 Reloaded"
-      trailer="https://www.youtube.com/watch?v=3mEcenluId4"
-    />
+    <div>
+      <Button 
+        variant="ghost" 
+        className="fixed top-4 left-4 z-50"
+        onClick={() => navigate('/')}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
+      <RFIDCountdown 
+        onExit={() => navigate('/')} 
+        activeGame="Crisis Brigade 2 Reloaded"
+        trailer="https://www.youtube.com/watch?v=3mEcenluId4"
+      />
+    </div>
   );
 }

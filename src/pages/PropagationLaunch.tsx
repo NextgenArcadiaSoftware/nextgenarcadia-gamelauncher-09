@@ -1,15 +1,27 @@
 
 import { useNavigate } from 'react-router-dom';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export default function PropagationLaunch() {
   const navigate = useNavigate();
 
   return (
-    <RFIDCountdown 
-      onExit={() => navigate('/')} 
-      activeGame="Propagation VR"
-      trailer="https://www.youtube.com/watch?v=wwj_5R3eEYM"
-    />
+    <div>
+      <Button 
+        variant="ghost" 
+        className="fixed top-4 left-4 z-50"
+        onClick={() => navigate('/')}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
+      <RFIDCountdown 
+        onExit={() => navigate('/')} 
+        activeGame="Propagation VR"
+        trailer="https://www.youtube.com/watch?v=wwj_5R3eEYM"
+      />
+    </div>
   );
 }
