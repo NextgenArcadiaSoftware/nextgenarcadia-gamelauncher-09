@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pencil, Timer, GamepadIcon, History } from "lucide-react";
+import { Pencil, Timer, GamepadIcon, History, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
 
@@ -576,16 +576,70 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="thumbnail">Thumbnail URL</Label>
-                  <Input
-                    id="thumbnail"
-                    type="url"
-                    value={editingGame.thumbnail}
-                    onChange={(e) =>
-                      setEditingGame({ ...editingGame, thumbnail: e.target.value })
-                    }
-                    required
-                  />
+                  <Label htmlFor="thumbnail">Thumbnail Image</Label>
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={editingGame.thumbnail} 
+                        alt={editingGame.title}
+                        className="w-24 h-24 object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="flex-grow space-y-2">
+                      <Input
+                        id="thumbnail"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+
+                          try {
+                            const fileExt = file.name.split('.').pop();
+                            const filePath = `${editingGame.id}-thumbnail.${fileExt}`;
+
+                            const { error: uploadError } = await supabase.storage
+                              .from('game-thumbnails')
+                              .upload(filePath, file, {
+                                upsert: true
+                              });
+
+                            if (uploadError) throw uploadError;
+
+                            const { data: { publicUrl } } = supabase.storage
+                              .from('game-thumbnails')
+                              .getPublicUrl(filePath);
+
+                            setEditingGame({ ...editingGame, thumbnail: publicUrl });
+                            
+                            toast({
+                              title: "Success",
+                              description: "Thumbnail uploaded successfully",
+                            });
+                          } catch (error) {
+                            console.error('Error uploading thumbnail:', error);
+                            toast({
+                              variant: "destructive",
+                              title: "Error",
+                              description: "Failed to upload thumbnail",
+                            });
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          document.getElementById('thumbnail')?.click();
+                        }}
+                        className="w-full"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload New Image
+                      </Button>
+                    </div>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="trailer">Trailer URL (Optional)</Label>
