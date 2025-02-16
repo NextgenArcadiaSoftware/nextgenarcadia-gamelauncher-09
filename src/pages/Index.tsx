@@ -25,6 +25,18 @@ const GAME_TRIGGERS: Record<string, string> = {
   "Creed: Rise to Glory Championship Edition": "start_creed"
 };
 
+const BEAT_SABER = {
+  title: "Beat Saber",
+  description: "Swing your sabers through the beats in the most popular VR rhythm game! Cut through blocks to your favorite music and become a legend in this immersive musical journey.",
+  genre: "Rhythm",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/b647b9b5-c6c6-4c53-8ae9-4f990eb7ec37.png",
+  executable_path: "steam://rungameid/620980",
+  launch_code: "BEAT",
+  status: "enabled" as const,
+  trailer: "https://www.youtube.com/watch?v=vL39Sg2AqWg"
+};
+
 const CREED = {
   title: "Creed: Rise to Glory Championship Edition",
   description: "Step into the ring as Adonis Creed and experience the thrill of professional boxing in VR. Train with Rocky Balboa, face challenging opponents, and rise through the ranks to become a champion in this immersive boxing experience.",
@@ -166,7 +178,7 @@ const Index = () => {
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const categories = ["All", "Action", "FPS", "Horror", "Sports", "Simulation", "Adventure"];
+  const categories = ["All", "Action", "FPS", "Horror", "Sports", "Simulation", "Adventure", "Rhythm"];
 
   useEffect(() => {
     fetchGames();
@@ -209,7 +221,8 @@ const Index = () => {
           PROPAGATION,
           SUBSIDE,
           CRISIS_BRIGADE,
-          CREED
+          CREED,
+          BEAT_SABER
         ] as Game[];
         setGames(defaultGames);
         toast({
@@ -236,7 +249,8 @@ const Index = () => {
         PROPAGATION,
         SUBSIDE,
         CRISIS_BRIGADE,
-        CREED
+        CREED,
+        BEAT_SABER
       ] as Game[];
       setGames(defaultGames);
     }
