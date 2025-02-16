@@ -17,18 +17,44 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   ];
 
-  const handleKeyClick = (key: string) => {
-    // Send key press to Python backend
-    const lowerKey = key.toLowerCase();
-    console.log('Sending key press to Python:', lowerKey);
-    
-    if (window.electron) {
-      window.electron.ipcRenderer.send('simulate-keypress', lowerKey);
-      console.log('Key press sent via electron:', lowerKey);
-    }
+  const sendKeyToServer = async (key: string) => {
+    try {
+      const response = await fetch('http://localhost:5001/keypress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ key: key })
+      });
 
-    // Call the provided callback
-    onKeyPress(key);
+      const data = await response.json();
+      console.log('Server response:', data);
+
+      // Call the provided callback after successful server communication
+      onKeyPress(key);
+    } catch (error) {
+      console.error('Error sending key to server:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    const handlePhysicalKeyPress = (event: KeyboardEvent) => {
+      console.log('Physical key pressed:', event.key);
+      sendKeyToServer(event.key);
+    };
+
+    // Add global keyboard listener
+    window.addEventListener('keydown', handlePhysicalKeyPress);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handlePhysicalKeyPress);
+    };
+  }, []);
+
+  const handleKeyClick = (key: string) => {
+    console.log('Virtual key clicked:', key);
+    sendKeyToServer(key);
   };
 
   return (
@@ -53,7 +79,10 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
         ))}
         <div className="flex justify-center gap-1 mt-2">
           <button
-            onClick={onBackspace}
+            onClick={() => {
+              sendKeyToServer('Backspace');
+              onBackspace();
+            }}
             className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 
                      text-white transition-colors duration-200
                      border border-white/10 backdrop-blur-sm"
@@ -61,7 +90,10 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
             <Delete className="w-5 h-5" />
           </button>
           <button
-            onClick={() => handleKeyClick(' ')}
+            onClick={() => {
+              sendKeyToServer(' ');
+              handleKeyClick(' ');
+            }}
             className="px-16 py-2 rounded-lg bg-white/10 hover:bg-white/20 
                      text-white transition-colors duration-200
                      border border-white/10 backdrop-blur-sm"
@@ -69,7 +101,10 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
             Space
           </button>
           <button
-            onClick={onEnter}
+            onClick={() => {
+              sendKeyToServer('Enter');
+              onEnter();
+            }}
             className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 
                      text-white transition-colors duration-200
                      border border-white/10 backdrop-blur-sm"
