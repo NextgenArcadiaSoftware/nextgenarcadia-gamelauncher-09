@@ -5,6 +5,7 @@ import keyboard
 import threading
 import json
 import os
+import time
 
 # Dictionary mapping game codes to their executable paths
 GAMES = {
@@ -23,7 +24,12 @@ GAMES = {
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+# Global variable to store the last pressed key
+last_pressed_key = None
+
 def on_key_event(event):
+    global last_pressed_key
+    last_pressed_key = event.name
     print(f"Key Pressed: {event.name}")
 
 @app.route('/keypress', methods=['POST'])
@@ -36,16 +42,23 @@ def handle_keypress():
         key = data.get('key', '').lower()
         print(f"Received key from web app: {key}")
         
-        # Direct key press simulation
-        keyboard.press_and_release(key)
+        # Directly simulate the key press with a small delay
+        keyboard.press(key)
+        time.sleep(0.1)  # Add a small delay
+        keyboard.release(key)
         
         return jsonify({
             "status": "success",
-            "message": f"Key {key} received and processed"
+            "message": f"Key {key} received and processed",
+            "last_pressed": last_pressed_key
         }), 200
     except Exception as e:
         print(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/last-key', methods=['GET'])
+def get_last_key():
+    return jsonify({"last_key": last_pressed_key})
 
 @app.route('/health', methods=['GET'])
 def health_check():
@@ -59,9 +72,10 @@ if __name__ == "__main__":
         print("=== Game Launcher Server ===")
         print(f"Starting server on http://localhost:5001")
         print("Press Ctrl+C to exit")
+        print("Keyboard listener active...")
         
-        # Run the Flask app
-        app.run(host='localhost', port=5001, debug=True)
+        # Run the Flask app without debug mode to prevent duplicate keyboard listeners
+        app.run(host='localhost', port=5001, debug=False)
         
     except Exception as e:
         print(f"Error starting server: {str(e)}")
