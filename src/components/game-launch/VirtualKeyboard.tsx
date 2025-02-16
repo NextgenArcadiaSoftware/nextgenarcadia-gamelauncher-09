@@ -20,8 +20,8 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   const handleKeyClick = (key: string) => {
     console.log(`Virtual Keyboard - Sending key: ${key}`);
     
-    // For the 'U' key, ensure we're sending the correct case
-    const keyToSend = key === 'U' ? 'u' : key.toLowerCase();
+    // Always send lowercase key to server
+    const keyToSend = key.toLowerCase();
     
     // Send key press to Flask server
     fetch("http://127.0.0.1:5001/keypress", {
@@ -29,11 +29,16 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key: keyToSend })
     })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then(data => console.log('Server response:', data))
     .catch(error => console.error('Error:', error));
 
-    // Create and dispatch keyboard event
+    // Create keyboard event with lowercase key
     const keyboardEvent = new KeyboardEvent('keydown', {
       key: keyToSend,
       code: `Key${key.toUpperCase()}`,
