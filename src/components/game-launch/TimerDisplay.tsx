@@ -1,8 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { Delete } from 'lucide-react';
 import { Button } from '../ui/button';
-import { VirtualKeyboard } from './VirtualKeyboard';
 
 interface TimerDisplayProps {
   timeLeft: number;
@@ -12,7 +10,6 @@ interface TimerDisplayProps {
 
 export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
-  const [inputWord, setInputWord] = useState('');
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -47,26 +44,11 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
       }
 
       console.log("Key sent successfully to server");
-      
-      // Call the provided exit callback
       onExit();
     } catch (error) {
       console.error('Error sending exit keystroke:', error);
-      onExit(); // Still exit even if key simulation fails
+      onExit();
     }
-  };
-
-  const handleKeyPress = (key: string) => {
-    setInputWord(prev => prev + key);
-  };
-
-  const handleBackspace = () => {
-    setInputWord(prev => prev.slice(0, -1));
-  };
-
-  const handleEnter = () => {
-    // Clear input after enter
-    setInputWord('');
   };
 
   return (
@@ -82,31 +64,19 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
           Currently Playing: {activeGame}
         </div>
       )}
-      <div className="w-full max-w-3xl px-4 space-y-8">
-        <div className="bg-black/20 backdrop-blur-sm p-4 rounded-lg mb-4">
-          <input
-            type="text"
-            value={inputWord}
-            readOnly
-            className="w-full bg-transparent text-white text-2xl text-center border-none outline-none"
-            placeholder="Type using the keyboard below..."
-          />
-        </div>
-        <VirtualKeyboard
-          onKeyPress={handleKeyPress}
-          onBackspace={handleBackspace}
-          onEnter={handleEnter}
-          inputWord={inputWord}
-        />
-        <Button
-          size="lg"
-          variant="destructive"
-          className="w-full bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in flex items-center gap-2 justify-center mt-4"
+      <div className="flex flex-col items-center space-y-4">
+        <button
           onClick={handleExit}
+          className="w-32 h-32 rounded-full bg-[#ea384c] text-white text-6xl font-bold 
+                   shadow-[0_0_20px_rgba(234,56,76,0.5),0_0_40px_rgba(234,56,76,0.3)] 
+                   hover:shadow-[0_0_30px_rgba(234,56,76,0.7),0_0_50px_rgba(234,56,76,0.5)] 
+                   transition-all duration-300 hover:scale-110 animate-pulse"
         >
-          <Delete className="w-6 h-6" />
+          Z
+        </button>
+        <span className="text-white text-xl font-medium tracking-wide animate-fade-in">
           Exit Session
-        </Button>
+        </span>
       </div>
     </div>
   );
