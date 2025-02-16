@@ -24,6 +24,12 @@ app = Flask(__name__)
 # Configure CORS to allow all origins and methods
 CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"]}})
 
+@app.before_request
+def log_request_info():
+    print('Headers: %s', request.headers)
+    print('Body: %s', request.get_data())
+    print('Route: %s', request.path)
+
 def on_key_event(event):
     key = event.name.lower()
     print(f"Key detected: {key}")
@@ -69,11 +75,22 @@ def handle_keypress():
         print(f"Error processing request: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/')
+def index():
+    return jsonify({"status": "Server is running"}), 200
+
 @app.route('/health', methods=['GET', 'OPTIONS'])
 def health_check():
     """Health check endpoint to verify server is running"""
-    response = jsonify({"status": "healthy"})
-    return response, 200
+    print("Health check endpoint hit")
+    if request.method == 'OPTIONS':
+        # Manually set CORS headers for OPTIONS request
+        response = jsonify({"status": "healthy"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', '*')
+        return response, 200
+    return jsonify({"status": "healthy"}), 200
 
 if __name__ == "__main__":
     try:
