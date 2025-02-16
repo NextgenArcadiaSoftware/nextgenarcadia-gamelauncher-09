@@ -65,6 +65,16 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     status: "enabled"
   },
   {
+    title: "Richies Plank Experience",
+    description: "Face your fears in VR! Walk a narrow plank 80 stories high above a bustling city.",
+    genre: "Simulation",
+    release_date: "2016-12-21",
+    thumbnail: "/lovable-uploads/85469694-f6e4-42b2-b7fb-891c0cdc883a.png",
+    trailer: "https://www.youtube.com/watch?v=faNsP7ExSt0",
+    executable_path: "steam://rungameid/517160",
+    status: "enabled"
+  },
+  {
     title: "RollerCoaster Legends",
     description: "Experience thrilling roller coaster rides in stunning virtual environments.",
     genre: "Adventure",
