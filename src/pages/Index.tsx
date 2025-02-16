@@ -30,12 +30,12 @@ const CREED = {
   description: "Step into the ring as Adonis Creed and experience the thrill of professional boxing in VR. Train with Rocky Balboa, face challenging opponents, and rise through the ranks to become a champion in this immersive boxing experience.",
   genre: "Sports",
   release_date: "2023-12-01",
-  thumbnail: "/lovable-uploads/5aa9a42e-0138-44d9-bdaf-778360a03730.png",
+  thumbnail: "/lovable-uploads/1a1125bb-7f6a-42dd-a5f3-8a095ae5e5dd.png",
   executable_path: "steam://rungameid/2147530",
   launch_code: "CREED",
-  status: "enabled",
+  status: "enabled" as const,
   trailer: "https://www.youtube.com/watch?v=HumpoJxwjvU"
-} as const;
+};
 
 const ALL_IN_ONE_SPORTS = {
   title: "All-in-One Sports VR",
@@ -47,7 +47,7 @@ const ALL_IN_ONE_SPORTS = {
   launch_code: "SPORTS",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=LNRD5qxDhHY"
-} as const;
+};
 
 const FRUIT_NINJA = {
   title: "Fruit Ninja VR",
@@ -59,7 +59,7 @@ const FRUIT_NINJA = {
   launch_code: "NINJA",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=hX_ohz6pP_I"
-} as const;
+};
 
 const RICHIES_PLANK = {
   title: "Richies Plank Experience",
@@ -71,7 +71,7 @@ const RICHIES_PLANK = {
   launch_code: "PLANK",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=8pFz-DqWZq0"
-} as const;
+};
 
 const ELVEN_ASSASSIN = {
   title: "Elven Assassin",
@@ -83,7 +83,7 @@ const ELVEN_ASSASSIN = {
   launch_code: "ELVEN",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=N7nX9nZlvx4"
-} as const;
+};
 
 const UNDEAD_CITADEL = {
   title: "Undead Citadel",
@@ -95,7 +95,7 @@ const UNDEAD_CITADEL = {
   launch_code: "CITADEL",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=5QI8cPCAO9Q"
-} as const;
+};
 
 const ARIZONA_SUNSHINE = {
   title: "Arizona Sunshine II",
@@ -107,7 +107,7 @@ const ARIZONA_SUNSHINE = {
   launch_code: "ARIZONA",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=eZ65ppbWuAE"
-} as const;
+};
 
 const IB_CRICKET = {
   title: "iB Cricket",
@@ -119,7 +119,7 @@ const IB_CRICKET = {
   launch_code: "CRICKET",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=CqZpFWJaCvg"
-} as const;
+};
 
 const PROPAGATION = {
   title: "Propagation VR",
@@ -131,7 +131,7 @@ const PROPAGATION = {
   launch_code: "PROP",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=WWKqTyUobSQ"
-} as const;
+};
 
 const SUBSIDE = {
   title: "Subside",
@@ -143,7 +143,7 @@ const SUBSIDE = {
   launch_code: "SUBSIDE",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=8mJj4M_ZuBc"
-} as const;
+};
 
 const CRISIS_BRIGADE = {
   title: "Crisis Brigade 2 Reloaded",
@@ -155,7 +155,7 @@ const CRISIS_BRIGADE = {
   launch_code: "CRISIS",
   status: "enabled",
   trailer: "https://www.youtube.com/watch?v=7iiMxGrcHXU"
-} as const;
+};
 
 const Index = () => {
   const [games, setGames] = useState<Game[]>([]);
@@ -189,8 +189,12 @@ const Index = () => {
 
       if (data && data.length > 0) {
         console.log('Number of games fetched:', data.length);
-        setGames(data);
-        console.log('Games state updated with:', data);
+        const typedGames = data.map(game => ({
+          ...game,
+          status: game.status as "enabled" | "disabled"
+        }));
+        setGames(typedGames);
+        console.log('Games state updated with:', typedGames);
       } else {
         console.log('No games found in the database');
         // Set default games if no games are found in the database
