@@ -103,7 +103,7 @@ export function GameCard({
     setImageSrc(`https://source.unsplash.com/random/800x600/?${encodeURIComponent(genre.toLowerCase())}`);
   };
 
-  const videoUrl = title === "Crisis Brigade 2 Reloaded"
+  const videoUrl = title === "Creed: Rise to Glory Championship Edition"
     ? "https://www.youtube.com/watch?v=pZHvTXD7QEw"
     : trailer;
 
