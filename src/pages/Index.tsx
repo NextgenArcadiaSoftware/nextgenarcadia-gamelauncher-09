@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -22,8 +21,21 @@ const GAME_TRIGGERS: Record<string, string> = {
   "Undead Citadel": "start_citadel",
   "Arizona Sunshine": "start_arizona",
   "Subside": "start_subside",
-  "Propagation VR": "start_prop"
+  "Propagation VR": "start_prop",
+  "Creed: Rise to Glory Championship Edition": "start_creed"
 };
+
+const CREED = {
+  title: "Creed: Rise to Glory Championship Edition",
+  description: "Step into the ring as Adonis Creed and experience the thrill of professional boxing in VR. Train with Rocky Balboa, face challenging opponents, and rise through the ranks to become a champion in this immersive boxing experience.",
+  genre: "Sports",
+  release_date: "2023-12-01",
+  thumbnail: "/lovable-uploads/5aa9a42e-0138-44d9-bdaf-778360a03730.png",
+  executable_path: "steam://rungameid/2147530",
+  launch_code: "CREED",
+  status: "enabled",
+  trailer: "https://www.youtube.com/watch?v=HumpoJxwjvU"
+} as const;
 
 const ALL_IN_ONE_SPORTS = {
   title: "All-in-One Sports VR",
@@ -192,7 +204,8 @@ const Index = () => {
           IB_CRICKET,
           PROPAGATION,
           SUBSIDE,
-          CRISIS_BRIGADE
+          CRISIS_BRIGADE,
+          CREED
         ] as Game[];
         setGames(defaultGames);
         toast({
@@ -218,7 +231,8 @@ const Index = () => {
         IB_CRICKET,
         PROPAGATION,
         SUBSIDE,
-        CRISIS_BRIGADE
+        CRISIS_BRIGADE,
+        CREED
       ] as Game[];
       setGames(defaultGames);
     }
