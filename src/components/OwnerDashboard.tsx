@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,14 +29,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
-import { AddGameDialog } from "./AddGameDialog";
 
 interface OwnerDashboardProps {
   onClose: () => void;
   onAddGame: (game: any) => void;
 }
 
-export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
+export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingGame, setEditingGame] = useState<Game | null>(null);
@@ -230,6 +230,27 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="settings">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="timer-duration">Session Duration (minutes)</Label>
+                <Input
+                  id="timer-duration"
+                  type="number"
+                  value={timerDuration ?? ''}
+                  onChange={(e) => {
+                    const newDuration = parseInt(e.target.value);
+                    if (!isNaN(newDuration)) {
+                      handleTimerDurationChange(newDuration);
+                    }
+                  }}
+                  placeholder="Loading..."
+                  disabled={timerDuration === null}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="games">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
@@ -243,7 +264,6 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
                   />
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
-                <AddGameDialog onAddGame={onAddGame} />
               </div>
 
               <div className="space-y-4">
@@ -427,27 +447,6 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
                     )}
                   </div>
                 )}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="timer-duration">Session Duration (minutes)</Label>
-                <Input
-                  id="timer-duration"
-                  type="number"
-                  value={timerDuration ?? ''}
-                  onChange={(e) => {
-                    const newDuration = parseInt(e.target.value);
-                    if (!isNaN(newDuration)) {
-                      handleTimerDurationChange(newDuration);
-                    }
-                  }}
-                  placeholder="Loading..."
-                  disabled={timerDuration === null}
-                />
               </div>
             </div>
           </TabsContent>
