@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
@@ -153,7 +154,7 @@ const Index = () => {
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const categories = ["All", "Action", "FPS", "Horror", "Sports", "Simulation"];
+  const categories = ["All", "Action", "FPS", "Horror", "Sports", "Simulation", "Adventure"];
 
   useEffect(() => {
     fetchGames();
@@ -161,24 +162,29 @@ const Index = () => {
 
   const fetchGames = async () => {
     try {
+      console.log('Fetching games from Supabase...');
       const { data, error } = await supabase
         .from('games')
         .select('*')
-        .order('created_at', { ascending: false });
+        .eq('status', 'enabled');
 
       if (error) {
+        console.error('Supabase error:', error);
         throw error;
       }
 
-      if (data) {
-        console.log('Fetched games:', data);
-        setGames(data as Game[]);
+      console.log('Raw games data:', data);
+
+      if (data && data.length > 0) {
+        console.log('Number of games fetched:', data.length);
+        setGames(data);
+        console.log('Games state updated with:', data);
       } else {
-        console.error('No games found in the database');
+        console.log('No games found in the database');
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "No games found in the database",
+          title: "No Games Found",
+          description: "No games are currently available in the library",
         });
         setGames([]);
       }
@@ -187,7 +193,7 @@ const Index = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch games",
+        description: "Failed to fetch games from the database",
       });
       setGames([]);
     }
@@ -279,6 +285,9 @@ const Index = () => {
   const filteredGames = selectedCategory === "All" 
     ? games 
     : games.filter(game => game.genre === selectedCategory);
+
+  console.log('Filtered games:', filteredGames);
+  console.log('Selected category:', selectedCategory);
 
   return (
     <div className="min-h-screen animate-gradient" style={{
