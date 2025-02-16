@@ -20,12 +20,14 @@ def handle_keypress():
         key = data.get('key', '').lower()
         print(f"Received key from web app: {key}")
         
-        # Simple direct key press
+        # Use keyboard.write() for more reliable key simulation
         keyboard.write(key)
+        print(f"Key {key} written successfully")
         
         return jsonify({
             "status": "success",
-            "message": f"Key {key} pressed"
+            "message": f"Key {key} pressed",
+            "key": key
         }), 200
     except Exception as e:
         print(f"Error processing request: {str(e)}")
@@ -40,9 +42,9 @@ if __name__ == "__main__":
         print("=== Game Launcher Server ===")
         print(f"Starting server on http://localhost:5001")
         print("Press Ctrl+C to exit")
+        print("Ready to receive keystrokes...")
         
-        # Run the Flask app without debug mode
-        app.run(host='localhost', port=5001, debug=False)
+        app.run(host='localhost', port=5001, threaded=True)
         
     except Exception as e:
         print(f"Error starting server: {str(e)}")

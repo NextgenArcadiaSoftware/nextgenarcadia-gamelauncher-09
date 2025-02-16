@@ -74,7 +74,7 @@ app.on('activate', () => {
   }
 });
 
-// Simplified key press handler
+// Direct key press handler
 ipcMain.on('simulate-keypress', async (event, key) => {
   console.log('Received key press in main process:', key);
 
@@ -90,7 +90,7 @@ ipcMain.on('simulate-keypress', async (event, key) => {
     }
 
     const data = await response.json();
-    console.log('Key press response:', data);
+    console.log('Key press successful:', data);
   } catch (error) {
     console.error('Error sending key press:', error);
   }
