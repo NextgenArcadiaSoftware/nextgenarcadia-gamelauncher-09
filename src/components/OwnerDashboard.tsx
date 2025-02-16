@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { Search, Pencil, Trash2 } from "lucide-react";
+import { Search, Pencil, Trash2, Play } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -29,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
+import { useNavigate } from "react-router-dom";
 
 interface OwnerDashboardProps {
   onClose: () => void;
@@ -41,6 +41,7 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
   const [editingGame, setEditingGame] = useState<Game | null>(null);
   const [timerDuration, setTimerDuration] = useState<number | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchGames();
@@ -109,6 +110,36 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
         variant: "destructive",
         title: "Error",
         description: "Failed to update timer duration",
+      });
+    }
+  };
+
+  const handleLaunchGame = (title: string) => {
+    const launchScreenRoutes: Record<string, string> = {
+      "Fruit Ninja VR": "/fruitninjalaunch",
+      "Elven Assassin": "/elvenassassinlaunch",
+      "Crisis Brigade 2 Reloaded": "/crisisbrigadelaunch",
+      "All-in-One Sports VR": "/sportslaunch",
+      "Richies Plank Experience": "/planklaunch",
+      "iB Cricket": "/cricketlaunch",
+      "Undead Citadel": "/undeadcitadellaunch",
+      "Arizona Sunshine II": "/arizonalaunch",
+      "Subside": "/subsidelaunch",
+      "Propagation VR": "/propagationlaunch",
+      "Creed: Rise to Glory Championship Edition": "/creedlaunch",
+      "Beat Saber": "/beatlaunch",
+      "RollerCoaster Legends": "/rollerlaunch"
+    };
+
+    const route = launchScreenRoutes[title];
+    if (route) {
+      navigate(route);
+      onClose();
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Launch route not found for this game",
       });
     }
   };
@@ -289,6 +320,15 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
                     </div>
 
                     <div className="flex items-center gap-4">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleLaunchGame(game.title)}
+                        className="text-primary"
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
+
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={game.status === 'enabled'}
