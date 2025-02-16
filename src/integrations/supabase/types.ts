@@ -27,6 +27,35 @@ export type Database = {
         }
         Relationships: []
       }
+      game_ratings: {
+        Row: {
+          created_at: string | null
+          game_id: string | null
+          id: string
+          rating: number
+        }
+        Insert: {
+          created_at?: string | null
+          game_id?: string | null
+          id?: string
+          rating: number
+        }
+        Update: {
+          created_at?: string | null
+          game_id?: string | null
+          id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_ratings_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_sessions: {
         Row: {
           created_at: string | null

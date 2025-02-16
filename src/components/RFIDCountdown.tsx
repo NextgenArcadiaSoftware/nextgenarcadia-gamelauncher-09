@@ -160,10 +160,33 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
     }
   }, [showGameScreen, targetWord, timeLeft, initialTimeLeft]);
 
-  const handleRatingSubmit = (rating: number) => {
+  const handleRatingSubmit = async (rating: number) => {
     // When exiting, send the stop command to the Python backend
     if (window.electron) {
       window.electron.ipcRenderer.send('stop-game', targetWord);
+    }
+    
+    if (activeGame) {
+      try {
+        // Get game ID first
+        const { data: gameData } = await supabase
+          .from('games')
+          .select('id')
+          .eq('title', activeGame)
+          .single();
+
+        if (gameData) {
+          // Record the rating
+          await supabase
+            .from('game_ratings')
+            .insert({
+              game_id: gameData.id,
+              rating
+            });
+        }
+      } catch (error) {
+        console.error('Error recording game rating:', error);
+      }
     }
     
     toast({

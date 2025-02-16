@@ -111,13 +111,52 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
     averageDuration: 0,
     popularGames: [] as { title: string; count: number }[]
   });
+  const [gameRatings, setGameRatings] = useState<{
+    title: string;
+    averageRating: number;
+    totalRatings: number;
+  }[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchGames();
     fetchSettings();
     fetchSessionStats();
+    fetchGameRatings();
   }, []);
+
+  const fetchGameRatings = async () => {
+    const { data: ratingsData, error } = await supabase
+      .from('game_ratings')
+      .select(`
+        rating,
+        games!inner(
+          title
+        )
+      `);
+
+    if (error) {
+      console.error('Error fetching ratings:', error);
+      return;
+    }
+
+    const ratingsByGame = ratingsData.reduce((acc: { [key: string]: number[] }, curr: any) => {
+      const title = curr.games.title;
+      if (!acc[title]) {
+        acc[title] = [];
+      }
+      acc[title].push(curr.rating);
+      return acc;
+    }, {});
+
+    const ratings = Object.entries(ratingsByGame).map(([title, ratings]) => ({
+      title,
+      averageRating: ratings.reduce((a, b) => a + b, 0) / ratings.length,
+      totalRatings: ratings.length
+    })).sort((a, b) => b.averageRating - a.averageRating);
+
+    setGameRatings(ratings);
+  };
 
   const fetchSessionStats = async () => {
     const today = new Date();
@@ -335,10 +374,11 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
         </DialogHeader>
         
         <Tabs defaultValue="stats" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="stats">Statistics</TabsTrigger>
-            <TabsTrigger value="timer">Timer Settings</TabsTrigger>
-            <TabsTrigger value="games">Game Management</TabsTrigger>
+            <TabsTrigger value="ratings">Ratings</TabsTrigger>
+            <TabsTrigger value="timer">Timer</TabsTrigger>
+            <TabsTrigger value="games">Games</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stats" className="space-y-4">
@@ -384,6 +424,35 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
                       <span className="text-muted-foreground">{game.count} sessions</span>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="ratings" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Game Ratings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {gameRatings.map((game) => (
+                    <div key={game.title} className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium">{game.title}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {game.totalRatings} {game.totalRatings === 1 ? 'rating' : 'ratings'}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold">{game.averageRating.toFixed(1)}</span>
+                        <span className="text-yellow-400">★</span>
+                      </div>
+                    </div>
+                  ))}
+                  {gameRatings.length === 0 && (
+                    <p className="text-muted-foreground text-center py-4">No ratings yet</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -452,7 +521,6 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
           </TabsContent>
         </Tabs>
 
-        {/* Edit Game Dialog */}
         {editingGame && (
           <Dialog open={!!editingGame} onOpenChange={() => setEditingGame(null)}>
             <DialogContent className="sm:max-w-[600px]">
