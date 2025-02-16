@@ -56,7 +56,8 @@ export function GameCard({
       "Undead Citadel": "/undeadcitadellaunch",
       "Arizona Sunshine": "/arizonalaunch",
       "Subside": "/subsidelaunch",
-      "Propagation VR": "/propagationlaunch"
+      "Propagation VR": "/propagationlaunch",
+      "Creed: Rise to Glory Championship Edition": "/creedlaunch"
     };
 
     const route = launchScreenRoutes[title];
