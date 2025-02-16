@@ -59,7 +59,7 @@ const defaultGames: Omit<Game, "id" | "created_at" | "updated_at">[] = [
     description: "The ultimate VR rhythm game. Slash the beats, move to the music, and play the way you want to play.",
     genre: "Rhythm",
     release_date: "2019-05-21",
-    thumbnail: "/lovable-uploads/f23f2e23-477b-4ede-bce1-7dbcfc1b2131.png",
+    thumbnail: "/lovable-uploads/b647b9b5-c6c6-4c53-8ae9-4f990eb7ec37.png",
     trailer: "https://www.youtube.com/watch?v=vL39Sg2AqWg",
     executable_path: "steam://rungameid/620980",
     status: "enabled"
