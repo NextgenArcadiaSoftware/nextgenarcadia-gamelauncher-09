@@ -115,7 +115,9 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
 
   const handleToggleGame = async (gameId: string) => {
     const game = games.find(g => g.id === gameId);
-    const newStatus = game?.status === 'enabled' ? 'disabled' as const : 'enabled' as const;
+    if (!game) return;
+    
+    const newStatus = game.status === 'enabled' ? 'disabled' as const : 'enabled' as const;
 
     try {
       const { error } = await supabase
@@ -135,7 +137,7 @@ export function OwnerDashboard({ onClose }: OwnerDashboardProps) {
 
       toast({
         title: `Game ${newStatus === 'enabled' ? 'Enabled' : 'Disabled'}`,
-        description: `${game?.title} has been ${newStatus === 'enabled' ? 'enabled' : 'disabled'}.`,
+        description: `${game.title} has been ${newStatus === 'enabled' ? 'enabled' : 'disabled'}.`,
       });
     } catch (error) {
       console.error('Error updating game:', error);
