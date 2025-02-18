@@ -1,7 +1,5 @@
 
 import { useEffect, useState } from 'react';
-import { Delete } from 'lucide-react';
-import { Button } from '../ui/button';
 
 interface TimerDisplayProps {
   timeLeft: number;
@@ -9,7 +7,7 @@ interface TimerDisplayProps {
   onExit: () => void;
 }
 
-export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
+export function TimerDisplay({ timeLeft: initialTime, activeGame }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
 
   useEffect(() => {
@@ -26,34 +24,6 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     return () => clearInterval(interval);
   }, []);
 
-  const handleExit = async () => {
-    try {
-      console.log("Attempting to send 'z' key to server...");
-      
-      const response = await fetch("http://127.0.0.1:5001/keypress", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({ key: 'z' }),
-        mode: 'cors'
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      console.log("Key sent successfully to server");
-      
-      // Call the provided exit callback
-      onExit();
-    } catch (error) {
-      console.error('Error sending exit keystroke:', error);
-      onExit(); // Still exit even if key simulation fails
-    }
-  };
-
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
       <div className="text-9xl font-mono mb-8 text-white animate-pulse tracking-widest">
@@ -67,15 +37,6 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
           Currently Playing: {activeGame}
         </div>
       )}
-      <Button
-        size="lg"
-        variant="destructive"
-        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in flex items-center gap-2"
-        onClick={handleExit}
-      >
-        <Delete className="w-6 h-6" />
-        Exit Session
-      </Button>
     </div>
   );
 }
