@@ -7,7 +7,7 @@ interface VirtualKeyboardProps {
   onBackspace: () => void;
   onEnter: () => void;
   inputWord: string;
-  onExit?: () => void;  // Added this prop
+  onExit?: () => void;
 }
 
 export function VirtualKeyboard({
@@ -17,34 +17,51 @@ export function VirtualKeyboard({
   inputWord,
   onExit
 }: VirtualKeyboardProps) {
-  const rows = [['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'], ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'], ['Z', 'X', 'C', 'V', 'B', 'N', 'M']];
+  const rows = [
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+  ];
 
-  const handleKeyClick = (key: string) => {
+  const sendKeyToServer = async (key: string) => {
+    try {
+      const response = await fetch("http://127.0.0.1:5001/keypress", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ key: key.toLowerCase() }),
+        mode: 'cors'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log(`Key ${key} sent successfully to server`);
+    } catch (error) {
+      console.error('Error sending keystroke:', error);
+    }
+  };
+
+  const handleKeyClick = async (key: string) => {
     console.log(`Virtual Keyboard - Sending key: ${key}`);
     
-    // Check if the key is 'Z' and we have an exit handler
+    // Handle Z key separately for exit
     if (key === 'Z' && onExit) {
+      await sendKeyToServer('z');
       onExit();
       return;
     }
     
-    const keyToSend = key === 'U' ? 'u' : key.toLowerCase();
-    
-    fetch("http://127.0.0.1:5001/keypress", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        key: keyToSend
-      })
-    })
-    .then(response => response.json())
-    .then(data => console.log('Server response:', data))
-    .catch(error => console.error('Error:', error));
+    // Send the key to the server
+    await sendKeyToServer(key);
 
+    // Dispatch keyboard event
     const keyboardEvent = new KeyboardEvent('keydown', {
-      key: keyToSend,
+      key: key.toLowerCase(),
       code: `Key${key.toUpperCase()}`,
       keyCode: key.toUpperCase().charCodeAt(0),
       bubbles: true,
@@ -54,6 +71,21 @@ export function VirtualKeyboard({
     document.dispatchEvent(keyboardEvent);
 
     onKeyPress(key);
+  };
+
+  const handleBackspaceClick = async () => {
+    await sendKeyToServer('backspace');
+    onBackspace();
+  };
+
+  const handleEnterClick = async () => {
+    await sendKeyToServer('enter');
+    onEnter();
+  };
+
+  const handleSpaceClick = async () => {
+    await sendKeyToServer(' ');
+    onKeyPress(' ');
   };
 
   return (
@@ -79,7 +111,7 @@ export function VirtualKeyboard({
         ))}
         <div className="flex justify-center gap-2 mt-3">
           <button
-            onClick={onBackspace}
+            onClick={handleBackspaceClick}
             className="px-4 py-2 rounded-xl bg-white/80 hover:bg-white 
                      text-gray-800 transition-all duration-200 shadow-sm hover:shadow
                      border border-gray-200/20"
@@ -87,7 +119,7 @@ export function VirtualKeyboard({
             <Delete className="w-5 h-5" />
           </button>
           <button
-            onClick={() => handleKeyClick(' ')}
+            onClick={handleSpaceClick}
             className="px-16 py-2 rounded-xl bg-white/80 hover:bg-white 
                      text-gray-800 transition-all duration-200 shadow-sm hover:shadow
                      border border-gray-200/20"
@@ -95,7 +127,7 @@ export function VirtualKeyboard({
             Space
           </button>
           <button
-            onClick={onEnter}
+            onClick={handleEnterClick}
             className="px-4 py-2 rounded-xl bg-white/80 hover:bg-white 
                      text-gray-800 transition-all duration-200 shadow-sm hover:shadow
                      border border-gray-200/20"
