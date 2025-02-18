@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Delete } from 'lucide-react';
 import { Button } from '../ui/button';
+import { VirtualKeyboard } from './VirtualKeyboard';
 
 interface TimerDisplayProps {
   timeLeft: number;
@@ -11,6 +12,7 @@ interface TimerDisplayProps {
 
 export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
+  const [inputWord, setInputWord] = useState('');
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -45,13 +47,23 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
       }
 
       console.log("Key sent successfully to server");
-      
-      // Call the provided exit callback
       onExit();
     } catch (error) {
       console.error('Error sending exit keystroke:', error);
-      onExit(); // Still exit even if key simulation fails
+      onExit();
     }
+  };
+
+  const handleKeyPress = (key: string) => {
+    setInputWord(prev => prev + key);
+  };
+
+  const handleBackspace = () => {
+    setInputWord(prev => prev.slice(0, -1));
+  };
+
+  const handleEnter = () => {
+    setInputWord('');
   };
 
   return (
@@ -70,12 +82,30 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
       <Button
         size="lg"
         variant="destructive"
-        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in flex items-center gap-2"
+        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in flex items-center gap-2 mb-8"
         onClick={handleExit}
       >
         <Delete className="w-6 h-6" />
         Exit Session
       </Button>
+      
+      <div className="w-full max-w-3xl px-4">
+        <div className="bg-black/20 backdrop-blur-sm p-4 rounded-lg mb-4">
+          <input
+            type="text"
+            value={inputWord}
+            readOnly
+            className="w-full bg-transparent text-white text-2xl text-center border-none outline-none"
+            placeholder="Type using the keyboard below..."
+          />
+        </div>
+        <VirtualKeyboard
+          onKeyPress={handleKeyPress}
+          onBackspace={handleBackspace}
+          onEnter={handleEnter}
+          inputWord={inputWord}
+        />
+      </div>
     </div>
   );
 }
