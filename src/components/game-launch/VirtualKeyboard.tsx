@@ -20,10 +20,8 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   const handleKeyClick = (key: string) => {
     console.log(`Virtual Keyboard - Sending key: ${key}`);
     
-    // For the 'U' key, ensure we're sending the correct case
     const keyToSend = key === 'U' ? 'u' : key.toLowerCase();
     
-    // Send key press to Flask server
     fetch("http://127.0.0.1:5001/keypress", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -33,7 +31,6 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
     .then(data => console.log('Server response:', data))
     .catch(error => console.error('Error:', error));
 
-    // Create and dispatch keyboard event
     const keyboardEvent = new KeyboardEvent('keydown', {
       key: keyToSend,
       code: `Key${key.toUpperCase()}`,
@@ -44,24 +41,23 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
     });
     document.dispatchEvent(keyboardEvent);
 
-    // Call the provided callback
     onKeyPress(key);
   };
 
   return (
-    <div className="p-4 bg-black/20 backdrop-blur-sm rounded-lg">
+    <div className="glass p-6 rounded-2xl">
       <div className="grid gap-2">
         {rows.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex justify-center gap-1">
+          <div key={rowIndex} className="flex justify-center gap-2">
             {row.map((key) => (
               <button
                 key={key}
                 onClick={() => handleKeyClick(key)}
-                className="w-12 h-12 rounded-lg bg-white/10 hover:bg-white/20 
-                          text-white font-bold text-lg transition-colors 
+                className="w-12 h-12 rounded-xl bg-white/80 hover:bg-white 
+                          text-gray-800 font-medium text-lg transition-all 
                           duration-200 flex items-center justify-center
-                          border border-white/10 backdrop-blur-sm
-                          active:scale-95 transform"
+                          shadow-sm hover:shadow border border-gray-200/20
+                          active:scale-95"
                 data-key={key.toLowerCase()}
               >
                 {key}
@@ -69,28 +65,28 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
             ))}
           </div>
         ))}
-        <div className="flex justify-center gap-1 mt-2">
+        <div className="flex justify-center gap-2 mt-3">
           <button
             onClick={onBackspace}
-            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 
-                     text-white transition-colors duration-200
-                     border border-white/10 backdrop-blur-sm"
+            className="px-4 py-2 rounded-xl bg-white/80 hover:bg-white 
+                     text-gray-800 transition-all duration-200 shadow-sm hover:shadow
+                     border border-gray-200/20"
           >
             <Delete className="w-5 h-5" />
           </button>
           <button
             onClick={() => handleKeyClick(' ')}
-            className="px-16 py-2 rounded-lg bg-white/10 hover:bg-white/20 
-                     text-white transition-colors duration-200
-                     border border-white/10 backdrop-blur-sm"
+            className="px-16 py-2 rounded-xl bg-white/80 hover:bg-white 
+                     text-gray-800 transition-all duration-200 shadow-sm hover:shadow
+                     border border-gray-200/20"
           >
             Space
           </button>
           <button
             onClick={onEnter}
-            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 
-                     text-white transition-colors duration-200
-                     border border-white/10 backdrop-blur-sm"
+            className="px-4 py-2 rounded-xl bg-white/80 hover:bg-white 
+                     text-gray-800 transition-all duration-200 shadow-sm hover:shadow
+                     border border-gray-200/20"
           >
             <CornerDownLeft className="w-5 h-5" />
           </button>

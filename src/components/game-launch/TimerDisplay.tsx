@@ -66,40 +66,47 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
-      <div className="text-9xl font-mono mb-8 text-white animate-pulse tracking-widest">
-        {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-      </div>
-      <div className="text-2xl text-white/90 mb-4 animate-fade-in">
-        Time Remaining
-      </div>
+    <div className="fixed inset-0 bg-gradient-to-br from-[#FEF7CD] via-[#FDE1D3] to-[#FFDEE2] flex flex-col items-center justify-start pt-16 z-50">
+      {/* Game Title */}
       {activeGame && (
-        <div className="text-xl text-white/80 mb-8 animate-fade-in">
-          Currently Playing: {activeGame}
+        <div className="text-2xl text-gray-800/80 mb-8 font-medium tracking-wide animate-fade-in">
+          {activeGame}
         </div>
       )}
-      <div className="flex flex-col items-center gap-2 mb-8">
+
+      {/* Timer Section */}
+      <div className="glass p-8 rounded-3xl mb-12 min-w-[300px] text-center">
+        <div className="text-8xl font-mono mb-2 text-gray-800 tracking-widest font-bold">
+          {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+        </div>
+        <div className="text-lg text-gray-600 font-medium">
+          Time Remaining
+        </div>
+      </div>
+
+      {/* Exit Button */}
+      <div className="flex flex-col items-center gap-3 mb-12">
         <button
           onClick={handleExit}
-          className="w-32 h-32 rounded-full bg-[#ea384c] text-white text-6xl font-bold 
-                   shadow-[0_0_20px_rgba(234,56,76,0.5),0_0_40px_rgba(234,56,76,0.3)] 
-                   hover:shadow-[0_0_30px_rgba(234,56,76,0.7),0_0_50px_rgba(234,56,76,0.5)] 
-                   transition-all duration-300 hover:scale-110 animate-pulse"
+          className="w-32 h-32 rounded-full bg-white/90 text-[#ea384c] text-6xl font-bold 
+                   shadow-lg hover:shadow-xl border border-[#ea384c]/10
+                   transition-all duration-300 hover:scale-105 hover:bg-white"
         >
           Z
         </button>
-        <span className="text-white text-xl font-medium tracking-wide animate-fade-in">
+        <span className="text-gray-700 text-lg font-medium">
           Exit Session
         </span>
       </div>
       
-      <div className="w-full max-w-3xl px-4">
-        <div className="bg-black/20 backdrop-blur-sm p-4 rounded-lg mb-4">
+      {/* Keyboard Section */}
+      <div className="w-full max-w-3xl px-6">
+        <div className="glass p-4 rounded-2xl mb-4">
           <input
             type="text"
             value={inputWord}
             readOnly
-            className="w-full bg-transparent text-white text-2xl text-center border-none outline-none"
+            className="w-full bg-transparent text-gray-800 text-2xl text-center border-none outline-none"
             placeholder="Type using the keyboard below..."
           />
         </div>
