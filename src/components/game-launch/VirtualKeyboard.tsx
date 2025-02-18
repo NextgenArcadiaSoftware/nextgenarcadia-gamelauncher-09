@@ -26,13 +26,16 @@ export function VirtualKeyboard({
 
   const sendKeyToServer = async (key: string) => {
     try {
+      console.log(`Sending key to server: ${key}`);
       const response = await fetch("http://127.0.0.1:5001/keypress", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Accept": "application/json"
         },
-        body: JSON.stringify({ key: key.toLowerCase() }),
+        body: JSON.stringify({ 
+          key: typeof key === 'string' ? key.toLowerCase() : key
+        }),
         mode: 'cors'
       });
 
@@ -40,52 +43,73 @@ export function VirtualKeyboard({
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      console.log(`Key ${key} sent successfully to server`);
+      const data = await response.json();
+      console.log(`Server response for key ${key}:`, data);
+      return true;
     } catch (error) {
       console.error('Error sending keystroke:', error);
+      return false;
     }
   };
 
   const handleKeyClick = async (key: string) => {
-    console.log(`Virtual Keyboard - Sending key: ${key}`);
+    console.log(`Virtual Keyboard - Key clicked: ${key}`);
     
     // Handle Z key separately for exit
     if (key === 'Z' && onExit) {
-      await sendKeyToServer('z');
-      onExit();
+      const sent = await sendKeyToServer('z');
+      if (sent) {
+        console.log('Z key sent successfully, triggering exit');
+        onExit();
+      }
       return;
     }
     
     // Send the key to the server
-    await sendKeyToServer(key);
+    const sent = await sendKeyToServer(key);
+    if (sent) {
+      // Only update UI if server communication was successful
+      console.log(`Key ${key} processed successfully`);
+      onKeyPress(key);
 
-    // Dispatch keyboard event
-    const keyboardEvent = new KeyboardEvent('keydown', {
-      key: key.toLowerCase(),
-      code: `Key${key.toUpperCase()}`,
-      keyCode: key.toUpperCase().charCodeAt(0),
-      bubbles: true,
-      cancelable: true,
-      composed: true
-    });
-    document.dispatchEvent(keyboardEvent);
-
-    onKeyPress(key);
+      // Dispatch keyboard event for additional handlers
+      const keyboardEvent = new KeyboardEvent('keydown', {
+        key: key.toLowerCase(),
+        code: `Key${key.toUpperCase()}`,
+        keyCode: key.toUpperCase().charCodeAt(0),
+        bubbles: true,
+        cancelable: true,
+        composed: true
+      });
+      document.dispatchEvent(keyboardEvent);
+    }
   };
 
   const handleBackspaceClick = async () => {
-    await sendKeyToServer('backspace');
-    onBackspace();
+    console.log('Backspace clicked');
+    const sent = await sendKeyToServer('backspace');
+    if (sent) {
+      console.log('Backspace processed successfully');
+      onBackspace();
+    }
   };
 
   const handleEnterClick = async () => {
-    await sendKeyToServer('enter');
-    onEnter();
+    console.log('Enter clicked');
+    const sent = await sendKeyToServer('enter');
+    if (sent) {
+      console.log('Enter processed successfully');
+      onEnter();
+    }
   };
 
   const handleSpaceClick = async () => {
-    await sendKeyToServer(' ');
-    onKeyPress(' ');
+    console.log('Space clicked');
+    const sent = await sendKeyToServer(' ');
+    if (sent) {
+      console.log('Space processed successfully');
+      onKeyPress(' ');
+    }
   };
 
   return (
