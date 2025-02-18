@@ -66,47 +66,49 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-[#FEF7CD] via-[#FDE1D3] to-[#FFDEE2] flex flex-col items-center justify-start pt-16 z-50">
-      {/* Game Title */}
-      {activeGame && (
-        <div className="text-2xl text-gray-800/80 mb-8 font-medium tracking-wide animate-fade-in">
-          {activeGame}
-        </div>
-      )}
+    <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#D946EF] to-[#8B5CF6] flex flex-col items-center justify-between py-6 z-50 animate-gradient">
+      {/* Top Section */}
+      <div className="flex flex-col items-center">
+        {activeGame && (
+          <div className="text-2xl text-white/90 mb-4 font-medium tracking-wide animate-fade-in">
+            {activeGame}
+          </div>
+        )}
 
-      {/* Timer Section */}
-      <div className="glass p-8 rounded-3xl mb-12 min-w-[300px] text-center">
-        <div className="text-8xl font-mono mb-2 text-gray-800 tracking-widest font-bold">
-          {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-        </div>
-        <div className="text-lg text-gray-600 font-medium">
-          Time Remaining
+        {/* Timer Section */}
+        <div className="glass p-8 rounded-3xl mb-6 min-w-[300px] text-center">
+          <div className="text-8xl font-mono mb-2 text-white tracking-widest font-bold">
+            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+          </div>
+          <div className="text-lg text-white/80 font-medium">
+            Time Remaining
+          </div>
         </div>
       </div>
 
-      {/* Exit Button */}
-      <div className="flex flex-col items-center gap-3 mb-12">
+      {/* Middle Section - Exit Button */}
+      <div className="flex flex-col items-center gap-3 mb-6">
         <button
           onClick={handleExit}
-          className="w-32 h-32 rounded-full bg-white/90 text-[#ea384c] text-6xl font-bold 
+          className="w-28 h-28 rounded-full bg-white/90 text-[#ea384c] text-6xl font-bold 
                    shadow-lg hover:shadow-xl border border-[#ea384c]/10
                    transition-all duration-300 hover:scale-105 hover:bg-white"
         >
           Z
         </button>
-        <span className="text-gray-700 text-lg font-medium">
+        <span className="text-white text-lg font-medium">
           Exit Session
         </span>
       </div>
       
-      {/* Keyboard Section */}
+      {/* Bottom Section - Keyboard */}
       <div className="w-full max-w-3xl px-6">
         <div className="glass p-4 rounded-2xl mb-4">
           <input
             type="text"
             value={inputWord}
             readOnly
-            className="w-full bg-transparent text-gray-800 text-2xl text-center border-none outline-none"
+            className="w-full bg-transparent text-white text-2xl text-center border-none outline-none"
             placeholder="Type using the keyboard below..."
           />
         </div>
