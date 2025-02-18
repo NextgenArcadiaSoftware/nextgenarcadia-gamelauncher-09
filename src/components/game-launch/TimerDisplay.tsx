@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from 'react';
-import { Delete } from 'lucide-react';
 import { Button } from '../ui/button';
 import { VirtualKeyboard } from './VirtualKeyboard';
 
@@ -79,15 +78,20 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
           Currently Playing: {activeGame}
         </div>
       )}
-      <Button
-        size="lg"
-        variant="destructive"
-        className="bg-black/20 backdrop-blur-sm hover:bg-black/30 text-xl px-8 py-6 animate-scale-in flex items-center gap-2 mb-8"
-        onClick={handleExit}
-      >
-        <Delete className="w-6 h-6" />
-        Exit Session
-      </Button>
+      <div className="flex flex-col items-center gap-2 mb-8">
+        <button
+          onClick={handleExit}
+          className="w-32 h-32 rounded-full bg-[#ea384c] text-white text-6xl font-bold 
+                   shadow-[0_0_20px_rgba(234,56,76,0.5),0_0_40px_rgba(234,56,76,0.3)] 
+                   hover:shadow-[0_0_30px_rgba(234,56,76,0.7),0_0_50px_rgba(234,56,76,0.5)] 
+                   transition-all duration-300 hover:scale-110 animate-pulse"
+        >
+          Z
+        </button>
+        <span className="text-white text-xl font-medium tracking-wide animate-fade-in">
+          Exit Session
+        </span>
+      </div>
       
       <div className="w-full max-w-3xl px-4">
         <div className="bg-black/20 backdrop-blur-sm p-4 rounded-lg mb-4">
