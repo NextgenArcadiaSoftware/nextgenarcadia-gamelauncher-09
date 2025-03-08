@@ -199,9 +199,22 @@ const Index = () => {
 
   const fetchGames = async () => {
     setIsLoading(true);
+    console.log('Starting game fetch from Supabase...');
+    
     try {
-      console.log('Fetching games from Supabase...');
+      // Test connection first
+      const { data: testData, error: testError } = await supabase
+        .from('games')
+        .select('count');
       
+      if (testError) {
+        console.error('Supabase connection test failed:', testError);
+        throw new Error(`Connection test failed: ${testError.message}`);
+      }
+      
+      console.log('Supabase connection test successful, fetching games...');
+      
+      // Fetch actual games data
       const { data, error } = await supabase
         .from('games')
         .select('*')
@@ -209,72 +222,87 @@ const Index = () => {
       
       if (error) {
         console.error('Supabase fetch error:', error);
-        throw error;
+        throw new Error(`Data fetch failed: ${error.message}`);
       }
       
-      console.log('Raw games data:', data);
+      console.log('Games data received:', data);
       
       if (data && data.length > 0) {
-        console.log('Number of games fetched:', data.length);
+        console.log(`Successfully fetched ${data.length} games`);
         
+        // Ensure all game objects have required properties
         const typedGames = data.map(game => ({
           ...game,
           id: game.id || crypto.randomUUID(),
-          status: game.status as "enabled" | "disabled"
-        }));
+          status: game.status || "enabled",
+          thumbnail: game.thumbnail || "/placeholder.svg"
+        })) as Game[];
         
         setGames(typedGames);
         console.log('Games state updated with:', typedGames);
       } else {
-        console.log('No games found in the database, adding default games');
-        
-        const defaultGames = [ALL_IN_ONE_SPORTS, FRUIT_NINJA, RICHIES_PLANK, ELVEN_ASSASSIN, UNDEAD_CITADEL, ARIZONA_SUNSHINE, IB_CRICKET, PROPAGATION, SUBSIDE, CRISIS_BRIGADE, CREED, BEAT_SABER, ROLLERCOASTER_LEGENDS] as Game[];
-        
-        for (const game of defaultGames) {
-          console.log(`Adding default game to Supabase: ${game.title}`);
-          try {
-            const { error: insertError } = await supabase
-              .from('games')
-              .insert({
-                title: game.title,
-                description: game.description,
-                genre: game.genre,
-                release_date: game.release_date,
-                thumbnail: game.thumbnail,
-                executable_path: game.executable_path,
-                trailer: game.trailer,
-                launch_code: game.launch_code,
-                status: game.status
-              });
-              
-            if (insertError) {
-              console.error(`Error adding default game ${game.title}:`, insertError);
-            } else {
-              console.log(`Successfully added default game: ${game.title}`);
-            }
-          } catch (insertErr) {
-            console.error(`Exception adding default game ${game.title}:`, insertErr);
-          }
-        }
-        
-        setGames(defaultGames);
-        toast({
-          title: "Using Default Games",
-          description: "Adding default games to the database"
-        });
+        console.log('No games found in database, adding default games');
+        await addDefaultGames();
       }
     } catch (error) {
       console.error('Error fetching games:', error);
       toast({
         variant: "destructive",
         title: "Database Connection Error",
-        description: "Failed to connect to the database. Using default games instead."
+        description: "Failed to connect to the database. Adding default games instead."
       });
       
-      const defaultGames = [ALL_IN_ONE_SPORTS, FRUIT_NINJA, RICHIES_PLANK, ELVEN_ASSASSIN, UNDEAD_CITADEL, ARIZONA_SUNSHINE, IB_CRICKET, PROPAGATION, SUBSIDE, CRISIS_BRIGADE, CREED, BEAT_SABER, ROLLERCOASTER_LEGENDS] as Game[];
-      setGames(defaultGames);
+      await addDefaultGames();
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const addDefaultGames = async () => {
+    try {
+      // Use your existing default game constants
+      const defaultGames = [ALL_IN_ONE_SPORTS, FRUIT_NINJA, RICHIES_PLANK, ELVEN_ASSASSIN, 
+        UNDEAD_CITADEL, ARIZONA_SUNSHINE, IB_CRICKET, PROPAGATION, SUBSIDE, 
+        CRISIS_BRIGADE, CREED, BEAT_SABER, ROLLERCOASTER_LEGENDS] as Game[];
+      
+      console.log(`Adding ${defaultGames.length} default games to database`);
+      
+      // Add each default game to the database
+      for (const game of defaultGames) {
+        const { error } = await supabase
+          .from('games')
+          .insert({
+            title: game.title,
+            description: game.description,
+            genre: game.genre,
+            release_date: game.release_date,
+            thumbnail: game.thumbnail || "/placeholder.svg",
+            executable_path: game.executable_path,
+            trailer: game.trailer,
+            launch_code: game.launch_code,
+            status: "enabled"
+          });
+        
+        if (error) {
+          console.error(`Error adding default game ${game.title}:`, error);
+        } else {
+          console.log(`Successfully added default game: ${game.title}`);
+        }
+      }
+      
+      setGames(defaultGames);
+      toast({
+        title: "Using Default Games",
+        description: "Added default games to your library"
+      });
+    } catch (error) {
+      console.error('Error adding default games:', error);
+      // If all else fails, just set the default games in state without DB insert
+      const defaultGames = [ALL_IN_ONE_SPORTS, FRUIT_NINJA, RICHIES_PLANK, ELVEN_ASSASSIN, 
+        UNDEAD_CITADEL, ARIZONA_SUNSHINE, IB_CRICKET, PROPAGATION, SUBSIDE, 
+        CRISIS_BRIGADE, CREED, BEAT_SABER, ROLLERCOASTER_LEGENDS] as Game[];
+      
+      setGames(defaultGames);
     }
   };
 

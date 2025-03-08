@@ -9,8 +9,16 @@ interface GameGridProps {
 }
 
 export function GameGrid({ games, onPlayGame, canPlayGames }: GameGridProps) {
-  // Filter out undefined games and ensure only enabled games are shown
-  const enabledGames = games?.filter(game => game && game.status === 'enabled') || [];
+  // Ensure we have valid games data
+  const validGames = Array.isArray(games) ? games : [];
+  
+  // Filter out null/undefined games and ensure only enabled games are shown
+  const enabledGames = validGames.filter(game => 
+    game && 
+    game.status === 'enabled' && 
+    game.title && 
+    game.description
+  );
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

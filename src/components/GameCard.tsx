@@ -1,4 +1,3 @@
-
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -7,12 +6,33 @@ import { useNavigate } from "react-router-dom";
 import placeholderImage from "../assets/placeholder.svg";
 
 const getImageUrl = (path: string) => {
-  if (!path) return placeholderImage;
-  if (path.startsWith('data:')) return path;
-  if (path === 'placeholder.svg' || path === '/placeholder.svg') return placeholderImage;
-  if (path.startsWith('http')) return path;
-  if (path.startsWith('/lovable-uploads/')) return path;
-  return path.startsWith('/') ? path : `/${path}`;
+  console.log("Processing image path:", path);
+  
+  if (!path) {
+    console.log("Empty path, using placeholder");
+    return placeholderImage;
+  }
+  
+  if (path.startsWith('data:')) {
+    return path;
+  }
+  
+  if (path === 'placeholder.svg' || path === '/placeholder.svg') {
+    return placeholderImage;
+  }
+  
+  if (path.startsWith('http')) {
+    return path;
+  }
+  
+  if (path.startsWith('/lovable-uploads/')) {
+    console.log("Using lovable upload path:", path);
+    return path;
+  }
+  
+  const finalPath = path.startsWith('/') ? path : `/${path}`;
+  console.log("Final image path:", finalPath);
+  return finalPath;
 };
 
 interface GameCardProps {
@@ -43,17 +63,24 @@ export function GameCard({
   const navigate = useNavigate();
 
   useEffect(() => {
-    const img = new Image();
+    console.log(`Loading image for "${title}" from path:`, thumbnail);
+    
     const imageUrl = getImageUrl(thumbnail);
+    const img = new Image();
+    
     img.onload = () => {
+      console.log(`Image for "${title}" loaded successfully:`, imageUrl);
       setImageSrc(imageUrl);
     };
+    
     img.onerror = () => {
-      console.error("Failed to load image:", thumbnail);
+      console.error(`Failed to load image for "${title}" from:`, thumbnail);
+      console.log(`Using placeholder for "${title}" instead`);
       setImageSrc(placeholderImage);
     };
+    
     img.src = imageUrl;
-  }, [thumbnail]);
+  }, [thumbnail, title]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
@@ -130,7 +157,10 @@ export function GameCard({
           src={imageSrc}
           alt={title}
           className="w-full h-full object-cover"
-          onError={() => setImageSrc(placeholderImage)}
+          onError={() => {
+            console.log(`Image error occurred for "${title}", setting placeholder`);
+            setImageSrc(placeholderImage);
+          }}
         />
         <div className="absolute inset-0" style={{
           background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%)'
