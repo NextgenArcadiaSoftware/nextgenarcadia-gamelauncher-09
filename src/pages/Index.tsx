@@ -4,7 +4,6 @@ import { RFIDCountdown } from "@/components/RFIDCountdown";
 import { Header } from "@/components/Header";
 import { CategoryBar } from "@/components/CategoryBar";
 import { GameGrid } from "@/components/GameGrid";
-import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import { OwnerDashboard } from "@/components/OwnerDashboard";
 import { GameShowcase } from "@/components/GameShowcase";
@@ -190,9 +189,8 @@ const Index = () => {
   const [showOwnerDashboard, setShowOwnerDashboard] = useState(false);
   const [canPlayGames, setCanPlayGames] = useState(false);
   const [activeGame, setActiveGame] = useState<string | null>(null);
-  const {
-    toast
-  } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   const categories = ["All", "Action", "FPS", "Horror", "Sports", "Simulation", "Adventure", "Rhythm"];
 
   useEffect(() => {
@@ -200,15 +198,17 @@ const Index = () => {
   }, []);
 
   const fetchGames = async () => {
+    setIsLoading(true);
     try {
       console.log('Fetching games from Supabase...');
-      const {
-        data,
-        error
-      } = await supabase.from('games').select('*');
+      
+      const { data, error } = await supabase
+        .from('games')
+        .select('*')
+        .order('title');
       
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('Supabase fetch error:', error);
         throw error;
       }
       
@@ -216,20 +216,24 @@ const Index = () => {
       
       if (data && data.length > 0) {
         console.log('Number of games fetched:', data.length);
+        
         const typedGames = data.map(game => ({
           ...game,
+          id: game.id || crypto.randomUUID(),
           status: game.status as "enabled" | "disabled"
         }));
+        
         setGames(typedGames);
         console.log('Games state updated with:', typedGames);
       } else {
-        console.log('No games found in the database, using default games');
+        console.log('No games found in the database, adding default games');
+        
         const defaultGames = [ALL_IN_ONE_SPORTS, FRUIT_NINJA, RICHIES_PLANK, ELVEN_ASSASSIN, UNDEAD_CITADEL, ARIZONA_SUNSHINE, IB_CRICKET, PROPAGATION, SUBSIDE, CRISIS_BRIGADE, CREED, BEAT_SABER, ROLLERCOASTER_LEGENDS] as Game[];
         
         for (const game of defaultGames) {
           console.log(`Adding default game to Supabase: ${game.title}`);
           try {
-            const { data: insertData, error: insertError } = await supabase
+            const { error: insertError } = await supabase
               .from('games')
               .insert({
                 title: game.title,
@@ -256,18 +260,21 @@ const Index = () => {
         setGames(defaultGames);
         toast({
           title: "Using Default Games",
-          description: "No games found in database, using default game list"
+          description: "Adding default games to the database"
         });
       }
     } catch (error) {
       console.error('Error fetching games:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch games from the database"
+        title: "Database Connection Error",
+        description: "Failed to connect to the database. Using default games instead."
       });
+      
       const defaultGames = [ALL_IN_ONE_SPORTS, FRUIT_NINJA, RICHIES_PLANK, ELVEN_ASSASSIN, UNDEAD_CITADEL, ARIZONA_SUNSHINE, IB_CRICKET, PROPAGATION, SUBSIDE, CRISIS_BRIGADE, CREED, BEAT_SABER, ROLLERCOASTER_LEGENDS] as Game[];
       setGames(defaultGames);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -362,15 +369,24 @@ const Index = () => {
               <Header />
             </div>
 
-            <div className="transform hover:scale-[1.02] transition-transform duration-300">
-              <GameShowcase games={games.slice(0, 3)} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
-            </div>
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-white border-r-transparent"></div>
+                <p className="mt-2 text-white">Loading games...</p>
+              </div>
+            ) : (
+              <>
+                <div className="transform hover:scale-[1.02] transition-transform duration-300">
+                  <GameShowcase games={games.slice(0, 3)} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
+                </div>
 
-            <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
-              <h2 className="text-2xl font-bold text-white next-gen-title">VR Games</h2>
-              <CategoryBar categories={categories} selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
-              <GameGrid games={filteredGames} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
-            </div>
+                <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
+                  <h2 className="text-2xl font-bold text-white next-gen-title">VR Games</h2>
+                  <CategoryBar categories={categories} selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
+                  <GameGrid games={filteredGames} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
+                </div>
+              </>
+            )}
           </div>
         </div>}
 

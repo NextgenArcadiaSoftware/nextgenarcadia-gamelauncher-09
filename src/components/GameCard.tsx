@@ -1,7 +1,8 @@
+
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import placeholderImage from "../assets/placeholder.svg";
 
@@ -10,6 +11,7 @@ const getImageUrl = (path: string) => {
   if (path.startsWith('data:')) return path;
   if (path === 'placeholder.svg' || path === '/placeholder.svg') return placeholderImage;
   if (path.startsWith('http')) return path;
+  if (path.startsWith('/lovable-uploads/')) return path;
   return path.startsWith('/') ? path : `/${path}`;
 };
 
@@ -36,9 +38,22 @@ export function GameCard({
   onPlay,
   canPlayGames,
 }: GameCardProps) {
-  const [imageSrc, setImageSrc] = useState(getImageUrl(thumbnail));
+  const [imageSrc, setImageSrc] = useState<string>(placeholderImage);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const img = new Image();
+    const imageUrl = getImageUrl(thumbnail);
+    img.onload = () => {
+      setImageSrc(imageUrl);
+    };
+    img.onerror = () => {
+      console.error("Failed to load image:", thumbnail);
+      setImageSrc(placeholderImage);
+    };
+    img.src = imageUrl;
+  }, [thumbnail]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
@@ -115,7 +130,7 @@ export function GameCard({
           src={imageSrc}
           alt={title}
           className="w-full h-full object-cover"
-          onError={handleImageError}
+          onError={() => setImageSrc(placeholderImage)}
         />
         <div className="absolute inset-0" style={{
           background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.1) 100%)'
@@ -129,7 +144,7 @@ export function GameCard({
               </span>
             </div>
             <div className="flex gap-2">
-              {videoUrl && (
+              {trailer && (
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
@@ -147,7 +162,7 @@ export function GameCard({
                       {isDialogOpen && (
                         <iframe
                           className="absolute top-0 left-0 w-full h-full"
-                          src={getYouTubeEmbedUrl(videoUrl)}
+                          src={getYouTubeEmbedUrl(trailer)}
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         ></iframe>
