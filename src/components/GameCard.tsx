@@ -1,4 +1,3 @@
-
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -9,7 +8,7 @@ import placeholderImage from "../assets/placeholder.svg";
 const getImageUrl = (path: string) => {
   if (!path) return placeholderImage;
   if (path.startsWith('data:')) return path;
-  if (path.startsWith('placeholder.svg') || path === '/placeholder.svg') return placeholderImage;
+  if (path === 'placeholder.svg' || path === '/placeholder.svg') return placeholderImage;
   if (path.startsWith('http')) return path;
   return path.startsWith('/') ? path : `/${path}`;
 };
@@ -104,31 +103,7 @@ export function GameCard({
     setImageSrc(placeholderImage);
   };
 
-  const videoUrl = title === "Creed: Rise to Glory Championship Edition"
-    ? "https://www.youtube.com/watch?v=EgbCMJ54xeM"
-    : title === "RollerCoaster Legends"
-    ? "https://www.youtube.com/watch?v=OpnTbOz_POE"
-    : title === "Crisis Brigade 2 Reloaded"
-    ? "https://www.youtube.com/watch?v=pZHvTXD7QEw"
-    : title === "All-in-One Sports VR"
-    ? "https://www.youtube.com/watch?v=Lva5G1a0kB0"
-    : title === "Fruit Ninja VR"
-    ? "https://www.youtube.com/watch?v=hPY4TRRHwZc"
-    : title === "Richies Plank Experience"
-    ? "https://www.youtube.com/watch?v=faNsP7ExSt0"
-    : title === "Elven Assassin"
-    ? "https://www.youtube.com/watch?v=D94cNMNyMy4"
-    : title === "Undead Citadel"
-    ? "https://www.youtube.com/watch?v=q-OlIIXZ3zk"
-    : title === "Arizona Sunshine II"
-    ? "https://www.youtube.com/watch?v=kNaSe37rcG4"
-    : title === "iB Cricket"
-    ? "https://www.youtube.com/watch?v=op7O-zLA71A"
-    : title === "Propagation VR"
-    ? "https://www.youtube.com/watch?v=TbTF1u6vHho"
-    : title === "Subside"
-    ? "https://www.youtube.com/watch?v=NIlqmYLAioM"
-    : trailer;
+  const videoUrl = trailer;
 
   return (
     <div 
@@ -154,7 +129,7 @@ export function GameCard({
               </span>
             </div>
             <div className="flex gap-2">
-              {(videoUrl || trailer) && (
+              {videoUrl && (
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
@@ -172,7 +147,7 @@ export function GameCard({
                       {isDialogOpen && (
                         <iframe
                           className="absolute top-0 left-0 w-full h-full"
-                          src={getYouTubeEmbedUrl(videoUrl || trailer || '')}
+                          src={getYouTubeEmbedUrl(videoUrl)}
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         ></iframe>

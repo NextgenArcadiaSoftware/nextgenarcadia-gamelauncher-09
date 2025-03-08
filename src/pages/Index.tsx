@@ -205,12 +205,15 @@ const Index = () => {
       const {
         data,
         error
-      } = await supabase.from('games').select('*').eq('status', 'enabled');
+      } = await supabase.from('games').select('*');
+      
       if (error) {
         console.error('Supabase error:', error);
         throw error;
       }
+      
       console.log('Raw games data:', data);
+      
       if (data && data.length > 0) {
         console.log('Number of games fetched:', data.length);
         const typedGames = data.map(game => ({
@@ -220,8 +223,36 @@ const Index = () => {
         setGames(typedGames);
         console.log('Games state updated with:', typedGames);
       } else {
-        console.log('No games found in the database');
+        console.log('No games found in the database, using default games');
         const defaultGames = [ALL_IN_ONE_SPORTS, FRUIT_NINJA, RICHIES_PLANK, ELVEN_ASSASSIN, UNDEAD_CITADEL, ARIZONA_SUNSHINE, IB_CRICKET, PROPAGATION, SUBSIDE, CRISIS_BRIGADE, CREED, BEAT_SABER, ROLLERCOASTER_LEGENDS] as Game[];
+        
+        for (const game of defaultGames) {
+          console.log(`Adding default game to Supabase: ${game.title}`);
+          try {
+            const { data: insertData, error: insertError } = await supabase
+              .from('games')
+              .insert({
+                title: game.title,
+                description: game.description,
+                genre: game.genre,
+                release_date: game.release_date,
+                thumbnail: game.thumbnail,
+                executable_path: game.executable_path,
+                trailer: game.trailer,
+                launch_code: game.launch_code,
+                status: game.status
+              });
+              
+            if (insertError) {
+              console.error(`Error adding default game ${game.title}:`, insertError);
+            } else {
+              console.log(`Successfully added default game: ${game.title}`);
+            }
+          } catch (insertErr) {
+            console.error(`Exception adding default game ${game.title}:`, insertErr);
+          }
+        }
+        
         setGames(defaultGames);
         toast({
           title: "Using Default Games",
