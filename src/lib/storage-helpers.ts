@@ -9,22 +9,33 @@ import { supabase } from "@/integrations/supabase/client";
  * @returns URL of the uploaded file
  */
 export const uploadFile = async (file: File, bucket: string, path: string): Promise<string> => {
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .upload(path, file, {
-      upsert: true,
-      cacheControl: "3600"
-    });
+  console.log(`Uploading file to ${bucket}/${path}`, file);
 
-  if (error) {
-    console.error("Error uploading file:", error);
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(path, file, {
+        upsert: true,
+        cacheControl: "3600"
+      });
+
+    if (error) {
+      console.error("Error uploading file:", error.message, error);
+      throw error;
+    }
+
+    console.log("Upload successful:", data);
+
+    // Get public URL for the file
+    const { data: urlData } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(path);
+
+    console.log("Public URL generated:", urlData.publicUrl);
+
+    return urlData.publicUrl;
+  } catch (error) {
+    console.error("Exception during upload:", error);
     throw error;
   }
-
-  // Get public URL for the file
-  const { data: { publicUrl } } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(path);
-
-  return publicUrl;
 };
