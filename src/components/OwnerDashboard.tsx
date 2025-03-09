@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pencil, Timer, GamepadIcon, History, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadFile } from "@/lib/storage-helpers";
 import type { Game } from "@/types/game";
 
 interface OwnerDashboardProps {
@@ -599,21 +600,16 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
                           if (!file) return;
 
                           try {
+                            toast({
+                              title: "Uploading",
+                              description: "Uploading thumbnail...",
+                            });
+
                             const fileExt = file.name.split('.').pop();
-                            const filePath = `${editingGame.id}-thumbnail.${fileExt}`;
-
-                            const { error: uploadError } = await supabase.storage
-                              .from('game-thumbnails')
-                              .upload(filePath, file, {
-                                upsert: true
-                              });
-
-                            if (uploadError) throw uploadError;
-
-                            const { data: { publicUrl } } = supabase.storage
-                              .from('game-thumbnails')
-                              .getPublicUrl(filePath);
-
+                            const fileName = `${Date.now()}-${editingGame.id}.${fileExt}`;
+                            
+                            const publicUrl = await uploadFile(file, 'game-thumbnails', fileName);
+                            
                             setEditingGame({ ...editingGame, thumbnail: publicUrl });
                             
                             toast({
@@ -625,7 +621,7 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
                             toast({
                               variant: "destructive",
                               title: "Error",
-                              description: "Failed to upload thumbnail",
+                              description: "Failed to upload thumbnail. Please check console for details.",
                             });
                           }
                         }}
