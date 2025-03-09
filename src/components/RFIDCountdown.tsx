@@ -29,11 +29,20 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
           .eq('id', 'global')
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching timer duration:', error);
+          // Set a default value if fetching fails
+          if (isMounted) setTimeLeft(5 * 60); // 5 minutes in seconds
+          throw error;
+        }
 
         if (data && isMounted) {
           console.log('Setting initial timer duration:', data.timer_duration);
           setTimeLeft(data.timer_duration * 60); // Convert minutes to seconds
+        } else if (isMounted) {
+          // Set a default value if no data
+          console.log('No timer data found, using default of 5 minutes');
+          setTimeLeft(5 * 60); // 5 minutes in seconds
         }
       } catch (error) {
         console.error('Error fetching timer duration:', error);
@@ -139,7 +148,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
             clearInterval(interval);
             setShowRating(true);
             // Record the session when it ends
-            const duration = initialTimeLeft! - prev;
+            const duration = initialTimeLeft! - 0;
             recordGameSession(duration);
             return 0;
           }
@@ -158,7 +167,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
 
       return () => clearInterval(interval);
     }
-  }, [showGameScreen, targetWord, timeLeft, initialTimeLeft]);
+  }, [showGameScreen, timeLeft, initialTimeLeft]);
 
   const handleRatingSubmit = async (rating: number) => {
     // When exiting, send the stop command to the Python backend
