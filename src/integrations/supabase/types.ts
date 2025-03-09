@@ -9,7 +9,133 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      game_ratings: {
+        Row: {
+          created_at: string | null
+          game_id: string | null
+          id: string
+          rating: number
+        }
+        Insert: {
+          created_at?: string | null
+          game_id?: string | null
+          id?: string
+          rating: number
+        }
+        Update: {
+          created_at?: string | null
+          game_id?: string | null
+          id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_ratings_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_sessions: {
+        Row: {
+          duration: number
+          ended_at: string | null
+          game_id: string | null
+          id: string
+          started_at: string | null
+        }
+        Insert: {
+          duration?: number
+          ended_at?: string | null
+          game_id?: string | null
+          id?: string
+          started_at?: string | null
+        }
+        Update: {
+          duration?: number
+          ended_at?: string | null
+          game_id?: string | null
+          id?: string
+          started_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_sessions_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          created_at: string | null
+          description: string
+          executable_path: string | null
+          genre: string
+          id: string
+          launch_code: string | null
+          release_date: string
+          status: string
+          thumbnail: string
+          title: string
+          trailer: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          executable_path?: string | null
+          genre: string
+          id?: string
+          launch_code?: string | null
+          release_date: string
+          status?: string
+          thumbnail: string
+          title: string
+          trailer?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          executable_path?: string | null
+          genre?: string
+          id?: string
+          launch_code?: string | null
+          release_date?: string
+          status?: string
+          thumbnail?: string
+          title?: string
+          trailer?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          timer_duration: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          timer_duration?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          timer_duration?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
