@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
-import { X } from 'lucide-react';
+import { X, Power } from 'lucide-react';
 
 interface TimerDisplayProps {
   timeLeft: number;
@@ -35,6 +35,13 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const handleAltF4 = () => {
+    // Use the electron API to send Alt+F4 keystroke
+    if (window.electron) {
+      window.electron.ipcRenderer.send('simulate-keypress', { key: 'F4', alt: true });
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
       <Button 
@@ -59,6 +66,16 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
           Currently Playing: {activeGame}
         </div>
       )}
+
+      <Button
+        variant="destructive"
+        size="lg"
+        className="mt-8 px-8 py-6 text-xl font-bold flex items-center gap-3 hover:bg-red-800 transition-colors animate-pulse"
+        onClick={handleAltF4}
+      >
+        <Power className="h-6 w-6" />
+        Alt+F4
+      </Button>
     </div>
   );
 }
