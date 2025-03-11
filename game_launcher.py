@@ -1,9 +1,11 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import keyboard
 import threading
 import json
 import os
+import subprocess
 
 # Dictionary mapping game codes to their executable paths
 GAMES = {
@@ -60,11 +62,32 @@ def handle_keypress():
         if not data:
             return jsonify({"error": "No data received"}), 400
         
-        key = data.get('key', '').lower()
-        print(f"Received key from web app: {key}")
-        
-        # Simulate the key press with a small delay to ensure proper registration
-        keyboard.press_and_release(key)
+        # Handle special key combinations
+        if isinstance(data, dict) and 'key' in data:
+            key = data['key']
+            alt = data.get('alt', False)
+            
+            print(f"Received key from web app: {key} with alt={alt}")
+            
+            # Handle Alt+F4 key combination
+            if key == 'F4' and alt:
+                print("Simulating Alt+F4")
+                keyboard.press('alt')
+                keyboard.press('f4')
+                keyboard.release('f4')
+                keyboard.release('alt')
+                return jsonify({
+                    "status": "success",
+                    "message": "Alt+F4 simulated",
+                }), 200
+            else:
+                # Regular key press
+                keyboard.press_and_release(key)
+        else:
+            # Simple string key
+            key = data.get('key', '').lower()
+            print(f"Received key from web app: {key}")
+            keyboard.press_and_release(key)
         
         return jsonify({
             "status": "success",
@@ -113,6 +136,8 @@ if __name__ == "__main__":
         print("V -> All-in-One Sports VR")
         print("G -> Creed Rise to Glory")
         print("\nPress Ctrl+C to exit")
+        print("\nSpecial Commands:")
+        print("Alt+F4 -> Force close active application")
         
         # Run the Flask app with threaded=True for better handling of concurrent requests
         app.run(host='localhost', port=5001, debug=True, threaded=True)

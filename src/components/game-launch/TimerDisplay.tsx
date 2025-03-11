@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { X, Power } from 'lucide-react';
+import { useToast } from '../ui/use-toast';
 
 interface TimerDisplayProps {
   timeLeft: number;
@@ -11,6 +12,7 @@ interface TimerDisplayProps {
 
 export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Reset the timer if initialTime changes
@@ -38,7 +40,19 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
   const handleAltF4 = () => {
     // Use the electron API to send Alt+F4 keystroke
     if (window.electron) {
+      console.log('Sending Alt+F4 command to electron');
       window.electron.ipcRenderer.send('simulate-keypress', { key: 'F4', alt: true });
+      toast({
+        title: "Exiting game",
+        description: "Sent Alt+F4 command to close the active application"
+      });
+    } else {
+      console.error('Electron API not available');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not send Alt+F4 command - Electron API not available"
+      });
     }
   };
 
@@ -70,7 +84,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
       <Button
         variant="destructive"
         size="lg"
-        className="mt-8 px-8 py-6 text-xl font-bold flex items-center gap-3 hover:bg-red-800 transition-colors animate-pulse"
+        className="mt-8 px-8 py-6 text-xl font-bold flex items-center gap-3 hover:bg-red-800 transition-colors animate-pulse shadow-lg shadow-red-900/30"
         onClick={handleAltF4}
       >
         <Power className="h-6 w-6" />
