@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 interface GameLaunchScreenProps {
   game: {
@@ -18,6 +20,7 @@ export function GameLaunchScreen({
 }: GameLaunchScreenProps) {
   const [showLaunchScreen, setShowLaunchScreen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Map game titles to their launch keys
   const gameLaunchKeys: Record<string, string> = {
@@ -122,9 +125,13 @@ export function GameLaunchScreen({
                 TAP RFID CARD TO START
               </div>
               <div className="flex justify-center">
-                <div className="w-32 h-32 flex items-center justify-center bg-blue-500/20 rounded-2xl border-4 border-white/20 backdrop-blur-sm">
-                  <span className="text-4xl text-white">🎮</span>
-                </div>
+                <button 
+                  onClick={() => navigate('/')}
+                  className="w-32 h-32 flex flex-col items-center justify-center bg-white/80 text-black hover:bg-white rounded-2xl border-4 border-white/20 backdrop-blur-sm gap-2 font-bold shadow-lg transition-all duration-200"
+                >
+                  <ArrowLeft className="h-8 w-8" />
+                  <span>Back to Games</span>
+                </button>
               </div>
             </div>
           </div>
