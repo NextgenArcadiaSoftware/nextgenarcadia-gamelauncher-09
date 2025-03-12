@@ -10,9 +10,9 @@ export default function PropagationLaunch() {
   return (
     <div className="relative min-h-screen">
       <Button 
-        variant="default" 
+        variant="outline" 
         size="lg"
-        className="fixed top-8 left-8 z-50 bg-white/20 hover:bg-white/30 text-white gap-2 text-xl font-bold"
+        className="fixed top-8 left-8 z-50 bg-white text-black hover:bg-white/90 gap-2 text-xl font-bold shadow-lg border-2"
         onClick={() => navigate('/')}
       >
         <ArrowLeft className="h-6 w-6" />

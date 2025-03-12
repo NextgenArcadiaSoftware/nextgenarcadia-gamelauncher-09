@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
@@ -9,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pencil, Timer, GamepadIcon, History, Upload } from "lucide-react";
+import { Pencil, Timer, GamepadIcon, History, Upload, Star, TrendingUp, Users, Activity } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage-helpers";
 import type { Game } from "@/types/game";
@@ -126,6 +127,14 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
     completed_sessions: number;
     game_title: string;
   }[]>([]);
+  const [monthlyOverview, setMonthlyOverview] = useState<{
+    month: string;
+    totalSessions: number;
+    completionRate: number;
+    avgRating: number;
+    avgDuration: number;
+    topGames: { title: string; count: number; percentage: number }[];
+  }[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -134,7 +143,127 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
     fetchSessionStats();
     fetchGameRatings();
     fetchMonthlyAnalytics();
+    fetchMonthlyOverview();
   }, []);
+
+  const fetchMonthlyOverview = async () => {
+    // Get all monthly session data and process it
+    const { data: monthData } = await supabase
+      .from('game_sessions')
+      .select('started_at, duration, completed, games:game_id(title)');
+      
+    if (!monthData) return;
+      
+    // Group sessions by month/year
+    const sessionsByMonth: Record<string, any[]> = {};
+    
+    monthData.forEach(session => {
+      if (!session.started_at) return;
+      
+      const date = new Date(session.started_at);
+      const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+      
+      if (!sessionsByMonth[monthYear]) {
+        sessionsByMonth[monthYear] = [];
+      }
+      
+      sessionsByMonth[monthYear].push(session);
+    });
+    
+    // Calculate metrics for each month
+    const overviewData = Object.entries(sessionsByMonth).map(([monthYear, sessions]) => {
+      const [year, month] = monthYear.split('-').map(Number);
+      const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+      
+      // Calculate total sessions
+      const totalSessions = sessions.length;
+      
+      // Calculate completion rate
+      const completedSessions = sessions.filter(s => s.completed).length;
+      const completionRate = totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
+      
+      // Calculate average duration
+      const validDurations = sessions.filter(s => s.duration !== null && s.duration > 0);
+      const avgDuration = validDurations.length > 0 
+        ? validDurations.reduce((sum, s) => sum + (s.duration || 0), 0) / validDurations.length
+        : 0;
+      
+      // Get top games
+      const gameCount: Record<string, number> = {};
+      sessions.forEach(session => {
+        const title = session.games?.title || 'Unknown';
+        gameCount[title] = (gameCount[title] || 0) + 1;
+      });
+      
+      const topGames = Object.entries(gameCount)
+        .map(([title, count]) => ({
+          title,
+          count,
+          percentage: (count / totalSessions) * 100
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+      
+      return {
+        month: monthName,
+        totalSessions,
+        completionRate,
+        avgRating: 0, // Will calculate from ratings data later
+        avgDuration: Math.round(avgDuration),
+        topGames
+      };
+    });
+    
+    // Get ratings data to calculate average rating per month
+    const { data: ratingsData } = await supabase
+      .from('game_ratings')
+      .select('rating, created_at');
+      
+    if (ratingsData) {
+      // Group ratings by month
+      const ratingsByMonth: Record<string, number[]> = {};
+      
+      ratingsData.forEach(rating => {
+        if (!rating.created_at) return;
+        
+        const date = new Date(rating.created_at);
+        const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
+        
+        if (!ratingsByMonth[monthYear]) {
+          ratingsByMonth[monthYear] = [];
+        }
+        
+        ratingsByMonth[monthYear].push(rating.rating);
+      });
+      
+      // Calculate average rating for each month
+      overviewData.forEach(month => {
+        const [year, monthNum] = month.month.split(' ')[1] 
+          ? [month.month.split(' ')[1], new Date(1, 0, 1).toLocaleString('default', { month: 'long' }).indexOf(month.month.split(' ')[0])]
+          : [new Date().getFullYear().toString(), new Date(1, 0, 1).toLocaleString('default', { month: 'long' }).indexOf(month.month)];
+        
+        const monthYear = `${year}-${monthNum + 1}`;
+        const ratings = ratingsByMonth[monthYear] || [];
+        
+        month.avgRating = ratings.length > 0
+          ? parseFloat((ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(1))
+          : 0;
+      });
+    }
+    
+    setMonthlyOverview(overviewData.sort((a, b) => {
+      // Sort by most recent month
+      const [yearA, monthNameA] = a.month.split(' ');
+      const [yearB, monthNameB] = b.month.split(' ');
+      
+      const yearDiff = parseInt(yearB || '0') - parseInt(yearA || '0');
+      if (yearDiff !== 0) return yearDiff;
+      
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+      return months.indexOf(monthNameB || '') - months.indexOf(monthNameA || '');
+    }));
+  };
 
   const fetchGameRatings = async () => {
     const { data: ratingsData, error } = await supabase
@@ -460,9 +589,92 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
           </TabsContent>
 
           <TabsContent value="monthly" className="space-y-4">
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle>Monthly Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {monthlyOverview.length > 0 ? (
+                  <div className="space-y-6">
+                    {monthlyOverview.map((month, index) => (
+                      <div key={index} className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold">{month.month}</h3>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="bg-card rounded-lg border p-3">
+                            <div className="flex items-center gap-2">
+                              <GamepadIcon className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">Sessions</span>
+                            </div>
+                            <p className="text-xl font-bold mt-1">{month.totalSessions}</p>
+                          </div>
+                          <div className="bg-card rounded-lg border p-3">
+                            <div className="flex items-center gap-2">
+                              <Activity className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">Completion</span>
+                            </div>
+                            <p className="text-xl font-bold mt-1">{month.completionRate.toFixed(0)}%</p>
+                          </div>
+                          <div className="bg-card rounded-lg border p-3">
+                            <div className="flex items-center gap-2">
+                              <Star className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">Avg. Rating</span>
+                            </div>
+                            <p className="text-xl font-bold mt-1">
+                              {month.avgRating ? (
+                                <span className="flex items-center">
+                                  {month.avgRating.toFixed(1)} 
+                                  <Star className="h-4 w-4 text-yellow-400 ml-1 fill-yellow-400" />
+                                </span>
+                              ) : 'No ratings'}
+                            </p>
+                          </div>
+                          <div className="bg-card rounded-lg border p-3">
+                            <div className="flex items-center gap-2">
+                              <Timer className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">Avg. Duration</span>
+                            </div>
+                            <p className="text-xl font-bold mt-1">{month.avgDuration} min</p>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Top Games</h4>
+                          <div className="space-y-2">
+                            {month.topGames.map((game, gameIndex) => (
+                              <div key={gameIndex} className="bg-card rounded-lg border p-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium">{game.title}</span>
+                                  <span className="text-sm text-muted-foreground">
+                                    {game.count} sessions ({game.percentage.toFixed(0)}%)
+                                  </span>
+                                </div>
+                                <div className="w-full bg-muted rounded-full h-2 mt-2">
+                                  <div 
+                                    className="bg-primary h-2 rounded-full" 
+                                    style={{ width: `${game.percentage}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            ))}
+                            {month.topGames.length === 0 && (
+                              <p className="text-sm text-muted-foreground">No games played this month</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">No monthly data available</p>
+                )}
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
-                <CardTitle>Monthly Analytics</CardTitle>
+                <CardTitle>Game Performance</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
@@ -768,4 +980,3 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
     </Dialog>
   );
 }
-
