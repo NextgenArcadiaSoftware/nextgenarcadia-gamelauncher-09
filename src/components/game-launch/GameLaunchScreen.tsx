@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -51,7 +52,7 @@ export function GameLaunchScreen({
           <Button
             onClick={() => {
               console.log("Back button clicked, navigating to /");
-              navigate('/');
+              navigate('/', { replace: true });
             }}
             className="flex items-center gap-2 bg-white/80 text-black hover:bg-white px-8 py-6 rounded-2xl text-xl font-bold shadow-lg transition-all duration-200 hover:scale-105"
             style={{
