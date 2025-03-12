@@ -8,11 +8,11 @@ export default function PlankLaunch() {
   const navigate = useNavigate();
 
   return (
-    <div>
+    <div className="relative min-h-screen">
       <Button 
-        variant="ghost" 
+        variant="default" 
         size="lg"
-        className="fixed top-8 left-8 z-50 text-white hover:bg-white/20 gap-2 text-xl"
+        className="fixed top-8 left-8 z-50 bg-white/20 hover:bg-white/30 text-white gap-2 text-xl font-bold"
         onClick={() => navigate('/')}
       >
         <ArrowLeft className="h-6 w-6" />
