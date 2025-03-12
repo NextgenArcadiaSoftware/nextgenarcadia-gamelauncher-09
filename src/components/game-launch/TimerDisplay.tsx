@@ -15,8 +15,57 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const sessionCompletionRef = useRef(false);
+  const sessionCreatedRef = useRef(false);
   const { toast } = useToast();
 
+  // Create a session when the component mounts
+  useEffect(() => {
+    const createGameSession = async () => {
+      if (!activeGame || sessionCreatedRef.current) return;
+      
+      try {
+        // Get game ID first
+        const { data: gameData } = await supabase
+          .from('games')
+          .select('id')
+          .eq('title', activeGame)
+          .single();
+
+        if (gameData) {
+          console.log('Creating new session for game:', activeGame);
+          sessionCreatedRef.current = true;
+          
+          // Create a new session
+          const { error } = await supabase
+            .from('game_sessions')
+            .insert({
+              game_id: gameData.id,
+              duration: Math.ceil(initialTime / 60), // Convert seconds to minutes
+              completed: false
+            });
+          
+          if (error) {
+            console.error('Error creating game session:', error);
+          } else {
+            console.log('Game session created successfully');
+          }
+        }
+      } catch (error) {
+        console.error('Error creating game session:', error);
+      }
+    };
+
+    createGameSession();
+    
+    return () => {
+      // If component unmounts before session is completed, we still want to mark it
+      if (!sessionCompletionRef.current && activeGame && sessionCreatedRef.current) {
+        markSessionComplete();
+      }
+    };
+  }, [activeGame, initialTime]);
+
+  // Timer effect
   useEffect(() => {
     // Reset the timer if initialTime changes
     setTimeLeft(initialTime);
@@ -29,42 +78,8 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
           clearInterval(interval);
           
           // Only mark the session as completed when timer ends and if not already marked
-          if (activeGame && !sessionCompletionRef.current) {
+          if (activeGame && !sessionCompletionRef.current && sessionCreatedRef.current) {
             sessionCompletionRef.current = true; // Set immediately to prevent race conditions
-            
-            const markSessionComplete = async () => {
-              try {
-                // Get game ID first
-                const { data: gameData } = await supabase
-                  .from('games')
-                  .select('id')
-                  .eq('title', activeGame)
-                  .single();
-
-                if (gameData) {
-                  console.log('Marking session complete for game:', activeGame, 'with ID:', gameData.id);
-                  // Update the latest session for this game as completed
-                  const { data, error } = await supabase
-                    .from('game_sessions')
-                    .update({ completed: true })
-                    .eq('game_id', gameData.id)
-                    .is('completed', false)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-                  
-                  if (error) {
-                    console.error('Error in update query:', error);
-                  } else {
-                    console.log('Session marked as completed, response:', data);
-                  }
-                  
-                  setSessionCompleted(true);
-                }
-              } catch (error) {
-                console.error('Error marking session as completed:', error);
-              }
-            };
-            
             markSessionComplete();
           }
           
@@ -76,6 +91,41 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
 
     return () => clearInterval(interval);
   }, [initialTime, activeGame]);
+
+  const markSessionComplete = async () => {
+    if (!activeGame) return;
+    
+    try {
+      // Get game ID first
+      const { data: gameData } = await supabase
+        .from('games')
+        .select('id')
+        .eq('title', activeGame)
+        .single();
+
+      if (gameData) {
+        console.log('Marking session complete for game:', activeGame, 'with ID:', gameData.id);
+        // Update the latest session for this game as completed
+        const { data, error } = await supabase
+          .from('game_sessions')
+          .update({ completed: true })
+          .eq('game_id', gameData.id)
+          .is('completed', false)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (error) {
+          console.error('Error in update query:', error);
+        } else {
+          console.log('Session marked as completed, response:', data);
+        }
+        
+        setSessionCompleted(true);
+      }
+    } catch (error) {
+      console.error('Error marking session as completed:', error);
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
