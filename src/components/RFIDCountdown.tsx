@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
@@ -106,27 +105,8 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
 
   const targetWord = getGameCode(activeGame);
 
-  const [initialTimeLeft, setInitialTimeLeft] = useState<number | null>(null);
-
   useEffect(() => {
-    if (timeLeft !== null) {
-      setInitialTimeLeft(timeLeft);
-    }
-  }, [timeLeft]);
-
-  useEffect(() => {
-    if (!showGameScreen && timeLeft !== null) {
-      const interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (!prev || prev <= 1) {
-            clearInterval(interval);
-            setShowRating(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
+    if (!showGameScreen && timeLeft !== null && targetWord) {
       // When timer starts, simulate typing the launch code for the Python backend
       if (window.electron) {
         targetWord.split('').forEach((char, index) => {
@@ -135,10 +115,8 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
           }, index * 100); // Type each character with a small delay
         });
       }
-
-      return () => clearInterval(interval);
     }
-  }, [showGameScreen, timeLeft]);
+  }, [showGameScreen, timeLeft, targetWord]);
 
   const handleRatingSubmit = async (rating: number) => {
     // When exiting, send the stop command to the Python backend
@@ -210,7 +188,15 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
     <TimerDisplay
       timeLeft={timeLeft}
       activeGame={activeGame}
-      onExit={onExit}
+      onExit={() => {
+        // We'll show the rating screen when the timer is complete
+        // otherwise we'll just exit directly
+        if (showGameScreen) {
+          onExit();
+        } else {
+          setShowRating(true);
+        }
+      }}
     />
   );
 }
