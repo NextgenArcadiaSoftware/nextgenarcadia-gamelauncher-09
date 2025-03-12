@@ -45,6 +45,7 @@ const App = () => (
           <Route path="/creedlaunch" element={<CreedLaunch />} />
           <Route path="/beatlaunch" element={<BeatSaberLaunch />} />
           <Route path="/rollerlaunch" element={<RollerCoasterLaunch />} />
+          <Route path="/unknown-game" element={<UnknownGameLaunch />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

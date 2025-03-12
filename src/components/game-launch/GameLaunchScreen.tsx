@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -25,7 +24,6 @@ export function GameLaunchScreen({
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Map game titles to their launch keys
   const gameLaunchKeys: Record<string, string> = {
     "Fruit Ninja VR": "f",
     "Crisis Brigade 2 Reloaded": "c",
@@ -45,14 +43,17 @@ export function GameLaunchScreen({
   const currentLaunchKey = gameLaunchKeys[game.title] || "x";
 
   useEffect(() => {
+    if (!gameLaunchKeys[game.title]) {
+      navigate('/unknown-game');
+      return;
+    }
+
     const handleKeyPress = (event: KeyboardEvent) => {
-      // Handle RFID input
       if (/^\d$/.test(event.key)) {
         setRfidInput(prev => {
           const newInput = prev + event.key;
-          // If we have a complete RFID number
           if (newInput.length >= 10) {
-            navigate('/', { replace: true }); // Navigate back to home
+            navigate('/', { replace: true });
             return '';
           }
           return newInput;
@@ -60,7 +61,6 @@ export function GameLaunchScreen({
         return;
       }
 
-      // Handle game launch key only when launch screen is shown
       if (event.key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
         handleGameStart();
       }
@@ -80,7 +80,6 @@ export function GameLaunchScreen({
 
   const simulateKeyPress = (key: string) => {
     try {
-      // Trigger the hidden button click to simulate a real key press
       const button = document.getElementById('myButton');
       if (button) {
         button.click();
@@ -108,7 +107,6 @@ export function GameLaunchScreen({
     simulateKeyPress(key);
   };
 
-  // RFID Detection Screen
   if (!showLaunchScreen) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
@@ -152,7 +150,6 @@ export function GameLaunchScreen({
     );
   }
 
-  // Game launch screen
   return (
     <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
       <div className="absolute inset-0 overflow-hidden">
