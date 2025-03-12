@@ -1,9 +1,11 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
 import { RatingScreen } from './game-launch/RatingScreen';
 import { GameLaunchScreen } from './game-launch/GameLaunchScreen';
 import { supabase } from '@/integrations/supabase/client';
+import { useLocation } from 'react-router-dom';
 
 interface RFIDCountdownProps {
   onExit: () => void;
@@ -16,6 +18,23 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
   const [showRating, setShowRating] = useState(false);
   const [showGameScreen, setShowGameScreen] = useState(true);
   const { toast } = useToast();
+  const location = useLocation();
+
+  // Handle RFID card inputs on launch pages
+  useEffect(() => {
+    const handleRFIDInput = (event: KeyboardEvent) => {
+      const isLaunchPage = location.pathname.toLowerCase().includes('launch');
+      
+      // If this is a digit (RFID input) and we're already on a launch page, refresh
+      if (/^\d$/.test(event.key) && isLaunchPage && !showGameScreen) {
+        console.log("RFID card presented during active game session, refreshing page");
+        window.location.reload();
+      }
+    };
+    
+    window.addEventListener('keypress', handleRFIDInput);
+    return () => window.removeEventListener('keypress', handleRFIDInput);
+  }, [location.pathname, showGameScreen]);
 
   // Initial timer duration fetch and subscription setup
   useEffect(() => {
