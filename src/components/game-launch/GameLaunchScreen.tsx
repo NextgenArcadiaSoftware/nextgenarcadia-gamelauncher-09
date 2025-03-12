@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '../ui/button';
 
@@ -23,7 +23,6 @@ export function GameLaunchScreen({
   const [showLaunchScreen, setShowLaunchScreen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Map game titles to their launch keys
   const gameLaunchKeys: Record<string, string> = {
@@ -70,18 +69,7 @@ export function GameLaunchScreen({
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      // Check if we're on a launch page
-      const isLaunchPage = location.pathname.toLowerCase().includes('launch');
-      
-      // If this is a digit (RFID input) and we're on a launch page, just refresh
-      if (/^\d$/.test(event.key) && isLaunchPage) {
-        console.log("RFID detected on launch page, refreshing");
-        window.location.reload();
-        return;
-      }
-      
-      // Normal game launch logic for non-launch pages
-      if (/^\d$/.test(event.key) && !showLaunchScreen && !isLaunchPage) {
+      if (/^\d$/.test(event.key) && !showLaunchScreen) {
         toast({
           title: "✨ RFID Detected",
           description: `${game.title} is ready to launch`
@@ -97,7 +85,7 @@ export function GameLaunchScreen({
     
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [game.title, showLaunchScreen, toast, onContinue, currentLaunchKey, location.pathname]);
+  }, [game.title, showLaunchScreen, toast, onContinue, currentLaunchKey]);
 
   const handleGameStart = () => {
     toast({
