@@ -49,7 +49,10 @@ export function GameLaunchScreen({
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80" />
         <div className="relative z-10">
           <Button
-            onClick={() => navigate('/')}
+            onClick={() => {
+              console.log("Back button clicked, navigating to /");
+              navigate('/');
+            }}
             className="flex items-center gap-2 bg-white/80 text-black hover:bg-white px-8 py-6 rounded-2xl text-xl font-bold shadow-lg transition-all duration-200 hover:scale-105"
             style={{
               boxShadow: '0 0 25px 5px rgba(255, 255, 255, 0.4), 0 0 10px 1px rgba(255, 255, 255, 0.7)'
