@@ -10,9 +10,9 @@ export default function BeatSaberLaunch() {
   return (
     <div className="relative min-h-screen">
       <Button 
-        variant="outline" 
+        variant="default" 
         size="lg"
-        className="fixed top-8 left-8 z-50 bg-white text-black hover:bg-white/90 gap-2 text-xl font-bold shadow-lg border-2"
+        className="fixed top-8 left-8 z-50 bg-white/80 text-black hover:bg-white gap-2 text-xl font-bold shadow-lg border-2"
         onClick={() => navigate('/')}
       >
         <ArrowLeft className="h-6 w-6" />
