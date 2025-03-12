@@ -21,6 +21,7 @@ import PropagationLaunch from "./pages/PropagationLaunch";
 import CreedLaunch from "./pages/CreedLaunch";
 import BeatSaberLaunch from "./pages/BeatSaberLaunch";
 import RollerCoasterLaunch from "./pages/RollerCoasterLaunch";
+import UnknownGameLaunch from "./pages/UnknownGameLaunch";
 
 const queryClient = new QueryClient();
 
