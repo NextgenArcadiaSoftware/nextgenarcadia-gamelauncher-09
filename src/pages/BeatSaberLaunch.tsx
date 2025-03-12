@@ -11,11 +11,12 @@ export default function BeatSaberLaunch() {
     <div>
       <Button 
         variant="ghost" 
-        className="fixed top-4 left-4 z-50"
+        size="lg"
+        className="fixed top-8 left-8 z-50 text-white hover:bg-white/20 gap-2 text-xl"
         onClick={() => navigate('/')}
       >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
+        <ArrowLeft className="h-6 w-6" />
+        Back to Games
       </Button>
       <RFIDCountdown 
         onExit={() => navigate('/')} 

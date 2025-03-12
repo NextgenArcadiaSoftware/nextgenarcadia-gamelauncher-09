@@ -1,16 +1,26 @@
 
 export type { Database } from '@/integrations/supabase/types';
 
-// If you need to extend or override any types, do it below
-// For example:
-/*
-export interface ExtendedDatabase extends Database {
-  public: {
-    Tables: {
-      your_table: {
-        // your extensions
-      } & Database['public']['Tables']['your_table']
-    }
-  }
+// Define additional types for analytics
+export interface MonthlyAnalytics {
+  month: number;
+  year: number;
+  total_sessions: number;
+  unique_games_played: number;
+  avg_duration: number;
+  completed_sessions: number;
+  game_title: string;
+  avg_rating?: number;
 }
-*/
+
+export interface GameRating {
+  title: string;
+  averageRating: number;
+  totalRatings: number;
+}
+
+export interface PopularGame {
+  title: string;
+  count: number;
+  percentage?: number;
+}
