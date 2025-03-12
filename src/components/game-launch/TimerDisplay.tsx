@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '../ui/button';
 import { X, Power } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
@@ -14,12 +14,14 @@ interface TimerDisplayProps {
 export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionCompleted, setSessionCompleted] = useState(false);
+  const sessionCompletionRef = useRef(false);
   const { toast } = useToast();
 
   useEffect(() => {
     // Reset the timer if initialTime changes
     setTimeLeft(initialTime);
     setSessionCompleted(false);
+    sessionCompletionRef.current = false;
     
     const interval = setInterval(async () => {
       setTimeLeft((prev) => {
@@ -27,7 +29,9 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
           clearInterval(interval);
           
           // Only mark the session as completed when timer ends and if not already marked
-          if (activeGame && !sessionCompleted) {
+          if (activeGame && !sessionCompletionRef.current) {
+            sessionCompletionRef.current = true; // Set immediately to prevent race conditions
+            
             const markSessionComplete = async () => {
               try {
                 // Get game ID first
@@ -38,14 +42,21 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
                   .single();
 
                 if (gameData) {
+                  console.log('Marking session complete for game:', activeGame, 'with ID:', gameData.id);
                   // Update the latest session for this game as completed
-                  await supabase
+                  const { data, error } = await supabase
                     .from('game_sessions')
                     .update({ completed: true })
                     .eq('game_id', gameData.id)
                     .is('completed', false)
                     .order('created_at', { ascending: false })
                     .limit(1);
+                  
+                  if (error) {
+                    console.error('Error in update query:', error);
+                  } else {
+                    console.log('Session marked as completed, response:', data);
+                  }
                   
                   setSessionCompleted(true);
                 }
@@ -64,7 +75,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [initialTime, activeGame, sessionCompleted]);
+  }, [initialTime, activeGame]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
