@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -127,7 +128,10 @@ export function GameLaunchScreen({
               <div className="flex justify-center">
                 <button 
                   onClick={() => navigate('/')}
-                  className="w-32 h-32 flex flex-col items-center justify-center bg-white/80 text-black hover:bg-white rounded-2xl border-4 border-white/20 backdrop-blur-sm gap-2 font-bold shadow-lg transition-all duration-200"
+                  className="w-64 h-32 flex flex-col items-center justify-center bg-white/80 text-black hover:bg-white rounded-2xl border-4 border-white/20 backdrop-blur-sm gap-2 font-bold shadow-lg transition-all duration-200 hover:scale-105"
+                  style={{
+                    boxShadow: '0 0 25px 5px rgba(255, 255, 255, 0.4), 0 0 10px 1px rgba(255, 255, 255, 0.7)'
+                  }}
                 >
                   <ArrowLeft className="h-8 w-8" />
                   <span>Back to Games</span>
