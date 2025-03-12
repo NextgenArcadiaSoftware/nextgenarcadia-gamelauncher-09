@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -20,6 +21,7 @@ export function GameLaunchScreen({
   onContinue
 }: GameLaunchScreenProps) {
   const [showLaunchScreen, setShowLaunchScreen] = useState(false);
+  const [rfidInput, setRfidInput] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -44,15 +46,21 @@ export function GameLaunchScreen({
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (/^\d$/.test(event.key) && !showLaunchScreen) {
-        toast({
-          title: "✨ RFID Detected",
-          description: `${game.title} is ready to launch`
+      // Handle RFID input
+      if (/^\d$/.test(event.key)) {
+        setRfidInput(prev => {
+          const newInput = prev + event.key;
+          // If we have a complete RFID number
+          if (newInput.length >= 10) {
+            navigate('/', { replace: true }); // Navigate back to home
+            return '';
+          }
+          return newInput;
         });
-        setShowLaunchScreen(true);
+        return;
       }
 
-      // Listen for the game-specific launch key
+      // Handle game launch key only when launch screen is shown
       if (event.key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
         handleGameStart();
       }
@@ -60,7 +68,7 @@ export function GameLaunchScreen({
     
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [game.title, showLaunchScreen, toast, onContinue, currentLaunchKey]);
+  }, [game.title, showLaunchScreen, toast, onContinue, currentLaunchKey, navigate]);
 
   const handleGameStart = () => {
     toast({
