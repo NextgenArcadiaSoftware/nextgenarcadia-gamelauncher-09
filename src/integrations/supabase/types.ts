@@ -40,6 +40,7 @@ export type Database = {
       }
       game_sessions: {
         Row: {
+          completed: boolean | null
           duration: number
           ended_at: string | null
           game_id: string | null
@@ -47,6 +48,7 @@ export type Database = {
           started_at: string | null
         }
         Insert: {
+          completed?: boolean | null
           duration?: number
           ended_at?: string | null
           game_id?: string | null
@@ -54,6 +56,7 @@ export type Database = {
           started_at?: string | null
         }
         Update: {
+          completed?: boolean | null
           duration?: number
           ended_at?: string | null
           game_id?: string | null
@@ -138,7 +141,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      monthly_game_analytics: {
+        Row: {
+          avg_duration: number | null
+          completed_sessions: number | null
+          game_id: string | null
+          game_title: string | null
+          month: number | null
+          total_sessions: number | null
+          unique_games_played: number | null
+          year: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_sessions_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

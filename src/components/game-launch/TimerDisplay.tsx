@@ -1,8 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { X, Power } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface TimerDisplayProps {
   timeLeft: number;
@@ -18,10 +18,40 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     // Reset the timer if initialTime changes
     setTimeLeft(initialTime);
     
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
+          
+          // Mark the session as completed when timer ends
+          if (activeGame) {
+            const markSessionComplete = async () => {
+              try {
+                // Get game ID first
+                const { data: gameData } = await supabase
+                  .from('games')
+                  .select('id')
+                  .eq('title', activeGame)
+                  .single();
+
+                if (gameData) {
+                  // Update the latest session for this game as completed
+                  await supabase
+                    .from('game_sessions')
+                    .update({ completed: true })
+                    .eq('game_id', gameData.id)
+                    .is('completed', false)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                }
+              } catch (error) {
+                console.error('Error marking session as completed:', error);
+              }
+            };
+            
+            markSessionComplete();
+          }
+          
           return 0;
         }
         return prev - 1;
@@ -29,7 +59,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [initialTime]);
+  }, [initialTime, activeGame]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);

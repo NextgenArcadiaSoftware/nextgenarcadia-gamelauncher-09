@@ -117,6 +117,15 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
     averageRating: number;
     totalRatings: number;
   }[]>([]);
+  const [monthlyAnalytics, setMonthlyAnalytics] = useState<{
+    month: number;
+    year: number;
+    total_sessions: number;
+    unique_games_played: number;
+    avg_duration: number;
+    completed_sessions: number;
+    game_title: string;
+  }[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -124,6 +133,7 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
     fetchSettings();
     fetchSessionStats();
     fetchGameRatings();
+    fetchMonthlyAnalytics();
   }, []);
 
   const fetchGameRatings = async () => {
@@ -273,6 +283,21 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
     }
   };
 
+  const fetchMonthlyAnalytics = async () => {
+    const { data, error } = await supabase
+      .from('monthly_game_analytics')
+      .select('*')
+      .order('year', { ascending: false })
+      .order('month', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching monthly analytics:', error);
+      return;
+    }
+
+    setMonthlyAnalytics(data);
+  };
+
   const handleGameStatusToggle = async (id: string, currentStatus: 'enabled' | 'disabled') => {
     const newStatus = currentStatus === 'enabled' ? 'disabled' : 'enabled';
     
@@ -378,8 +403,9 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
         </DialogHeader>
         
         <Tabs defaultValue="stats" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-4">
-            <TabsTrigger value="stats">Statistics</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 mb-4">
+            <TabsTrigger value="stats">Overview</TabsTrigger>
+            <TabsTrigger value="monthly">Monthly</TabsTrigger>
             <TabsTrigger value="ratings">Ratings</TabsTrigger>
             <TabsTrigger value="timer">Timer</TabsTrigger>
             <TabsTrigger value="games">Games</TabsTrigger>
@@ -428,6 +454,69 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
                       <span className="text-muted-foreground">{game.count} sessions</span>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="monthly" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Monthly Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {monthlyAnalytics.reduce((acc: any[], curr) => {
+                    const monthYear = `${new Date(0, curr.month - 1).toLocaleString('default', { month: 'long' })} ${curr.year}`;
+                    const existingMonth = acc.find(m => m.monthYear === monthYear);
+                    
+                    if (existingMonth) {
+                      existingMonth.games.push({
+                        title: curr.game_title,
+                        sessions: curr.total_sessions,
+                        completed: curr.completed_sessions,
+                        avgDuration: Math.round(curr.avg_duration)
+                      });
+                    } else {
+                      acc.push({
+                        monthYear,
+                        month: curr.month,
+                        year: curr.year,
+                        games: [{
+                          title: curr.game_title,
+                          sessions: curr.total_sessions,
+                          completed: curr.completed_sessions,
+                          avgDuration: Math.round(curr.avg_duration)
+                        }]
+                      });
+                    }
+                    return acc;
+                  }, []).map((month) => (
+                    <div key={month.monthYear} className="space-y-4">
+                      <h3 className="text-lg font-semibold">{month.monthYear}</h3>
+                      <div className="grid gap-4">
+                        {month.games.map((game: any) => (
+                          <div key={game.title} className="flex items-center justify-between p-4 bg-card rounded-lg border">
+                            <div>
+                              <div className="font-medium">{game.title}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {game.completed} completed of {game.sessions} sessions
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-medium">{game.avgDuration} min</div>
+                              <div className="text-sm text-muted-foreground">
+                                avg. duration
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  {monthlyAnalytics.length === 0 && (
+                    <p className="text-muted-foreground text-center py-4">No monthly data available</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -679,3 +768,4 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
     </Dialog>
   );
 }
+
