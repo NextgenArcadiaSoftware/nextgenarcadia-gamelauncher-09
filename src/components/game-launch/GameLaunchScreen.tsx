@@ -1,10 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
-import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface GameLaunchScreenProps {
   game: {
@@ -42,30 +41,6 @@ export function GameLaunchScreen({
   };
 
   const currentLaunchKey = gameLaunchKeys[game.title] || "x";
-
-  // If game title is "Unknown Game", render only the back button
-  if (game.title === "Unknown Game") {
-    return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80" />
-        <div className="relative z-10">
-          <Button
-            onClick={() => {
-              console.log("Back button clicked, navigating to /");
-              navigate('/', { replace: true });
-            }}
-            className="flex items-center gap-2 bg-white/80 text-black hover:bg-white px-8 py-6 rounded-2xl text-xl font-bold shadow-lg transition-all duration-200 hover:scale-105"
-            style={{
-              boxShadow: '0 0 25px 5px rgba(255, 255, 255, 0.4), 0 0 10px 1px rgba(255, 255, 255, 0.7)'
-            }}
-          >
-            <ArrowLeft className="h-6 w-6" />
-            Back to Games
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
