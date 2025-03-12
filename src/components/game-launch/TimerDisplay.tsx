@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { X, Power } from 'lucide-react';
@@ -12,19 +13,21 @@ interface TimerDisplayProps {
 
 export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
+  const [sessionCompleted, setSessionCompleted] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     // Reset the timer if initialTime changes
     setTimeLeft(initialTime);
+    setSessionCompleted(false);
     
     const interval = setInterval(async () => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
           
-          // Mark the session as completed when timer ends
-          if (activeGame) {
+          // Only mark the session as completed when timer ends and if not already marked
+          if (activeGame && !sessionCompleted) {
             const markSessionComplete = async () => {
               try {
                 // Get game ID first
@@ -43,6 +46,8 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
                     .is('completed', false)
                     .order('created_at', { ascending: false })
                     .limit(1);
+                  
+                  setSessionCompleted(true);
                 }
               } catch (error) {
                 console.error('Error marking session as completed:', error);
@@ -59,7 +64,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [initialTime, activeGame]);
+  }, [initialTime, activeGame, sessionCompleted]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);

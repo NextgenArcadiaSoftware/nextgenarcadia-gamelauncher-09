@@ -21,6 +21,7 @@ export default function BeatSaberLaunch() {
       <RFIDCountdown 
         onExit={() => navigate('/')} 
         activeGame="Beat Saber"
+        trailer="https://www.youtube.com/watch?v=vL39Sg2AqWg"
       />
     </div>
   );
