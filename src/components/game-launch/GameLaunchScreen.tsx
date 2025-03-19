@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
 import { VirtualKeyboard } from './VirtualKeyboard';
@@ -52,8 +53,13 @@ export function GameLaunchScreen({
       if (/^\d$/.test(event.key)) {
         setRfidInput(prev => {
           const newInput = prev + event.key;
+          // Check if we have a complete RFID number (10+ digits)
           if (newInput.length >= 10) {
-            navigate('/', { replace: true });
+            setShowLaunchScreen(true);
+            toast({
+              title: "✅ RFID Card Detected",
+              description: "You can now launch the game"
+            });
             return '';
           }
           return newInput;
