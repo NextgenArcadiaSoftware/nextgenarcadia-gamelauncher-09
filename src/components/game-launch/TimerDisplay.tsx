@@ -92,6 +92,43 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     return () => clearInterval(interval);
   }, [initialTime, activeGame]);
 
+  // Listen for the STOP_GAME message from external hardware button
+  useEffect(() => {
+    // Check if electron is available
+    if (window.electron) {
+      console.log('Setting up external button listener');
+      
+      // Create the listener function
+      const handleExternalButton = () => {
+        console.log('External stop button detected');
+        // Show toast notification
+        toast({
+          title: "External Button Pressed",
+          description: "Session ending..."
+        });
+        
+        // Mark session as completed if not already done
+        if (activeGame && !sessionCompletionRef.current && sessionCreatedRef.current) {
+          sessionCompletionRef.current = true;
+          markSessionComplete();
+        }
+        
+        // End the timer immediately
+        setTimeLeft(0);
+        // Trigger exit after a short delay to allow the user to see what's happening
+        setTimeout(onExit, 1500);
+      };
+      
+      // Register the listener with electron IPC
+      window.electron.ipcRenderer.on('external-button-pressed', handleExternalButton);
+      
+      // Clean up the listener when component unmounts
+      return () => {
+        window.electron.ipcRenderer.removeAllListeners('external-button-pressed');
+      };
+    }
+  }, [activeGame, onExit, toast]);
+
   const markSessionComplete = async () => {
     if (!activeGame) return;
     
