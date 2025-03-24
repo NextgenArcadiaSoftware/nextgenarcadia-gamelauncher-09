@@ -7,7 +7,7 @@
   },
   "files": [
     "dist/**/*",
-    "electron/**/*",
+    "electron/**/*.js",
     "!**/node_modules/**/*"
   ],
   "extraResources": [

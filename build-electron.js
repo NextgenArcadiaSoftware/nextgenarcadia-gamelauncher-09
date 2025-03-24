@@ -17,6 +17,22 @@ exec('npx tsc -p electron/tsconfig.json', (error, stdout, stderr) => {
   console.log('TypeScript compilation successful');
   console.log(stdout);
   
+  // Verify that main.js exists
+  const mainJsPath = path.join(__dirname, 'electron', 'main.js');
+  if (!fs.existsSync(mainJsPath)) {
+    console.error(`Error: ${mainJsPath} does not exist after TypeScript compilation`);
+    console.error('Checking what files were generated:');
+    const electronDir = path.join(__dirname, 'electron');
+    if (fs.existsSync(electronDir)) {
+      console.log('Files in electron directory:', fs.readdirSync(electronDir));
+    } else {
+      console.error('Electron directory does not exist!');
+    }
+    return;
+  }
+  
+  console.log(`Verified: ${mainJsPath} exists`);
+  
   // Define the build command using electron-builder with the config file
   const buildCommand = 'npx electron-builder --config electron-builder.json';
 
