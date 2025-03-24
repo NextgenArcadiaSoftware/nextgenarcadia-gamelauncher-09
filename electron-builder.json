@@ -39,6 +39,5 @@
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true
-  },
-  "electronDependencies": false
+  }
 }

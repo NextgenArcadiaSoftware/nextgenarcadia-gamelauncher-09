@@ -8,7 +8,7 @@ This document provides instructions for running and building the Electron applic
 To run the Electron app in development mode, use the following command:
 
 ```bash
-NODE_ENV=development node start-electron.js
+node start-electron.js
 ```
 
 This will:
@@ -37,10 +37,6 @@ The Electron app is configured using the `electron-builder.json` file in the pro
 - Output directory
 - Build targets (Windows, macOS, Linux)
 - Installer options
-
-## Development vs Production Dependencies
-
-All Electron-related packages are treated as development dependencies. They are used during development and build, but not included in the final production package unnecessarily.
 
 ## Using Python Services
 

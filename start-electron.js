@@ -11,8 +11,7 @@ console.log(`Mode: ${isDev ? 'Development' : 'Production'}`);
 
 // Define the commands
 const commands = {
-  // In dev mode, we explicitly use the dev dependencies
-  dev: 'NODE_ENV=development npx concurrently "npm run dev" "npx wait-on http://localhost:8080 && npx electron electron/main.ts"',
+  dev: 'npx concurrently "npm run dev" "npx wait-on http://localhost:8080 && npx electron electron/main.ts"',
   prod: 'npx electron .'
 };
 

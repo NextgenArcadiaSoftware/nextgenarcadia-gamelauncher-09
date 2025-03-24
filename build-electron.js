@@ -6,8 +6,7 @@ const fs = require('fs');
 console.log('Building Electron app...');
 
 // Define the build command using electron-builder with the config file
-// Note: Running with NODE_ENV=production to ensure dev dependencies aren't included in final build
-const buildCommand = 'NODE_ENV=production npx electron-builder --config electron-builder.json';
+const buildCommand = 'npx electron-builder --config electron-builder.json';
 
 console.log(`Executing: ${buildCommand}`);
 
