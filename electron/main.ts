@@ -37,6 +37,7 @@ function createWindow() {
 
   initRFIDReader();
   initExternalButtonListener();
+  initStopEndpoint();
 }
 
 function initRFIDReader() {
@@ -92,6 +93,29 @@ function initExternalButtonListener() {
   
   server.listen(5005, () => {
     console.log('External button listener server running on port 5005');
+  });
+}
+
+function initStopEndpoint() {
+  const stopServer = http.createServer((req, res) => {
+    if (req.url === '/stop' && req.method === 'POST') {
+      console.log('Stop endpoint hit in Electron process');
+      
+      if (mainWindow) {
+        mainWindow.webContents.send('external-button-pressed');
+        console.log('Sent external-button-pressed event to renderer process');
+      }
+      
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'success', message: 'Stop command received' }));
+    } else {
+      res.writeHead(404);
+      res.end();
+    }
+  });
+  
+  stopServer.listen(5006, () => {
+    console.log('Stop endpoint server running on port 5006');
   });
 }
 

@@ -121,7 +121,8 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
   const handleRatingSubmit = async (rating: number) => {
     // When exiting, send the stop command to the Python backend
     if (window.electron) {
-      window.electron.ipcRenderer.send('stop-game', targetWord);
+      // Use the proper stop-game command
+      window.electron.ipcRenderer.send('simulate-keypress', 'stop');
     }
     
     if (activeGame) {

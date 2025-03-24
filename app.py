@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from functools import wraps
@@ -38,9 +37,15 @@ GAMES = {
 def notify_electron_app(command):
     """Send a command to the Electron app's HTTP server"""
     try:
-        # Send the command to the Electron app's HTTP listener
+        # First try the regular notification endpoint
         response = requests.post('http://localhost:5005', data=command, timeout=2)
         print(f"Sent {command} to Electron app, response: {response.status_code}")
+        
+        # For STOP_GAME commands, also hit the dedicated stop endpoint
+        if command == "STOP_GAME":
+            stop_response = requests.post('http://localhost:5006/stop', timeout=2)
+            print(f"Sent stop command to dedicated endpoint, response: {stop_response.status_code}")
+            
         return response.status_code == 200
     except Exception as e:
         print(f"Error sending command to Electron app: {str(e)}")
@@ -142,4 +147,3 @@ if __name__ == '__main__':
     print("\nStarting server...")
     
     app.run(host='localhost', port=5001, debug=True, threaded=True)
-

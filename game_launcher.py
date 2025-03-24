@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import keyboard
@@ -39,6 +38,12 @@ def notify_electron_app(command):
         # Send the command to the Electron app's HTTP listener
         response = requests.post('http://localhost:5005', data=command, timeout=2)
         print(f"Sent {command} to Electron app, response: {response.status_code}")
+        
+        # For STOP_GAME commands, also hit the dedicated stop endpoint
+        if command == "STOP_GAME":
+            stop_response = requests.post('http://localhost:5006/stop', timeout=2)
+            print(f"Sent stop command to dedicated endpoint, response: {stop_response.status_code}")
+            
         return response.status_code == 200
     except Exception as e:
         print(f"Error sending command to Electron app: {str(e)}")
@@ -91,7 +96,14 @@ def stop_game():
 
 @app.route('/keypress', methods=['POST'])
 def handle_keypress():
-    # ... keep existing code (keypress handling)
+    data = request.get_json()
+    if not data or 'key' not in data:
+        return jsonify({"error": "Key not provided"}), 400
+    
+    key = data['key'].lower()
+    print(f"Simulating key press: {key}")
+    keyboard.press_and_release(key)
+    return jsonify({"status": "success", "message": f"Key {key} pressed"}), 200
 
 @app.route('/')
 def index():
@@ -99,7 +111,7 @@ def index():
 
 @app.route('/health', methods=['GET', 'OPTIONS'])
 def health_check():
-    # ... keep existing code (health check functionality)
+    return jsonify({"status": "Server is healthy"}), 200
 
 if __name__ == "__main__":
     try:
