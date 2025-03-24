@@ -28,7 +28,10 @@ npm run build
 node build-electron.js
 ```
 
-The packaged application will be available in the `release` directory as specified in the `electron-builder.json` configuration file.
+The build process will:
+1. Compile TypeScript files in the electron directory
+2. Build the Electron app using electron-builder
+3. Create distributables in the `release` directory
 
 ## Configurations
 

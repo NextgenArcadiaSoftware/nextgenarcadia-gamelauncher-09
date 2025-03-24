@@ -7,15 +7,18 @@
   },
   "files": [
     "dist/**/*",
-    "electron/**/*"
+    "electron/**/*",
+    "!**/node_modules/**/*"
   ],
   "extraResources": [
     {
       "from": "public",
-      "to": "public",
-      "filter": ["**/*"]
+      "to": "public"
     }
   ],
+  "extraMetadata": {
+    "main": "electron/main.js"
+  },
   "win": {
     "target": [
       "nsis"
