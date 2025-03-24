@@ -6,6 +6,7 @@ import threading
 import json
 import os
 import subprocess
+import requests
 
 # Dictionary mapping game codes to their executable paths
 GAMES = {
@@ -32,6 +33,17 @@ def log_request_info():
     print('Body: %s', request.get_data())
     print('Route: %s', request.path)
 
+def notify_electron_app(command):
+    """Send a command to the Electron app's HTTP server"""
+    try:
+        # Send the command to the Electron app's HTTP listener
+        response = requests.post('http://localhost:5005', data=command, timeout=2)
+        print(f"Sent {command} to Electron app, response: {response.status_code}")
+        return response.status_code == 200
+    except Exception as e:
+        print(f"Error sending command to Electron app: {str(e)}")
+        return False
+
 def on_key_event(event):
     key = event.name.lower()
     print(f"Key detected: {key}")
@@ -55,49 +67,31 @@ def on_key_event(event):
         game_code = key_to_game[key]
         print(f"Matched game code: {game_code}")
 
+# Add a new route to handle the STOP_GAME command
+@app.route('/stop-game', methods=['POST'])
+def stop_game():
+    try:
+        print("STOP_GAME command received! Killing game...")
+        
+        # Forward the command to the Electron app
+        if notify_electron_app("STOP_GAME"):
+            return jsonify({
+                "status": "success", 
+                "message": "Stop game command forwarded to Electron app"
+            }), 200
+        else:
+            return jsonify({
+                "status": "warning",
+                "message": "Stop game command received but failed to notify Electron app"
+            }), 200
+            
+    except Exception as e:
+        print(f"Error processing stop game command: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/keypress', methods=['POST'])
 def handle_keypress():
-    try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "No data received"}), 400
-        
-        # Handle special key combinations
-        if isinstance(data, dict) and 'key' in data:
-            key = data['key']
-            alt = data.get('alt', False)
-            
-            print(f"Received key from web app: {key} with alt={alt}")
-            
-            # Handle Alt+F4 key combination
-            if key == 'F4' and alt:
-                print("Simulating Alt+F4")
-                keyboard.press('alt')
-                keyboard.press('f4')
-                keyboard.release('f4')
-                keyboard.release('alt')
-                return jsonify({
-                    "status": "success",
-                    "message": "Alt+F4 simulated",
-                }), 200
-            else:
-                # Regular key press
-                keyboard.press_and_release(key)
-        else:
-            # Simple string key
-            key = data.get('key', '').lower()
-            print(f"Received key from web app: {key}")
-            keyboard.press_and_release(key)
-        
-        return jsonify({
-            "status": "success",
-            "message": f"Key {key} received and processed",
-            "key": key
-        }), 200
-        
-    except Exception as e:
-        print(f"Error processing request: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+    # ... keep existing code (keypress handling)
 
 @app.route('/')
 def index():
@@ -105,16 +99,7 @@ def index():
 
 @app.route('/health', methods=['GET', 'OPTIONS'])
 def health_check():
-    """Health check endpoint to verify server is running"""
-    print("Health check endpoint hit")
-    if request.method == 'OPTIONS':
-        # Manually set CORS headers for OPTIONS request
-        response = jsonify({"status": "healthy"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
-        return response, 200
-    return jsonify({"status": "healthy"}), 200
+    # ... keep existing code (health check functionality)
 
 if __name__ == "__main__":
     try:
@@ -138,6 +123,7 @@ if __name__ == "__main__":
         print("\nPress Ctrl+C to exit")
         print("\nSpecial Commands:")
         print("Alt+F4 -> Force close active application")
+        print("STOP_GAME -> End current game session")
         
         # Run the Flask app with threaded=True for better handling of concurrent requests
         app.run(host='localhost', port=5001, debug=True, threaded=True)

@@ -7,6 +7,7 @@ import os
 import time
 import logging
 import keyboard
+import requests
 from typing import Dict, Optional
 
 app = Flask(__name__)
@@ -34,6 +35,17 @@ GAMES = {
     "PVR": r"C:\Program Files (x86)\Steam\steamapps\common\Propagation VR\PropagationVR.exe"
 }
 
+def notify_electron_app(command):
+    """Send a command to the Electron app's HTTP server"""
+    try:
+        # Send the command to the Electron app's HTTP listener
+        response = requests.post('http://localhost:5005', data=command, timeout=2)
+        print(f"Sent {command} to Electron app, response: {response.status_code}")
+        return response.status_code == 200
+    except Exception as e:
+        print(f"Error sending command to Electron app: {str(e)}")
+        return False
+
 @app.route('/keypress', methods=['POST', 'OPTIONS'])
 def handle_keypress():
     if request.method == 'OPTIONS':
@@ -53,6 +65,15 @@ def handle_keypress():
         
         key = data.get('key', '').lower()
         print(f"Processing key: {key}") # Debug print
+        
+        # Special handling for STOP_GAME command
+        if key == 'stop' or key == 'stop_game':
+            print("STOP_GAME command received! Killing game...")
+            notify_electron_app("STOP_GAME")
+            return jsonify({
+                "status": "success",
+                "message": "STOP_GAME command processed"
+            }), 200
         
         # Map keys to game codes
         key_to_game = {
@@ -99,6 +120,20 @@ def health_check():
         return response, 200
     return jsonify({"status": "healthy"}), 200
 
+# Add a new endpoint to handle STOP_GAME commands
+@app.route('/stop', methods=['GET', 'POST'])
+def stop_game():
+    """Endpoint to handle STOP_GAME command"""
+    print("STOP_GAME command received! Killing game...")
+    
+    # Forward the command to the Electron app
+    notify_electron_app("STOP_GAME")
+    
+    return jsonify({
+        "status": "success",
+        "message": "Game stopping command processed"
+    }), 200
+
 if __name__ == '__main__':
     print("\n=== Game Launcher Server ===")
     print("Server Configuration:")
@@ -107,3 +142,4 @@ if __name__ == '__main__':
     print("\nStarting server...")
     
     app.run(host='localhost', port=5001, debug=True, threaded=True)
+

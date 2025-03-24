@@ -1,10 +1,10 @@
-
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
 import { SerialPort } from 'serialport';
 import { ReadlineParser } from '@serialport/parser-readline';
 import fetch from 'node-fetch';
+import http from 'http';
 
 let mainWindow: BrowserWindow;
 
@@ -36,6 +36,7 @@ function createWindow() {
   });
 
   initRFIDReader();
+  initExternalButtonListener();
 }
 
 function initRFIDReader() {
@@ -57,6 +58,43 @@ function initRFIDReader() {
   });
 }
 
+function initExternalButtonListener() {
+  const server = http.createServer((req, res) => {
+    let body = '';
+    
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+    
+    req.on('end', () => {
+      try {
+        if (body.includes('STOP_GAME')) {
+          console.log('STOP_GAME command received from Flask server');
+          
+          if (mainWindow) {
+            mainWindow.webContents.send('external-button-pressed');
+            console.log('Sent external-button-pressed event to window');
+          }
+          
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'success', message: 'STOP_GAME command received' }));
+        } else {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'error', message: 'Invalid command' }));
+        }
+      } catch (error) {
+        console.error('Error processing request:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'error', message: 'Server error' }));
+      }
+    });
+  });
+  
+  server.listen(5005, () => {
+    console.log('External button listener server running on port 5005');
+  });
+}
+
 app.commandLine.appendSwitch('disable-gpu-vsync');
 app.commandLine.appendSwitch('disable-frame-rate-limit');
 
@@ -74,12 +112,10 @@ app.on('activate', () => {
   }
 });
 
-// Add IPC handler for key press simulation
 ipcMain.on('simulate-keypress', async (event, key) => {
   console.log('Received key press in main process:', key);
 
   try {
-    // Send key press to Python server
     const response = await fetch('http://localhost:5001/keypress', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -95,14 +131,13 @@ ipcMain.on('simulate-keypress', async (event, key) => {
   } catch (error) {
     console.error('Error sending key press to Python server:', error);
     
-    // Fallback to direct Python script execution if HTTP request fails
     const pythonScript = `
-import keyboard
-import time
+    import keyboard
+    import time
 
-keyboard.press('${key}')
-time.sleep(0.1)
-keyboard.release('${key}')
+    keyboard.press('${key}')
+    time.sleep(0.1)
+    keyboard.release('${key}')
     `;
     
     exec(`python -c "${pythonScript}"`, (error, stdout, stderr) => {
@@ -115,7 +150,6 @@ keyboard.release('${key}')
   }
 });
 
-// Add IPC handler for exiting kiosk mode
 ipcMain.on('exit-kiosk', () => {
   app.quit();
 });
