@@ -10,9 +10,10 @@ interface RFIDCountdownProps {
   onExit: () => void;
   activeGame?: string | null;
   trailer?: string;  
+  steamUrl?: string; // Add support for direct Steam URLs
 }
 
-export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProps) {
+export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showRating, setShowRating] = useState(false);
   const [showGameScreen, setShowGameScreen] = useState(true);
@@ -107,17 +108,24 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
   const targetWord = getGameCode(activeGame);
 
   useEffect(() => {
-    if (!showGameScreen && timeLeft !== null && targetWord) {
-      // When timer starts, simulate typing the launch code for the Python backend
-      if (window.electron) {
+    if (!showGameScreen && timeLeft !== null) {
+      // For Steam URL games, launch directly via the Steam protocol
+      if (steamUrl && window.electron) {
+        console.log(`Launching Steam game with URL: ${steamUrl}`);
+        window.electron.ipcRenderer.send('launch-steam-game', steamUrl);
+      } 
+      // For regular games, simulate typing the launch code
+      else if (targetWord) {
         targetWord.split('').forEach((char, index) => {
           setTimeout(() => {
-            window.electron?.ipcRenderer.send('simulate-keypress', char);
+            if (window.electron) {
+              window.electron.ipcRenderer.send('simulate-keypress', char);
+            }
           }, index * 100); // Type each character with a small delay
         });
       }
     }
-  }, [showGameScreen, timeLeft, targetWord]);
+  }, [showGameScreen, timeLeft, targetWord, steamUrl]);
 
   // Setup webhook listener for timer stop command
   useEffect(() => {

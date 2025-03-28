@@ -1,3 +1,4 @@
+
 import { Play, Video } from "lucide-react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -55,6 +56,7 @@ export function GameCard({
   genre,
   release_date,
   trailer,
+  executablePath,
   onPlay,
   canPlayGames,
 }: GameCardProps) {
@@ -88,6 +90,22 @@ export function GameCard({
 
   const handlePlayButtonClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
+    
+    // Check if this is a Steam URL
+    if (executablePath && executablePath.startsWith('steam://')) {
+      console.log(`Launching Steam game with URL: ${executablePath}`);
+      
+      // Send to Electron to handle the Steam URL protocol
+      if (window.electron) {
+        window.electron.ipcRenderer.send('launch-steam-game', executablePath);
+      } else {
+        // Fallback for web-only environments
+        window.open(executablePath, '_blank');
+      }
+      return;
+    }
+    
+    // Handle dedicated launch pages
     const launchScreenRoutes: Record<string, string> = {
       "Fruit Ninja VR": "/fruitninjalaunch",
       "Elven Assassin": "/elvenassassinlaunch",

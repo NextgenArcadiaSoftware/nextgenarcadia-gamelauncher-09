@@ -22,6 +22,7 @@ export default function CreedLaunch() {
         onExit={() => navigate('/')} 
         activeGame="Creed: Rise to Glory Championship Edition"
         trailer="https://www.youtube.com/watch?v=EgbCMJ54xeM"
+        steamUrl="steam://rungameid/2147530"
       />
     </div>
   );

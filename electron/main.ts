@@ -222,6 +222,45 @@ ipcMain.on('simulate-keypress', async (event, key) => {
   }
 });
 
+ipcMain.on('launch-steam-game', (event, steamUrl) => {
+  console.log(`Launching game with Steam URL: ${steamUrl}`);
+  
+  try {
+    // For Windows
+    if (process.platform === 'win32') {
+      exec(`start ${steamUrl}`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error launching Steam game: ${error}`);
+          return;
+        }
+        console.log('Steam game launched successfully');
+      });
+    } 
+    // For macOS
+    else if (process.platform === 'darwin') {
+      exec(`open "${steamUrl}"`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error launching Steam game: ${error}`);
+          return;
+        }
+        console.log('Steam game launched successfully');
+      });
+    } 
+    // For Linux
+    else if (process.platform === 'linux') {
+      exec(`xdg-open "${steamUrl}"`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error launching Steam game: ${error}`);
+          return;
+        }
+        console.log('Steam game launched successfully');
+      });
+    }
+  } catch (error) {
+    console.error('Error launching Steam game:', error);
+  }
+});
+
 ipcMain.on('exit-kiosk', () => {
   app.quit();
 });

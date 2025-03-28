@@ -22,6 +22,7 @@ export default function BeatSaberLaunch() {
         onExit={() => navigate('/')} 
         activeGame="Beat Saber"
         trailer="https://www.youtube.com/watch?v=vL39Sg2AqWg"
+        steamUrl="steam://rungameid/620980"
       />
     </div>
   );

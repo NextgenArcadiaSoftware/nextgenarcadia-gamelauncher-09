@@ -4,13 +4,40 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
     send: (channel: string, ...args: any[]) => {
-      ipcRenderer.send(channel, ...args);
+      // Whitelist of allowed channels
+      const validChannels = [
+        'simulate-keypress', 
+        'exit-kiosk',
+        'launch-steam-game'
+      ];
+      
+      if (validChannels.includes(channel)) {
+        ipcRenderer.send(channel, ...args);
+      }
     },
     on: (channel: string, func: (...args: any[]) => void) => {
-      ipcRenderer.on(channel, (event, ...args) => func(...args));
+      // Whitelist of allowed channels for receiving
+      const validChannels = [
+        'rfid-detected', 
+        'external-button-pressed',
+        'webhook-stop-timer'
+      ];
+      
+      if (validChannels.includes(channel)) {
+        ipcRenderer.on(channel, (event, ...args) => func(...args));
+      }
     },
     removeAllListeners: (channel: string) => {
-      ipcRenderer.removeAllListeners(channel);
+      // Whitelist of allowed channels for removing
+      const validChannels = [
+        'rfid-detected', 
+        'external-button-pressed',
+        'webhook-stop-timer'
+      ];
+      
+      if (validChannels.includes(channel)) {
+        ipcRenderer.removeAllListeners(channel);
+      }
     }
   }
 });
