@@ -38,6 +38,7 @@ function createWindow() {
   initRFIDReader();
   initExternalButtonListener();
   initStopEndpoint();
+  initWebhookEndpoint();
 }
 
 function initRFIDReader() {
@@ -116,6 +117,53 @@ function initStopEndpoint() {
   
   stopServer.listen(5006, () => {
     console.log('Stop endpoint server running on port 5006');
+  });
+}
+
+function initWebhookEndpoint() {
+  const webhookServer = http.createServer((req, res) => {
+    if (req.url === '/webhook/stop-timer' && (req.method === 'POST' || req.method === 'GET')) {
+      console.log('Webhook endpoint hit: stop-timer');
+      
+      let body = '';
+      
+      req.on('data', (chunk) => {
+        body += chunk.toString();
+      });
+      
+      req.on('end', () => {
+        try {
+          const payload = body ? JSON.parse(body) : {};
+          console.log('Webhook payload:', payload);
+          
+          if (mainWindow) {
+            mainWindow.webContents.send('webhook-stop-timer', payload);
+            console.log('Sent webhook-stop-timer event to renderer process');
+          }
+          
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            status: 'success', 
+            message: 'Stop timer command received',
+            timestamp: new Date().toISOString()
+          }));
+        } catch (error) {
+          console.error('Error processing webhook request:', error);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            status: 'error', 
+            message: 'Server error processing webhook'
+          }));
+        }
+      });
+    } else {
+      res.writeHead(404);
+      res.end(JSON.stringify({ status: 'error', message: 'Not found' }));
+    }
+  });
+  
+  webhookServer.listen(5007, () => {
+    console.log('Webhook server running on port 5007');
   });
 }
 

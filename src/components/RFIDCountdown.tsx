@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
@@ -117,6 +118,33 @@ export function RFIDCountdown({ onExit, activeGame, trailer }: RFIDCountdownProp
       }
     }
   }, [showGameScreen, timeLeft, targetWord]);
+
+  // Setup webhook listener for timer stop command
+  useEffect(() => {
+    if (window.electron) {
+      console.log('Setting up webhook stop timer listener');
+      
+      const handleWebhookStopTimer = (payload: any) => {
+        console.log('Webhook stop timer received with payload:', payload);
+        
+        toast({
+          title: "External Stop Command",
+          description: "Timer stopped via webhook command",
+        });
+        
+        // Show the rating screen instead of just exiting
+        setShowRating(true);
+      };
+      
+      // Register the webhook listener
+      window.electron.ipcRenderer.on('webhook-stop-timer', handleWebhookStopTimer);
+      
+      // Clean up the listener when component unmounts
+      return () => {
+        window.electron.ipcRenderer.removeAllListeners('webhook-stop-timer');
+      };
+    }
+  }, [toast]);
 
   const handleRatingSubmit = async (rating: number) => {
     // When exiting, send the stop command to the Python backend
