@@ -261,6 +261,37 @@ ipcMain.on('launch-steam-game', (event, steamUrl) => {
   }
 });
 
+ipcMain.on('end-game', async (event) => {
+  console.log('Received end-game command in main process');
+
+  try {
+    // Send request to the Python backend's end-game endpoint
+    const response = await fetch('http://localhost:5001/end-game', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('End game command response:', data);
+    
+    // Also forward the stop timer event to the renderer
+    if (mainWindow) {
+      mainWindow.webContents.send('webhook-stop-timer', { source: 'end-game-button' });
+    }
+  } catch (error) {
+    console.error('Error sending end-game command:', error);
+    
+    // Fallback: send stop command directly
+    if (mainWindow) {
+      mainWindow.webContents.send('webhook-stop-timer', { source: 'end-game-button-fallback' });
+    }
+  }
+});
+
 ipcMain.on('exit-kiosk', () => {
   app.quit();
 });

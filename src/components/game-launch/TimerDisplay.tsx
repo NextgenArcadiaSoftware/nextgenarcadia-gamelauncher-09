@@ -1,7 +1,6 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '../ui/button';
-import { X, Power } from 'lucide-react';
+import { X, Power, StopCircle } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -189,6 +188,25 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     }
   };
 
+  const handleEndGame = () => {
+    // Use the electron API to send end-game command
+    if (window.electron) {
+      console.log('Sending end-game command to electron');
+      window.electron.ipcRenderer.send('end-game');
+      toast({
+        title: "Ending Game",
+        description: "Sent command to end the current game session"
+      });
+    } else {
+      console.error('Electron API not available');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not end game - Electron API not available"
+      });
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
       <Button 
@@ -214,15 +232,27 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         </div>
       )}
 
-      <Button
-        variant="destructive"
-        size="lg"
-        className="mt-8 px-8 py-6 text-xl font-bold flex items-center gap-3 hover:bg-red-800 transition-colors animate-pulse shadow-lg shadow-red-900/30"
-        onClick={handleAltF4}
-      >
-        <Power className="h-6 w-6" />
-        Alt+F4
-      </Button>
+      <div className="flex flex-col md:flex-row gap-4 mt-8">
+        <Button
+          variant="destructive"
+          size="lg"
+          className="px-8 py-6 text-xl font-bold flex items-center gap-3 hover:bg-red-800 transition-colors animate-pulse shadow-lg shadow-red-900/30"
+          onClick={handleAltF4}
+        >
+          <Power className="h-6 w-6" />
+          Alt+F4
+        </Button>
+
+        <Button
+          variant="outline"
+          size="lg"
+          className="px-8 py-6 text-xl font-bold flex items-center gap-3 bg-white/10 text-white border-white/30 hover:bg-white/20 transition-colors shadow-lg"
+          onClick={handleEndGame}
+        >
+          <StopCircle className="h-6 w-6" />
+          End Game
+        </Button>
+      </div>
     </div>
   );
 }

@@ -8,7 +8,8 @@ contextBridge.exposeInMainWorld('electron', {
       const validChannels = [
         'simulate-keypress', 
         'exit-kiosk',
-        'launch-steam-game'
+        'launch-steam-game',
+        'end-game'
       ];
       
       if (validChannels.includes(channel)) {

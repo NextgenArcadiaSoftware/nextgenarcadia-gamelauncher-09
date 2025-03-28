@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import keyboard
@@ -94,6 +95,26 @@ def stop_game():
         print(f"Error processing stop game command: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+# Add a dedicated endpoint for ending games via API
+@app.route('/end-game', methods=['GET', 'POST'])
+def end_game():
+    try:
+        print("END_GAME command received via API! Ending game session...")
+        
+        # Send stop command to the Electron app
+        notify_electron_app("STOP_GAME")
+        
+        # Also simulate the 'stop' keypress for legacy support
+        keyboard.press_and_release('stop')
+        
+        return jsonify({
+            "status": "success",
+            "message": "Game end command processed successfully"
+        }), 200
+    except Exception as e:
+        print(f"Error processing end game command: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/keypress', methods=['POST'])
 def handle_keypress():
     data = request.get_json()
@@ -136,6 +157,8 @@ if __name__ == "__main__":
         print("\nSpecial Commands:")
         print("Alt+F4 -> Force close active application")
         print("STOP_GAME -> End current game session")
+        print("API Endpoints:")
+        print("GET/POST /end-game -> End current game session via API")
         
         # Run the Flask app with threaded=True for better handling of concurrent requests
         app.run(host='localhost', port=5001, debug=True, threaded=True)
