@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '../ui/button';
 import { X, Power, StopCircle } from 'lucide-react';
@@ -16,6 +17,9 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
   const sessionCompletionRef = useRef(false);
   const sessionCreatedRef = useRef(false);
   const { toast } = useToast();
+
+  // Check if Electron is available
+  const isElectronAvailable = Boolean(window.electron);
 
   // Create a session when the component mounts
   useEffect(() => {
@@ -94,7 +98,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
   // Listen for the STOP_GAME message from external hardware button
   useEffect(() => {
     // Check if electron is available
-    if (window.electron) {
+    if (isElectronAvailable) {
       console.log('Setting up external button listener');
       
       // Create the listener function
@@ -126,7 +130,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         window.electron.ipcRenderer.removeAllListeners('external-button-pressed');
       };
     }
-  }, [activeGame, onExit, toast]);
+  }, [activeGame, onExit, toast, isElectronAvailable]);
 
   const markSessionComplete = async () => {
     if (!activeGame) return;
@@ -171,7 +175,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
 
   const handleAltF4 = () => {
     // Use the electron API to send Alt+F4 keystroke
-    if (window.electron) {
+    if (isElectronAvailable) {
       console.log('Sending Alt+F4 command to electron');
       window.electron.ipcRenderer.send('simulate-keypress', { key: 'F4', alt: true });
       toast({
@@ -179,18 +183,18 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         description: "Sent Alt+F4 command to close the active application"
       });
     } else {
-      console.error('Electron API not available');
+      console.log('Electron API not available - in browser preview mode');
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Could not send Alt+F4 command - Electron API not available"
+        variant: "default",
+        title: "Browser Preview Mode",
+        description: "Alt+F4 simulation - Electron APIs unavailable in browser"
       });
     }
   };
 
   const handleEndGame = () => {
     // Use the electron API to send end-game command
-    if (window.electron) {
+    if (isElectronAvailable) {
       console.log('Sending end-game command to electron');
       window.electron.ipcRenderer.send('end-game');
       toast({
@@ -198,11 +202,11 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         description: "Sent command to end the current game session"
       });
     } else {
-      console.error('Electron API not available');
+      console.log('Electron API not available - in browser preview mode');
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Could not end game - Electron API not available"
+        variant: "default",
+        title: "Browser Preview Mode",
+        description: "End game simulation - Electron APIs unavailable in browser"
       });
     }
   };

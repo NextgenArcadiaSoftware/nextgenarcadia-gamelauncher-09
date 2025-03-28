@@ -19,6 +19,9 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   const [showGameScreen, setShowGameScreen] = useState(true);
   const { toast } = useToast();
 
+  // Check if Electron is available
+  const isElectronAvailable = Boolean(window.electron);
+
   // Initial timer duration fetch and subscription setup
   useEffect(() => {
     let isMounted = true;
@@ -110,26 +113,31 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   useEffect(() => {
     if (!showGameScreen && timeLeft !== null) {
       // For Steam URL games, launch directly via the Steam protocol
-      if (steamUrl && window.electron) {
+      if (steamUrl && isElectronAvailable) {
         console.log(`Launching Steam game with URL: ${steamUrl}`);
         window.electron.ipcRenderer.send('launch-steam-game', steamUrl);
       } 
       // For regular games, simulate typing the launch code
-      else if (targetWord) {
+      else if (targetWord && isElectronAvailable) {
         targetWord.split('').forEach((char, index) => {
           setTimeout(() => {
-            if (window.electron) {
-              window.electron.ipcRenderer.send('simulate-keypress', char);
-            }
+            window.electron.ipcRenderer.send('simulate-keypress', char);
           }, index * 100); // Type each character with a small delay
+        });
+      } else if (!isElectronAvailable) {
+        console.log('Electron API not available - in browser preview mode');
+        toast({
+          title: "Browser Preview Mode",
+          description: "Game launch simulation - Electron APIs unavailable in browser",
+          variant: "default"
         });
       }
     }
-  }, [showGameScreen, timeLeft, targetWord, steamUrl]);
+  }, [showGameScreen, timeLeft, targetWord, steamUrl, toast, isElectronAvailable]);
 
   // Setup webhook listener for timer stop command
   useEffect(() => {
-    if (window.electron) {
+    if (isElectronAvailable) {
       console.log('Setting up webhook stop timer listener');
       
       const handleWebhookStopTimer = (payload: any) => {
@@ -152,11 +160,11 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
         window.electron.ipcRenderer.removeAllListeners('webhook-stop-timer');
       };
     }
-  }, [toast]);
+  }, [toast, isElectronAvailable]);
 
   const handleRatingSubmit = async (rating: number) => {
     // When exiting, send the stop command to the Python backend
-    if (window.electron) {
+    if (isElectronAvailable) {
       // Use the proper stop-game command
       window.electron.ipcRenderer.send('simulate-keypress', 'stop');
     }
