@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '../ui/button';
-import { X, Power, StopCircle, Keyboard } from 'lucide-react';
+import { X, Keyboard } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { TimerKeyboard } from './TimerKeyboard';
@@ -14,7 +14,7 @@ interface TimerDisplayProps {
 export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionCompleted, setSessionCompleted] = useState(false);
-  const [showKeyboard, setShowKeyboard] = useState(false);
+  const [showKeyboard, setShowKeyboard] = useState(true);
   const sessionCompletionRef = useRef(false);
   const sessionCreatedRef = useRef(false);
   const { toast } = useToast();
@@ -174,44 +174,6 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleAltF4 = () => {
-    // Use the electron API to send Alt+F4 keystroke
-    if (isElectronAvailable) {
-      console.log('Sending Alt+F4 command to electron');
-      window.electron.ipcRenderer.send('simulate-keypress', { key: 'F4', alt: true });
-      toast({
-        title: "Exiting game",
-        description: "Sent Alt+F4 command to close the active application"
-      });
-    } else {
-      console.log('Electron API not available - in browser preview mode');
-      toast({
-        variant: "default",
-        title: "Browser Preview Mode",
-        description: "Alt+F4 simulation - Electron APIs unavailable in browser"
-      });
-    }
-  };
-
-  const handleEndGame = () => {
-    // Use the electron API to send end-game command
-    if (isElectronAvailable) {
-      console.log('Sending end-game command to electron');
-      window.electron.ipcRenderer.send('end-game');
-      toast({
-        title: "Ending Game",
-        description: "Sent command to end the current game session"
-      });
-    } else {
-      console.log('Electron API not available - in browser preview mode');
-      toast({
-        variant: "default",
-        title: "Browser Preview Mode",
-        description: "End game simulation - Electron APIs unavailable in browser"
-      });
-    }
-  };
-
   const handleKeyPress = (key: string) => {
     console.log(`Key pressed from on-screen keyboard: ${key}`);
     
@@ -234,10 +196,6 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         description: `Keypress simulation - Electron APIs unavailable in browser`
       });
     }
-  };
-
-  const toggleKeyboard = () => {
-    setShowKeyboard(!showKeyboard);
   };
 
   return (
@@ -265,45 +223,9 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <Button
-          variant="destructive"
-          size="lg"
-          className="px-8 py-6 text-xl font-bold flex items-center gap-3 hover:bg-red-800 transition-colors animate-pulse shadow-lg shadow-red-900/30"
-          onClick={handleAltF4}
-        >
-          <Power className="h-6 w-6" />
-          Alt+F4
-        </Button>
-
-        <Button
-          variant="outline"
-          size="lg"
-          className="px-8 py-6 text-xl font-bold flex items-center gap-3 bg-white/10 text-white border-white/30 hover:bg-white/20 transition-colors shadow-lg"
-          onClick={handleEndGame}
-        >
-          <StopCircle className="h-6 w-6" />
-          End Game
-        </Button>
-
-        <Button
-          variant={showKeyboard ? "secondary" : "outline"}
-          size="lg"
-          className={`px-8 py-6 text-xl font-bold flex items-center gap-3 ${
-            showKeyboard ? 'bg-white/20' : 'bg-white/10'
-          } text-white border-white/30 hover:bg-white/20 transition-colors shadow-lg`}
-          onClick={toggleKeyboard}
-        >
-          <Keyboard className="h-6 w-6" />
-          {showKeyboard ? "Hide Keyboard" : "Show Keyboard"}
-        </Button>
+      <div className="fixed bottom-4 left-0 right-0 flex justify-center animate-fade-in-up">
+        <TimerKeyboard onKeyPress={handleKeyPress} />
       </div>
-
-      {showKeyboard && (
-        <div className="fixed bottom-4 left-0 right-0 flex justify-center animate-fade-in-up">
-          <TimerKeyboard onKeyPress={handleKeyPress} />
-        </div>
-      )}
     </div>
   );
 }
