@@ -10,7 +10,7 @@ interface RFIDCountdownProps {
   onExit: () => void;
   activeGame?: string | null;
   trailer?: string;  
-  steamUrl?: string; // Add support for direct Steam URLs
+  steamUrl?: string; // Support for direct Steam URLs
 }
 
 export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCountdownProps) {

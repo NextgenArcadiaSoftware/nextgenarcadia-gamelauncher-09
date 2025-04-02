@@ -1,9 +1,9 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '../ui/button';
-import { X, Power, StopCircle } from 'lucide-react';
+import { X, Power, StopCircle, Keyboard } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { TimerKeyboard } from './TimerKeyboard';
 
 interface TimerDisplayProps {
   timeLeft: number;
@@ -14,6 +14,7 @@ interface TimerDisplayProps {
 export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionCompleted, setSessionCompleted] = useState(false);
+  const [showKeyboard, setShowKeyboard] = useState(false);
   const sessionCompletionRef = useRef(false);
   const sessionCreatedRef = useRef(false);
   const { toast } = useToast();
@@ -211,6 +212,34 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     }
   };
 
+  const handleKeyPress = (key: string) => {
+    console.log(`Key pressed from on-screen keyboard: ${key}`);
+    
+    if (key === 'X') {
+      toast({
+        title: "Exit Key Pressed",
+        description: "Exiting game session..."
+      });
+      setTimeout(() => onExit(), 1000);
+    } else if (isElectronAvailable) {
+      window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
+      toast({
+        title: "Key Pressed",
+        description: `Sending ${key} key to the game`
+      });
+    } else {
+      toast({
+        variant: "default",
+        title: "Browser Preview Mode",
+        description: `Keypress simulation - Electron APIs unavailable in browser`
+      });
+    }
+  };
+
+  const toggleKeyboard = () => {
+    setShowKeyboard(!showKeyboard);
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
       <Button 
@@ -231,12 +260,12 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
       </div>
       
       {activeGame && (
-        <div className="text-xl text-white/80 mb-8 animate-fade-in">
+        <div className="text-xl text-white/80 mb-6 animate-fade-in">
           Currently Playing: {activeGame}
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-4 mt-8">
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
         <Button
           variant="destructive"
           size="lg"
@@ -256,7 +285,25 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
           <StopCircle className="h-6 w-6" />
           End Game
         </Button>
+
+        <Button
+          variant={showKeyboard ? "secondary" : "outline"}
+          size="lg"
+          className={`px-8 py-6 text-xl font-bold flex items-center gap-3 ${
+            showKeyboard ? 'bg-white/20' : 'bg-white/10'
+          } text-white border-white/30 hover:bg-white/20 transition-colors shadow-lg`}
+          onClick={toggleKeyboard}
+        >
+          <Keyboard className="h-6 w-6" />
+          {showKeyboard ? "Hide Keyboard" : "Show Keyboard"}
+        </Button>
       </div>
+
+      {showKeyboard && (
+        <div className="fixed bottom-4 left-0 right-0 flex justify-center animate-fade-in-up">
+          <TimerKeyboard onKeyPress={handleKeyPress} />
+        </div>
+      )}
     </div>
   );
 }
