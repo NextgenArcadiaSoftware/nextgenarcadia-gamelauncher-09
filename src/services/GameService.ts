@@ -1,6 +1,6 @@
 
 /**
- * GameService - Handles communication with the C++ game server
+ * GameService - Handles direct communication with the C++ game server
  */
 
 // Default timeout for fetch requests
@@ -10,12 +10,12 @@ const DEFAULT_TIMEOUT = 5000;
 const SERVER_URL = 'http://localhost:5001';
 
 /**
- * Sends a keypress to the C++ server
+ * Sends a keypress directly to the C++ server
  * @param key The key to send
  * @returns Promise with the server response
  */
 export const sendKeyPress = async (key: string): Promise<any> => {
-  console.log(`Sending key ${key} to game server`);
+  console.log(`Sending key ${key} directly to C++ game server`);
   
   try {
     const response = await fetch(`${SERVER_URL}/keypress`, {
@@ -32,12 +32,12 @@ export const sendKeyPress = async (key: string): Promise<any> => {
     if (response.status === 204) {
       return {
         status: 204,
-        message: `Successfully sent key ${key} to server`
+        message: `Successfully sent key ${key} to C++ server`
       };
     }
     
     if (!response.ok) {
-      throw new Error(`Server returned status: ${response.status}`);
+      throw new Error(`C++ server returned status: ${response.status}`);
     }
     
     // Ensure proper UTF-8 decoding
@@ -51,18 +51,18 @@ export const sendKeyPress = async (key: string): Promise<any> => {
       return { status: response.status, message: decodedText };
     }
   } catch (error) {
-    console.error('Error sending keypress:', error);
+    console.error('Error sending keypress to C++ server:', error);
     throw error;
   }
 };
 
 /**
- * Closes all running games
+ * Closes all running games by communicating directly with C++ server
  * @param gameName Optional specific game to close
  * @returns Promise with the server response
  */
 export const closeGames = async (gameName?: string): Promise<any> => {
-  console.log(`Closing games ${gameName ? `(${gameName})` : ''}`);
+  console.log(`Closing games ${gameName ? `(${gameName})` : ''} - direct C++ server request`);
   
   try {
     const payload = gameName ? { gameName } : {};
@@ -81,12 +81,12 @@ export const closeGames = async (gameName?: string): Promise<any> => {
     if (response.status === 204) {
       return {
         status: 204,
-        message: `Successfully closed ${gameName || 'all games'}`
+        message: `Successfully closed ${gameName || 'all games'} via C++ server`
       };
     }
     
     if (!response.ok) {
-      throw new Error(`Server returned status: ${response.status}`);
+      throw new Error(`C++ server returned status: ${response.status}`);
     }
     
     // Ensure proper UTF-8 decoding
@@ -100,13 +100,13 @@ export const closeGames = async (gameName?: string): Promise<any> => {
       return { status: response.status, message: decodedText };
     }
   } catch (error) {
-    console.error('Error closing games:', error);
+    console.error('Error closing games via C++ server:', error);
     throw error;
   }
 };
 
 /**
- * Checks the health of the game server
+ * Checks the health of the C++ game server directly
  * @returns Promise with boolean indicating if server is healthy
  */
 export const checkServerHealth = async (): Promise<boolean> => {
@@ -116,9 +116,10 @@ export const checkServerHealth = async (): Promise<boolean> => {
       signal: AbortSignal.timeout(2000)
     });
     
+    // C++ server might return 404 for health endpoint but still be working
     return response.ok || response.status === 204 || response.status === 404;
   } catch (error) {
-    console.error('Server health check failed:', error);
+    console.error('C++ server health check failed:', error);
     return false;
   }
 };
