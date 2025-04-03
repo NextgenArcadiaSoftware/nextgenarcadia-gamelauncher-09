@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { GameLaunchHeader } from './GameLaunchHeader';
 import { Button } from '../ui/button';
@@ -122,7 +123,11 @@ export function GameLaunchScreen({ game, onContinue }: GameLaunchScreenProps) {
       <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
       
       {/* Header */}
-      <GameLaunchHeader />
+      <GameLaunchHeader 
+        activeGame={game.title} 
+        inputWord="" 
+        targetWord=""
+      />
       
       {/* Main content */}
       <div className="flex flex-col md:flex-row flex-grow pt-16 px-4 md:px-8 items-center justify-center gap-8 relative z-10 max-w-7xl mx-auto w-full">
