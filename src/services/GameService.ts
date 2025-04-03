@@ -4,16 +4,16 @@
  */
 
 // Default timeout for fetch requests
-const DEFAULT_TIMEOUT = 8000; // Increased from 5000 to 8000
+const DEFAULT_TIMEOUT = 5000;
 
 // Base URL for the C++ server
 const SERVER_URL = 'http://localhost:5001';
 
 // Max number of retries for failed requests
-const MAX_RETRIES = 3; // Increased from 2 to 3
+const MAX_RETRIES = 2;
 
 // Delay between retries in milliseconds
-const RETRY_DELAY = 1500; // Increased from 1000 to 1500
+const RETRY_DELAY = 1000;
 
 /**
  * Sends a keypress directly to the C++ server
@@ -25,25 +25,19 @@ export const sendKeyPress = async (key: string, retries = 0): Promise<any> => {
   console.log(`Sending key ${key} directly to C++ game server${retries > 0 ? ` (retry ${retries}/${MAX_RETRIES})` : ''}`);
   
   try {
-    // Create a controller that we can use to abort the fetch if it takes too long
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      console.log(`Request for key ${key} timed out after ${DEFAULT_TIMEOUT}ms, aborting...`);
-      controller.abort();
-    }, DEFAULT_TIMEOUT);
+    const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT);
     
     const response = await fetch(`${SERVER_URL}/keypress`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',
-        'Accept-Charset': 'UTF-8',
-        'Accept': 'application/json'
+        'Accept-Charset': 'UTF-8'
       },
       body: JSON.stringify({ key: key.toLowerCase() }),
       signal: controller.signal,
       mode: 'cors', // Explicit CORS mode
-      credentials: 'same-origin',
-      cache: 'no-cache' // Add no-cache to prevent caching issues
+      credentials: 'same-origin'
     });
     
     clearTimeout(timeoutId);
@@ -74,7 +68,7 @@ export const sendKeyPress = async (key: string, retries = 0): Promise<any> => {
     console.error('Error sending keypress to C++ server:', error);
     
     // Implement retry logic
-    if (retries < MAX_RETRIES) {
+    if (retries < MAX_RETRIES && error.name !== 'AbortError') {
       console.log(`Retrying keypress in ${RETRY_DELAY}ms...`);
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
       return sendKeyPress(key, retries + 1);
@@ -96,25 +90,19 @@ export const closeGames = async (gameName?: string, retries = 0): Promise<any> =
   
   try {
     const payload = gameName ? { gameName } : {};
-    // Create a controller that we can use to abort the fetch if it takes too long
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      console.log(`Close games request timed out after ${DEFAULT_TIMEOUT}ms, aborting...`);
-      controller.abort();
-    }, DEFAULT_TIMEOUT);
+    const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT);
     
     const response = await fetch(`${SERVER_URL}/close`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',
-        'Accept-Charset': 'UTF-8',
-        'Accept': 'application/json'
+        'Accept-Charset': 'UTF-8'
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
       mode: 'cors', // Explicit CORS mode
-      credentials: 'same-origin',
-      cache: 'no-cache' // Add no-cache to prevent caching issues
+      credentials: 'same-origin'
     });
     
     clearTimeout(timeoutId);
@@ -163,20 +151,13 @@ export const closeGames = async (gameName?: string, retries = 0): Promise<any> =
 export const checkServerHealth = async (retries = 0): Promise<boolean> => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      console.log(`Health check request timed out after 3000ms, aborting...`);
-      controller.abort();
-    }, 3000); // Slightly increased timeout for health checks (from 2000 to 3000)
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // Shorter timeout for health checks
     
     const response = await fetch(`${SERVER_URL}/health`, {
-      headers: { 
-        'Accept-Charset': 'UTF-8',
-        'Accept': 'application/json'
-      },
+      headers: { 'Accept-Charset': 'UTF-8' },
       signal: controller.signal,
       mode: 'cors', // Explicit CORS mode
-      credentials: 'same-origin',
-      cache: 'no-cache' // Add no-cache to prevent caching issues
+      credentials: 'same-origin'
     });
     
     clearTimeout(timeoutId);
@@ -195,17 +176,4 @@ export const checkServerHealth = async (retries = 0): Promise<boolean> => {
     
     return false;
   }
-};
-
-/**
- * Fallback method for local development if C++ server is unavailable
- * This simulates the C++ server response
- */
-export const simulateServerResponse = (key: string): { status: number, message: string } => {
-  console.log(`Simulating C++ server response for key: ${key}`);
-  
-  return {
-    status: 200,
-    message: `Simulated response for key: ${key}. No C++ server available.`
-  };
 };

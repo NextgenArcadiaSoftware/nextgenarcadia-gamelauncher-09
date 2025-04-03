@@ -138,13 +138,10 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
                 setLastServerStatus(result.status || 200);
                 setServerResponse(result.message || `Successfully launched ${activeGame}`);
                 
-                // Use setTimeout to avoid React state updates during render
-                setTimeout(() => {
-                  toast({
-                    title: "Game Launching",
-                    description: `Launching ${activeGame}...`,
-                  });
-                }, 0);
+                toast({
+                  title: "Game Launching",
+                  description: `Launching ${activeGame}...`,
+                });
                 
                 console.log('Game launch response:', result);
               })
@@ -152,14 +149,11 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
                 console.error('Error launching game:', error);
                 setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
                 
-                // Use setTimeout to avoid React state updates during render
-                setTimeout(() => {
-                  toast({
-                    variant: "destructive",
-                    title: "Launch Error",
-                    description: "Failed to connect to game launcher service"
-                  });
-                }, 0);
+                toast({
+                  variant: "destructive",
+                  title: "Launch Error",
+                  description: "Failed to connect to game launcher service"
+                });
                 
                 if (window.electron) {
                   console.log("Falling back to Electron keypress simulation");
@@ -174,14 +168,11 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
         }
       } else if (!isElectronAvailable) {
         console.log('Electron API not available - in browser preview mode');
-        // Use setTimeout to avoid React state updates during render
-        setTimeout(() => {
-          toast({
-            title: "Browser Preview Mode",
-            description: "Game launch simulation - Electron APIs unavailable in browser",
-            variant: "default"
-          });
-        }, 0);
+        toast({
+          title: "Browser Preview Mode",
+          description: "Game launch simulation - Electron APIs unavailable in browser",
+          variant: "default"
+        });
       }
     }
   }, [showGameScreen, timeLeft, targetWord, steamUrl, toast, isElectronAvailable, activeGame]);
@@ -247,16 +238,9 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
               game_id: gameData.id,
               rating
             });
-          
-          console.log(`Rating saved: ${rating} stars for game ${activeGame}`);
         }
       } catch (error) {
         console.error('Error recording game rating:', error);
-        toast({
-          variant: "destructive",
-          title: "Rating Error",
-          description: "Could not save your rating, but your feedback is still appreciated!"
-        });
       }
     }
     
@@ -283,12 +267,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
     return (
       <GameLaunchScreen 
         game={gameData}
-        onContinue={() => {
-          // Use setTimeout to delay the state update to avoid conflicts
-          setTimeout(() => {
-            setShowGameScreen(false);
-          }, 0);
-        }}
+        onContinue={() => setShowGameScreen(false)}
       />
     );
   }

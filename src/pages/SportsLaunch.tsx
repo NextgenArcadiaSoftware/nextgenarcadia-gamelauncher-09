@@ -12,7 +12,6 @@ export default function SportsLaunch() {
   const { toast } = useToast();
   const [serverResponse, setServerResponse] = useState<string | null>(null);
   const [requestStatus, setRequestStatus] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Set up global key event listener for both the X key and C++ program
   useEffect(() => {
@@ -23,7 +22,6 @@ export default function SportsLaunch() {
       if (e.key.toLowerCase() === 'x') {
         console.log('X key detected, ending game');
         setRequestStatus('Sending close command to server...');
-        setIsLoading(true);
         
         try {
           // Send close command using our GameService
@@ -47,7 +45,6 @@ export default function SportsLaunch() {
         } catch (error) {
           console.error('Error closing game:', error);
           setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
-          setIsLoading(false);
           
           // Fallback Electron method
           if (window.electron) {
@@ -85,7 +82,6 @@ export default function SportsLaunch() {
         size="lg"
         className="fixed top-8 left-8 z-50 bg-white text-black hover:bg-white/90 gap-2 text-xl font-bold shadow-lg border-2"
         onClick={() => navigate('/')}
-        disabled={isLoading}
       >
         <ArrowLeft className="h-6 w-6" />
         Back to Games
