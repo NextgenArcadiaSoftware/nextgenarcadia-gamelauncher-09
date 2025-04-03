@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Delete, CornerDownLeft } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
@@ -29,7 +30,11 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
     
     // For X key, use the close endpoint instead of keypress
     const endpoint = key === 'X' ? 'close' : 'keypress';
-    const payload = key === 'X' ? {} : { key: keyToSend };
+    const payload = key === 'X' ? 
+      { command: "CLOSE_GAME" } : 
+      { key: keyToSend, command: `KEY_${key.toUpperCase()}_PRESSED` };
+    
+    console.log(`Sending to C++ server:`, payload);
     
     // Use port 5001 for the C++ server
     const serverUrl = 'http://localhost:5001';
@@ -56,11 +61,11 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
     })
     .then(data => {
       console.log('C++ server response:', data);
-      setLastResponse(data.message || `Key ${key} received`);
+      setLastResponse(data.message || `Key ${key} received, command: KEY_${key.toUpperCase()}_PRESSED`);
       
       toast({
         title: "Game Command",
-        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key} - ${data.message || "Key received"}`
+        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key} - Command: KEY_${key.toUpperCase()}_PRESSED`
       });
       
       // Create and dispatch a real DOM keyboard event

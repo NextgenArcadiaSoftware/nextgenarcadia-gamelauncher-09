@@ -190,10 +190,14 @@ ipcMain.on('simulate-keypress', async (event, key) => {
   try {
     const serverUrl = 'http://localhost:5001'; // Updated to port 5001
     
+    // Send with the KEY_X_PRESSED format
     const response = await fetch(`${serverUrl}/keypress`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key })
+      body: JSON.stringify({ 
+        key, 
+        command: `KEY_${key.toUpperCase()}_PRESSED` 
+      })
     });
 
     if (!response.ok) {

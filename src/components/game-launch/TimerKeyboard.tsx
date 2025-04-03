@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { X } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
@@ -26,7 +27,11 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     
     // For X key, use the close endpoint instead of keypress
     const endpoint = key === 'X' ? 'close' : 'keypress';
-    const payload = key === 'X' ? {} : { key: key.toLowerCase() };
+    const payload = key === 'X' ? 
+      { command: "CLOSE_GAME" } : 
+      { key: key.toLowerCase(), command: `KEY_${key.toUpperCase()}_PRESSED` };
+    
+    console.log(`Sending to C++ server:`, payload);
     
     fetch(`${serverUrl}/${endpoint}`, {
       method: "POST",
@@ -50,11 +55,11 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     })
     .then(data => {
       console.log('C++ server response:', data);
-      setLastResponse(data.message || `Key ${key} received`);
+      setLastResponse(data.message || `Key ${key} received, command: KEY_${key.toUpperCase()}_PRESSED`);
       
       toast({
         title: "Game Command",
-        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key} - ${data.message || "Key received"}`
+        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key} - Command: KEY_${key.toUpperCase()}_PRESSED`
       });
       
       // Create and dispatch a real DOM keyboard event
