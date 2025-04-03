@@ -4,15 +4,54 @@ import { RFIDCountdown } from '@/components/RFIDCountdown';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function SportsLaunch() {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Set up global key event listener for the C++ program
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       console.log(`Global keydown detected: ${e.key}`);
-      // The C++ program will listen for these events
+      
+      // Special handling for 'V' key to launch All-in-One Sports VR
+      if (e.key.toLowerCase() === 'v') {
+        try {
+          fetch("http://localhost:5001/keypress", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+              key: 'v', 
+              command: 'KEY_V_PRESSED', 
+              game: 'All-in-One Sports VR' 
+            })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('C++ server response:', data);
+            toast({
+              title: "Game Launch",
+              description: "Launching All-in-One Sports VR..."
+            });
+          })
+          .catch(error => {
+            console.error('Error sending V key to C++ server:', error);
+            toast({
+              variant: "destructive",
+              title: "Launch Error",
+              description: "Could not connect to game launcher"
+            });
+          });
+        } catch (error) {
+          console.error('Error in V key press handling:', error);
+        }
+      }
     };
 
     // Add the global event listener
@@ -22,7 +61,7 @@ export default function SportsLaunch() {
       // Clean up
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
-  }, []);
+  }, [toast]);
 
   return (
     <div className="relative min-h-screen">
