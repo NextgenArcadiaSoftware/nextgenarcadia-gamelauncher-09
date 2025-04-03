@@ -1,3 +1,4 @@
+
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
@@ -189,23 +190,39 @@ ipcMain.on('simulate-keypress', async (event, key) => {
 
   try {
     const serverUrl = 'http://localhost:5001';
-    const command = `KEY_${key.toUpperCase()}_PRESSED`;
+    const endpoint = key.toLowerCase() === 'x' ? 'close' : 'keypress';
     
-    const response = await fetch(`${serverUrl}/keypress`, {
+    // For regular keypresses use the key parameter
+    const payload = key.toLowerCase() === 'x' ? 
+      {} : 
+      { key: key.toLowerCase() };
+    
+    console.log(`Sending to C++ server: ${endpoint}`, payload);
+    
+    const response = await fetch(`${serverUrl}/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ command })
+      body: JSON.stringify(payload)
     });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-    console.log('Key press simulation response:', data);
+    const text = await response.text();
+    console.log('C++ server response:', text);
+    
+    // Forward the response to renderer
+    if (mainWindow) {
+      mainWindow.webContents.send('cpp-server-response', {
+        key,
+        response: text
+      });
+    }
   } catch (error) {
     console.error('Error sending key press to C++ server:', error);
     
+    // Fallback to Python approach for key simulation
     const pythonScript = `
     import keyboard
     import time
@@ -265,7 +282,7 @@ ipcMain.on('end-game', async (event) => {
   console.log('Received end-game command in main process');
 
   try {
-    const response = await fetch('http://localhost:5001/end-game', {
+    const response = await fetch('http://localhost:5001/close', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -274,11 +291,14 @@ ipcMain.on('end-game', async (event) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-    console.log('End game command response:', data);
+    const text = await response.text();
+    console.log('End game command response:', text);
     
     if (mainWindow) {
-      mainWindow.webContents.send('webhook-stop-timer', { source: 'end-game-button' });
+      mainWindow.webContents.send('webhook-stop-timer', { 
+        source: 'end-game-button',
+        response: text 
+      });
     }
   } catch (error) {
     console.error('Error sending end-game command:', error);

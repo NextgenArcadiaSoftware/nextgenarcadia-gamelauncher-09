@@ -26,25 +26,29 @@ export default function SportsLaunch() {
         // Send close command to C++ server
         fetch("http://localhost:5001/close", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            command: "CLOSE_GAME",
-            gameName: "All-in-One Sports VR"
-          })
+          headers: { "Content-Type": "application/json" }
         })
         .then(response => {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          return response.json();
+          return response.text();
         })
-        .then(data => console.log('Close game response:', data))
+        .then(text => {
+          console.log('Close game response:', text);
+          // Show game termination toast with the C++ server response
+          toast({
+            variant: "destructive",
+            title: "Games Terminated",
+            description: text || "All games closed successfully"
+          });
+          
+          // Navigate back after short delay
+          setTimeout(() => navigate('/'), 1000);
+        })
         .catch(error => {
           console.error('Error closing game:', error);
           // Even if the C++ server is unavailable, still navigate back
           setTimeout(() => navigate('/'), 1000);
         });
-        
-        // Navigate back after short delay
-        setTimeout(() => navigate('/'), 1000);
       }
       
       // The C++ program will listen for other key events

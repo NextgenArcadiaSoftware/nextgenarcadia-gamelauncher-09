@@ -53,10 +53,9 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     
     // For X key, use the close endpoint instead of keypress
     const endpoint = key === 'X' ? 'close' : 'keypress';
-    const command = `KEY_${key.toUpperCase()}_PRESSED`;
     const payload = key === 'X' ? 
-      { command: "CLOSE_GAME" } : 
-      { command, key: key.toLowerCase() };
+      {} : 
+      { key: key.toLowerCase() };
     
     console.log(`Sending to C++ server:`, payload);
     
@@ -72,38 +71,32 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       setConnectionError(false);
-      return response.text().then(text => {
-        // Try to parse as JSON if possible
-        try {
-          return JSON.parse(text);
-        } catch (e) {
-          // If not JSON, return as text
-          return { message: text || `Command ${command} received` };
-        }
-      });
+      return response.text();
     })
-    .then(data => {
-      console.log('C++ server response:', data);
+    .then(text => {
+      console.log('C++ server raw response:', text);
       
       // Set the formatted response message
-      const responseMessage = data.message || `Command sent: ${command}`;
-      setLastResponse(responseMessage);
+      setLastResponse(text);
       
-      // Display a toast notification based on response type
-      if (responseMessage.includes("Launched")) {
+      // Check for specific response patterns from C++ server
+      if (text.includes("Launched:")) {
         toast({
           title: "Game Launched",
-          description: responseMessage
+          description: `Game successfully launched`,
+          variant: "default"
         });
-      } else if (responseMessage.includes("Terminating")) {
+      } else if (text.includes("Killed:") || text.includes("terminated")) {
         toast({
-          title: "Game Command",
-          description: key === 'X' ? "Terminating all games..." : responseMessage
+          title: "Game Closed",
+          description: key === 'X' ? "Terminating all games..." : text,
+          variant: "destructive"
         });
       } else {
         toast({
-          title: "Game Command",
-          description: responseMessage
+          title: "Command Sent",
+          description: `Key ${key} command processed`,
+          variant: "default"
         });
       }
       
@@ -168,7 +161,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       {lastResponse && !connectionError && (
         <Alert className="mb-4 bg-green-500/20 border-green-500">
           <AlertTitle>Server Response</AlertTitle>
-          <AlertDescription>
+          <AlertDescription className="whitespace-pre-line">
             {lastResponse}
           </AlertDescription>
         </Alert>

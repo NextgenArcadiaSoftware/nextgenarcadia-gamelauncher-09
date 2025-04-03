@@ -21,7 +21,8 @@ contextBridge.exposeInMainWorld('electron', {
       const validChannels = [
         'rfid-detected', 
         'external-button-pressed',
-        'webhook-stop-timer'
+        'webhook-stop-timer',
+        'cpp-server-response'
       ];
       
       if (validChannels.includes(channel)) {
@@ -33,7 +34,8 @@ contextBridge.exposeInMainWorld('electron', {
       const validChannels = [
         'rfid-detected', 
         'external-button-pressed',
-        'webhook-stop-timer'
+        'webhook-stop-timer',
+        'cpp-server-response'
       ];
       
       if (validChannels.includes(channel)) {
