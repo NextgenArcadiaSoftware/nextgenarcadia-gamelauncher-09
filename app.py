@@ -71,20 +71,9 @@ def handle_keypress():
         key = data.get('key', '').lower()
         print(f"Processing key: {key}") # Debug print
         
-        # Detailed key press logging
-        key_messages = {
-            'f': 'F Key received - Launching Fruit Ninja VR',
-            'c': 'C Key received - Launching Crisis Brigade 2',
-            's': 'S Key received - Launching Subside',
-            'p': 'P Key received - Launching Propagation VR',
-            'i': 'I Key received - Launching iB Cricket',
-            'a': 'A Key received - Launching Arizona Sunshine',
-            'u': 'U Key received - Launching Undead Citadel',
-            'e': 'E Key received - Launching Elven Assassin',
-            'r': 'R Key received - Launching Richie\'s Plank Experience',
-            'v': 'V Key received - Launching All-in-One Sports VR',
-            'x': 'X Key received - Terminating all games'
-        }
+        # Simple key received message
+        received_message = f"Received {key.upper()} key"
+        print(received_message)
         
         # Special handling for STOP_GAME command
         if key == 'stop' or key == 'stop_game':
@@ -99,12 +88,9 @@ def handle_keypress():
         print(f"Simulating keypress for: {key}") # Debug print
         keyboard.press_and_release(key)
         
-        # Get the specific message for the key, default to generic message
-        message = key_messages.get(key, f"{key.upper()} Key received")
-        
         return jsonify({
             "status": "success",
-            "message": message,
+            "message": received_message,
             "key": key
         }), 200
         
