@@ -27,9 +27,10 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     
     // For X key, use the close endpoint instead of keypress
     const endpoint = key === 'X' ? 'close' : 'keypress';
+    const command = `KEY_${key.toUpperCase()}_PRESSED`;
     const payload = key === 'X' ? 
       { command: "CLOSE_GAME" } : 
-      { key: key.toLowerCase(), command: `KEY_${key.toUpperCase()}_PRESSED` };
+      { command };
     
     console.log(`Sending to C++ server:`, payload);
     
@@ -49,17 +50,17 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
           return JSON.parse(text);
         } catch (e) {
           // If not JSON, return as text
-          return { message: text || `Key ${key} received` };
+          return { message: text || `Command ${command} received` };
         }
       });
     })
     .then(data => {
       console.log('C++ server response:', data);
-      setLastResponse(data.message || `Key ${key} received, command: KEY_${key.toUpperCase()}_PRESSED`);
+      setLastResponse(data.message || `Command sent: ${command}`);
       
       toast({
         title: "Game Command",
-        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key} - Command: KEY_${key.toUpperCase()}_PRESSED`
+        description: key === 'X' ? "Terminating all games..." : `Sent command: ${command}`
       });
       
       // Create and dispatch a real DOM keyboard event

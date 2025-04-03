@@ -188,16 +188,13 @@ ipcMain.on('simulate-keypress', async (event, key) => {
   console.log('Received key press in main process:', key);
 
   try {
-    const serverUrl = 'http://localhost:5001'; // Updated to port 5001
+    const serverUrl = 'http://localhost:5001';
+    const command = `KEY_${key.toUpperCase()}_PRESSED`;
     
-    // Send with the KEY_X_PRESSED format
     const response = await fetch(`${serverUrl}/keypress`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        key, 
-        command: `KEY_${key.toUpperCase()}_PRESSED` 
-      })
+      body: JSON.stringify({ command })
     });
 
     if (!response.ok) {
@@ -232,7 +229,6 @@ ipcMain.on('launch-steam-game', (event, steamUrl) => {
   console.log(`Launching game with Steam URL: ${steamUrl}`);
   
   try {
-    // For Windows
     if (process.platform === 'win32') {
       exec(`start ${steamUrl}`, (error, stdout, stderr) => {
         if (error) {
@@ -242,7 +238,6 @@ ipcMain.on('launch-steam-game', (event, steamUrl) => {
         console.log('Steam game launched successfully');
       });
     } 
-    // For macOS
     else if (process.platform === 'darwin') {
       exec(`open "${steamUrl}"`, (error, stdout, stderr) => {
         if (error) {
@@ -252,7 +247,6 @@ ipcMain.on('launch-steam-game', (event, steamUrl) => {
         console.log('Steam game launched successfully');
       });
     } 
-    // For Linux
     else if (process.platform === 'linux') {
       exec(`xdg-open "${steamUrl}"`, (error, stdout, stderr) => {
         if (error) {
@@ -271,7 +265,6 @@ ipcMain.on('end-game', async (event) => {
   console.log('Received end-game command in main process');
 
   try {
-    // Send request to the Python backend's end-game endpoint
     const response = await fetch('http://localhost:5001/end-game', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
@@ -284,14 +277,12 @@ ipcMain.on('end-game', async (event) => {
     const data = await response.json();
     console.log('End game command response:', data);
     
-    // Also forward the stop timer event to the renderer
     if (mainWindow) {
       mainWindow.webContents.send('webhook-stop-timer', { source: 'end-game-button' });
     }
   } catch (error) {
     console.error('Error sending end-game command:', error);
     
-    // Fallback: send stop command directly
     if (mainWindow) {
       mainWindow.webContents.send('webhook-stop-timer', { source: 'end-game-button-fallback' });
     }
