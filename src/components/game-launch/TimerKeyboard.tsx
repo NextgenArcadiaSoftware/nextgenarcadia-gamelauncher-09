@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
@@ -10,14 +10,40 @@ interface TimerKeyboardProps {
 
 export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   const { toast } = useToast();
-  const [connectionError, setConnectionError] = React.useState(false);
-  const [lastResponse, setLastResponse] = React.useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState(false);
+  const [lastResponse, setLastResponse] = useState<string | null>(null);
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const rows = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
     ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   ];
+
+  // Check server connectivity on mount
+  useEffect(() => {
+    checkServerConnectivity();
+    
+    // Set up periodic connectivity checks
+    const intervalId = setInterval(checkServerConnectivity, 10000);
+    
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  const checkServerConnectivity = () => {
+    fetch('http://localhost:5001/health')
+      .then(response => {
+        if (response.ok) {
+          setConnectionError(false);
+          setReconnectAttempts(0);
+        }
+      })
+      .catch(() => {
+        setConnectionError(true);
+      });
+  };
 
   const handleKeyClick = (key: string) => {
     console.log(`Timer Keyboard - Key pressed: ${key}`);
@@ -37,7 +63,9 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     fetch(`${serverUrl}/${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      // Set timeout to avoid hanging requests
+      signal: AbortSignal.timeout(2000)
     })
     .then(response => {
       if (!response.ok) {
@@ -77,16 +105,26 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     .catch(error => {
       console.error('Error sending keypress to C++ server:', error);
       setConnectionError(true);
+      
+      // Increment reconnect attempts
+      setReconnectAttempts(prev => prev + 1);
+      
       toast({
         variant: "destructive",
         title: "Connection Error",
         description: "Could not connect to the C++ server"
       });
       
-      // Try electron method as fallback
+      // Try fallback methods
       if (window.electron) {
         console.log("Falling back to Electron keypress simulation");
         window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
+      }
+      
+      // For X key specifically, still try to navigate back
+      if (key === 'X') {
+        console.log("X key pressed - Attempting to close game even with connection error");
+        // The onKeyPress will handle navigation
       }
     });
     
@@ -100,12 +138,18 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         <Alert variant="destructive" className="mb-4">
           <AlertTitle>Connection Error</AlertTitle>
           <AlertDescription>
-            Unable to connect to the C++ server. Please check that the C++ server is running.
+            Unable to connect to the C++ server. {reconnectAttempts > 0 && `Attempted ${reconnectAttempts} reconnects.`}
+            <button 
+              className="ml-2 text-white underline" 
+              onClick={() => checkServerConnectivity()}
+            >
+              Retry Connection
+            </button>
           </AlertDescription>
         </Alert>
       )}
       
-      {lastResponse && (
+      {lastResponse && !connectionError && (
         <Alert className="mb-4 bg-green-500/20 border-green-500">
           <AlertTitle>Server Response</AlertTitle>
           <AlertDescription>

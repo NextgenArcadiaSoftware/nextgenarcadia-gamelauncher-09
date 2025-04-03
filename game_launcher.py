@@ -7,6 +7,19 @@ import json
 import os
 import subprocess
 import requests
+import time
+import logging
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("game_launcher.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("GameLauncher")
 
 # Dictionary mapping game codes to their executable paths
 GAMES = {
@@ -23,36 +36,51 @@ GAMES = {
     "CRD": r"C:\Program Files (x86)\Steam\steamapps\common\Creed Rise to Glory\Creed.exe"
 }
 
+# Game name mapping for prettier logging and responses
+GAME_NAMES = {
+    "FNJ": "Fruit Ninja VR",
+    "EAX": "Elven Assassin",
+    "CBR": "Crisis Brigade 2",
+    "AIO": "All-In-One Sports VR",
+    "RPE": "Richie's Plank Experience",
+    "IBC": "iB Cricket",
+    "UDC": "Undead Citadel",
+    "ARS": "Arizona Sunshine",
+    "SBS": "Subside",
+    "PVR": "Propagation VR",
+    "CRD": "Creed: Rise to Glory"
+}
+
 app = Flask(__name__)
 # Configure CORS to allow all origins and methods
 CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"]}})
 
 @app.before_request
 def log_request_info():
-    print('Headers: %s', request.headers)
-    print('Body: %s', request.get_data())
-    print('Route: %s', request.path)
+    logger.info(f"Request: {request.method} {request.path}")
+    logger.debug(f"Headers: {request.headers}")
+    logger.debug(f"Body: {request.get_data()}")
 
 def notify_electron_app(command):
     """Send a command to the Electron app's HTTP server"""
     try:
         # Send the command to the Electron app's HTTP listener
         response = requests.post('http://localhost:5005', data=command, timeout=2)
-        print(f"Sent {command} to Electron app, response: {response.status_code}")
+        logger.info(f"Sent {command} to Electron app, response: {response.status_code}")
         
         # For STOP_GAME commands, also hit the dedicated stop endpoint
         if command == "STOP_GAME":
             stop_response = requests.post('http://localhost:5006/stop', timeout=2)
-            print(f"Sent stop command to dedicated endpoint, response: {stop_response.status_code}")
+            logger.info(f"Sent stop command to dedicated endpoint, response: {stop_response.status_code}")
             
         return response.status_code == 200
     except Exception as e:
-        print(f"Error sending command to Electron app: {str(e)}")
+        logger.error(f"Error sending command to Electron app: {str(e)}")
         return False
 
 def on_key_event(event):
     key = event.name.lower()
-    print(f"Key detected: {key}")
+    logger.info(f"Key detected: {key}")
     
     # Map keys to game codes
     key_to_game = {
@@ -64,20 +92,21 @@ def on_key_event(event):
         'a': 'ARS',  # Arizona Sunshine
         'u': 'UDC',  # Undead Citadel
         'e': 'EAX',  # Elven Assassin
-        'r': 'RPE',  # Richie's Plank
+        'r': 'RPE',  # Richies Plank
         'v': 'AIO',  # All-in-One Sports
         'g': 'CRD'   # Creed Rise to Glory
     }
     
     if key in key_to_game:
         game_code = key_to_game[key]
-        print(f"Matched game code: {game_code}")
+        game_name = GAME_NAMES.get(game_code, game_code)
+        logger.info(f"Matched game code: {game_code} - {game_name}")
 
 # Add a new route to handle the STOP_GAME command
 @app.route('/stop-game', methods=['POST'])
 def stop_game():
     try:
-        print("STOP_GAME command received! Killing game...")
+        logger.info("STOP_GAME command received! Killing game...")
         
         # Forward the command to the Electron app
         if notify_electron_app("STOP_GAME"):
@@ -92,14 +121,14 @@ def stop_game():
             }), 200
             
     except Exception as e:
-        print(f"Error processing stop game command: {str(e)}")
+        logger.error(f"Error processing stop game command: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 # Add a dedicated endpoint for ending games via API
 @app.route('/end-game', methods=['GET', 'POST'])
 def end_game():
     try:
-        print("END_GAME command received via API! Ending game session...")
+        logger.info("END_GAME command received via API! Ending game session...")
         
         # Send stop command to the Electron app
         notify_electron_app("STOP_GAME")
@@ -112,26 +141,67 @@ def end_game():
             "message": "Game end command processed successfully"
         }), 200
     except Exception as e:
-        print(f"Error processing end game command: {str(e)}")
+        logger.error(f"Error processing end game command: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/keypress', methods=['POST'])
+@app.route('/keypress', methods=['POST', 'OPTIONS'])
 def handle_keypress():
-    data = request.get_json()
-    if not data or 'key' not in data:
-        return jsonify({"error": "Key not provided"}), 400
-    
-    key = data['key'].lower()
-    print(f"Simulating key press: {key}")
-    keyboard.press_and_release(key)
-    return jsonify({
-        "status": "success", 
-        "message": f"Key '{key}' received and pressed successfully"
-    }), 200
+    if request.method == 'OPTIONS':
+        response = jsonify({"status": "ok"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Methods', 'POST')
+        return response
+        
+    try:
+        data = request.get_json()
+        logger.info(f"Keypress data received: {data}")
+        
+        if not data or 'key' not in data:
+            logger.warning("Key not provided in request")
+            return jsonify({"error": "Key not provided"}), 400
+        
+        key = data['key'].lower()
+        command = data.get('command', f"KEY_{key.upper()}_PRESSED")
+        
+        logger.info(f"Simulating key press: {key} with command: {command}")
+        
+        # Map keys to game codes for special handling
+        key_to_game = {
+            'f': 'FNJ',  # Fruit Ninja
+            'c': 'CBR',  # Crisis Brigade
+            's': 'SBS',  # Subside
+            'g': 'PVR',  # Propagation
+            'i': 'IBC',  # iB Cricket
+            'a': 'ARS',  # Arizona Sunshine
+            'u': 'UDC',  # Undead Citadel
+            'e': 'EAX',  # Elven Assassin
+            'r': 'RPE',  # Richies Plank
+            'v': 'AIO',  # All-in-One Sports
+        }
+        
+        game_info = ""
+        if key in key_to_game:
+            game_code = key_to_game[key]
+            game_name = GAME_NAMES.get(game_code, game_code)
+            game_info = f" - Launching {game_name}"
+        
+        # Perform the key press
+        keyboard.press_and_release(key)
+        
+        return jsonify({
+            "status": "success", 
+            "message": f"Key '{key}' received and pressed successfully{game_info}",
+            "key": key,
+            "command": command
+        }), 200
+    except Exception as e:
+        logger.error(f"Error processing keypress: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/close', methods=['POST'])
 def handle_close():
-    print("Close command received, terminating all games...")
+    logger.info("Close command received, terminating all games...")
     # Implement your game closing logic here
     try:
         # Simulate the X key press
@@ -143,7 +213,7 @@ def handle_close():
             "message": "Close command received, terminating all games"
         }), 200
     except Exception as e:
-        print(f"Error processing close command: {str(e)}")
+        logger.error(f"Error processing close command: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/')
@@ -152,6 +222,14 @@ def index():
 
 @app.route('/health', methods=['GET', 'OPTIONS'])
 def health_check():
+    if request.method == 'OPTIONS':
+        response = jsonify({"status": "healthy"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', '*')
+        return response, 200
+    
+    logger.debug("Health check endpoint accessed")
     return jsonify({"status": "Server is healthy"}), 200
 
 if __name__ == "__main__":
@@ -159,29 +237,35 @@ if __name__ == "__main__":
         # Register the keyboard listener
         keyboard.on_press(on_key_event)
         
-        print("=== Game Launcher Server ===")
-        print("Starting server on http://localhost:5001")
-        print("Key mappings:")
-        print("F -> Fruit Ninja VR")
-        print("C -> Crisis Brigade 2")
-        print("S -> Subside")
-        print("P -> Propagation VR")
-        print("I -> iB Cricket")
-        print("A -> Arizona Sunshine")
-        print("U -> Undead Citadel")
-        print("E -> Elven Assassin")
-        print("R -> Richie's Plank")
-        print("V -> All-in-One Sports VR")
-        print("G -> Creed Rise to Glory")
-        print("\nPress Ctrl+C to exit")
-        print("\nSpecial Commands:")
-        print("Alt+F4 -> Force close active application")
-        print("STOP_GAME -> End current game session")
-        print("API Endpoints:")
-        print("GET/POST /end-game -> End current game session via API")
+        logger.info("=== Game Launcher Server ===")
+        logger.info("Starting server on http://localhost:5001")
+        logger.info("Key mappings:")
+        for k, code in {
+            'F': 'Fruit Ninja VR',
+            'C': 'Crisis Brigade 2',
+            'S': 'Subside',
+            'G': 'Propagation VR',
+            'I': 'iB Cricket',
+            'A': 'Arizona Sunshine',
+            'U': 'Undead Citadel',
+            'E': 'Elven Assassin',
+            'R': 'Richie\'s Plank',
+            'V': 'All-in-One Sports VR'
+        }.items():
+            logger.info(f"{k} -> {code}")
+        
+        logger.info("\nPress Ctrl+C to exit")
+        logger.info("\nSpecial Commands:")
+        logger.info("Alt+F4 -> Force close active application")
+        logger.info("STOP_GAME -> End current game session")
+        logger.info("API Endpoints:")
+        logger.info("GET/POST /end-game -> End current game session via API")
+        logger.info("POST /keypress -> Send keypress to system")
+        logger.info("POST /close -> Close active game")
+        logger.info("GET /health -> Check server health")
         
         # Run the Flask app with threaded=True for better handling of concurrent requests
         app.run(host='localhost', port=5001, debug=True, threaded=True)
         
     except Exception as e:
-        print(f"Error starting server: {str(e)}")
+        logger.critical(f"Error starting server: {str(e)}")
