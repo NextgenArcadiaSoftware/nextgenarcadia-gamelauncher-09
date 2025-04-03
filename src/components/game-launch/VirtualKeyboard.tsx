@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Delete, CornerDownLeft } from 'lucide-react';
+import { useToast } from '../ui/use-toast';
 
 interface VirtualKeyboardProps {
   onKeyPress: (key: string) => void;
@@ -10,6 +11,7 @@ interface VirtualKeyboardProps {
 }
 
 export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }: VirtualKeyboardProps) {
+  const { toast } = useToast();
   const rows = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -23,15 +25,33 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
     // For the 'U' key, ensure we're sending the correct case
     const keyToSend = key === 'U' ? 'u' : key.toLowerCase();
     
-    // Send key press to Flask server
-    fetch("http://127.0.0.1:5001/keypress", {
+    // Send key press to C++ server
+    fetch("http://localhost:5001/keypress", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key: keyToSend })
     })
-    .then(response => response.json())
-    .then(data => console.log('Server response:', data))
-    .catch(error => console.error('Error:', error));
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('C++ server response:', data);
+      toast({
+        title: "Game Command",
+        description: key === 'X' ? "Terminating all games..." : `Launching game with key: ${key}`
+      });
+    })
+    .catch(error => {
+      console.error('Error sending keypress to C++ server:', error);
+      toast({
+        variant: "destructive",
+        title: "Connection Error",
+        description: "Could not connect to the game launcher"
+      });
+    });
 
     // Create and dispatch keyboard event
     const keyboardEvent = new KeyboardEvent('keydown', {
@@ -57,11 +77,15 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
               <button
                 key={key}
                 onClick={() => handleKeyClick(key)}
-                className="w-12 h-12 rounded-lg bg-white/10 hover:bg-white/20 
-                          text-white font-bold text-lg transition-colors 
-                          duration-200 flex items-center justify-center
-                          border border-white/10 backdrop-blur-sm
-                          active:scale-95 transform"
+                className={`w-12 h-12 rounded-lg ${
+                  key === 'X' 
+                    ? 'bg-red-600 text-white animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.7)]' 
+                    : 'bg-white/10 hover:bg-white/20 text-white'
+                } 
+                font-bold text-lg transition-colors 
+                duration-200 flex items-center justify-center
+                border ${key === 'X' ? 'border-red-500' : 'border-white/10'} backdrop-blur-sm
+                active:scale-95 transform`}
                 data-key={key.toLowerCase()}
               >
                 {key}

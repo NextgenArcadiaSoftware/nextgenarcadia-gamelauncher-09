@@ -1,6 +1,7 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '../ui/button';
-import { X, Keyboard } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { TimerKeyboard } from './TimerKeyboard';
@@ -182,6 +183,17 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         title: "Exit Key Pressed",
         description: "Exiting game session..."
       });
+      
+      // Send close command to C++ server
+      fetch("http://localhost:5001/close", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(response => response.json())
+      .then(data => console.log('Close games response:', data))
+      .catch(error => console.error('Error closing games:', error));
+      
+      // Exit after short delay
       setTimeout(() => onExit(), 1000);
     } else if (isElectronAvailable) {
       window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());

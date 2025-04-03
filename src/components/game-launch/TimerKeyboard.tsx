@@ -18,12 +18,37 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
 
   const handleKeyClick = (key: string) => {
     console.log(`Timer Keyboard - Key pressed: ${key}`);
-    onKeyPress(key);
     
-    toast({
-      title: "Key Pressed",
-      description: `${key} key pressed`
+    // Send key press to C++ server
+    fetch("http://localhost:5001/keypress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: key.toLowerCase() })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('C++ server response:', data);
+      toast({
+        title: "Game Command",
+        description: key === 'X' ? "Terminating all games..." : `Launch command: ${key}`
+      });
+    })
+    .catch(error => {
+      console.error('Error sending keypress to C++ server:', error);
+      toast({
+        variant: "default",
+        title: "Connection Notice",
+        description: "Using fallback method - C++ server not detected"
+      });
     });
+    
+    // Call the original onKeyPress handler
+    onKeyPress(key);
   };
 
   return (
