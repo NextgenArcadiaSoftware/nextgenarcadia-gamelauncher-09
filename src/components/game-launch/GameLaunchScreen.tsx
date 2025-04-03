@@ -56,10 +56,13 @@ export function GameLaunchScreen({
           // Check if we have a complete RFID number (10+ digits)
           if (newInput.length >= 10) {
             setShowLaunchScreen(true);
-            toast({
-              title: "✅ RFID Card Detected",
-              description: "You can now launch the game"
-            });
+            // Using setTimeout to avoid the React state update during render issue
+            setTimeout(() => {
+              toast({
+                title: "✅ RFID Card Detected",
+                description: "You can now launch the game"
+              });
+            }, 0);
             return '';
           }
           return newInput;
@@ -77,10 +80,13 @@ export function GameLaunchScreen({
   }, [game.title, showLaunchScreen, toast, onContinue, currentLaunchKey, navigate]);
 
   const handleGameStart = () => {
-    toast({
-      title: "🎮 Game Starting",
-      description: "Starting your VR session"
-    });
+    // Using setTimeout to avoid the React state update during render issue
+    setTimeout(() => {
+      toast({
+        title: "🎮 Game Starting",
+        description: "Starting your VR session"
+      });
+    }, 0);
     onContinue();
   };
 
@@ -93,19 +99,24 @@ export function GameLaunchScreen({
 
       if (key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
         handleGameStart();
+      } else {
+        // Using setTimeout to avoid the React state update during render issue
+        setTimeout(() => {
+          toast({
+            title: "Key Pressed",
+            description: `${key.toUpperCase()} key press simulated`
+          });
+        }, 0);
       }
-
-      toast({
-        title: "Key Pressed",
-        description: `${key.toUpperCase()} key press simulated`
-      });
     } catch (error) {
       console.error('Error simulating key press:', error);
-      toast({
-        title: "Error",
-        description: "Failed to simulate key press",
-        variant: "destructive"
-      });
+      setTimeout(() => {
+        toast({
+          title: "Error",
+          description: "Failed to simulate key press",
+          variant: "destructive"
+        });
+      }, 0);
     }
   };
 

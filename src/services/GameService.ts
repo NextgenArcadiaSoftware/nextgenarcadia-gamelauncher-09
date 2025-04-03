@@ -35,7 +35,9 @@ export const sendKeyPress = async (key: string, retries = 0): Promise<any> => {
         'Accept-Charset': 'UTF-8'
       },
       body: JSON.stringify({ key: key.toLowerCase() }),
-      signal: controller.signal
+      signal: controller.signal,
+      mode: 'cors', // Explicit CORS mode
+      credentials: 'same-origin'
     });
     
     clearTimeout(timeoutId);
@@ -98,7 +100,9 @@ export const closeGames = async (gameName?: string, retries = 0): Promise<any> =
         'Accept-Charset': 'UTF-8'
       },
       body: JSON.stringify(payload),
-      signal: controller.signal
+      signal: controller.signal,
+      mode: 'cors', // Explicit CORS mode
+      credentials: 'same-origin'
     });
     
     clearTimeout(timeoutId);
@@ -151,7 +155,9 @@ export const checkServerHealth = async (retries = 0): Promise<boolean> => {
     
     const response = await fetch(`${SERVER_URL}/health`, {
       headers: { 'Accept-Charset': 'UTF-8' },
-      signal: controller.signal
+      signal: controller.signal,
+      mode: 'cors', // Explicit CORS mode
+      credentials: 'same-origin'
     });
     
     clearTimeout(timeoutId);
@@ -171,4 +177,3 @@ export const checkServerHealth = async (retries = 0): Promise<boolean> => {
     return false;
   }
 };
-
