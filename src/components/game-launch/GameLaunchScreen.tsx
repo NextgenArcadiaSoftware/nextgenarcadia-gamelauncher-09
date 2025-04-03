@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from 'react';
 import { useToast } from '../ui/use-toast';
-import { VirtualKeyboard } from './VirtualKeyboard';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -90,40 +89,6 @@ export function GameLaunchScreen({
     onContinue();
   };
 
-  const simulateKeyPress = (key: string) => {
-    try {
-      const button = document.getElementById('myButton');
-      if (button) {
-        button.click();
-      }
-
-      if (key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
-        handleGameStart();
-      } else {
-        // Using setTimeout to avoid the React state update during render issue
-        setTimeout(() => {
-          toast({
-            title: "Key Pressed",
-            description: `${key.toUpperCase()} key press simulated`
-          });
-        }, 0);
-      }
-    } catch (error) {
-      console.error('Error simulating key press:', error);
-      setTimeout(() => {
-        toast({
-          title: "Error",
-          description: "Failed to simulate key press",
-          variant: "destructive"
-        });
-      }, 0);
-    }
-  };
-
-  const handleKeyPress = (key: string) => {
-    simulateKeyPress(key);
-  };
-
   if (!showLaunchScreen) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
@@ -199,23 +164,26 @@ export function GameLaunchScreen({
 
           <div className="flex flex-col items-center gap-4 mt-8">
             <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
-              Press {currentLaunchKey.toUpperCase()} When Ready
+              Ready to Launch
             </div>
-            <button 
-              onClick={() => simulateKeyPress(currentLaunchKey)} 
-              className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
+            <Button 
+              onClick={handleGameStart}
+              size="lg" 
+              className="w-48 h-16 text-2xl font-bold bg-blue-600 hover:bg-blue-700 transform transition-all duration-200 hover:scale-105"
             >
-              {currentLaunchKey.toUpperCase()}
-            </button>
+              Start Game
+            </Button>
           </div>
 
-          <div className="mt-8">
-            <VirtualKeyboard
-              onKeyPress={handleKeyPress}
-              onBackspace={() => {}}
-              onEnter={() => {}}
-              inputWord=""
-            />
+          <div className="mt-8 flex justify-center">
+            <Button
+              variant="outline"
+              className="border-white/20 text-white hover:bg-white/10"
+              onClick={() => navigate('/')}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Games
+            </Button>
           </div>
         </div>
       </div>

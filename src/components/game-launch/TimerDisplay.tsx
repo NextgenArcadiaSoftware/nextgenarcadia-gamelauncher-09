@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { X } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { TimerKeyboard } from './TimerKeyboard';
+import { closeGames } from '@/services/GameService';
 
 interface TimerDisplayProps {
   timeLeft: number;
@@ -15,7 +15,6 @@ interface TimerDisplayProps {
 export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionCompleted, setSessionCompleted] = useState(false);
-  const [showKeyboard, setShowKeyboard] = useState(true);
   const sessionCompletionRef = useRef(false);
   const sessionCreatedRef = useRef(false);
   const { toast } = useToast();
@@ -175,38 +174,31 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleKeyPress = (key: string) => {
-    console.log(`Key pressed from on-screen keyboard: ${key}`);
-    
-    if (key === 'X') {
-      toast({
-        title: "Exit Key Pressed",
-        description: "Exiting game session..."
-      });
+  // Emergency exit handler
+  const handleEmergencyExit = async () => {
+    // Send close command to C++ server
+    try {
+      const result = await closeGames();
+      console.log('Close games response:', result);
       
-      // Send close command to C++ server
-      fetch("http://localhost:5001/close", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(response => response.json())
-      .then(data => console.log('Close games response:', data))
-      .catch(error => console.error('Error closing games:', error));
+      toast({
+        title: "Game Termination",
+        description: "Closing all active games...",
+        variant: "destructive"
+      });
       
       // Exit after short delay
       setTimeout(() => onExit(), 1000);
-    } else if (isElectronAvailable) {
-      window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
-      toast({
-        title: "Key Pressed",
-        description: `Sending ${key} key to the game`
-      });
-    } else {
-      toast({
-        variant: "default",
-        title: "Browser Preview Mode",
-        description: `Keypress simulation - Electron APIs unavailable in browser`
-      });
+    } catch (error) {
+      console.error('Error closing games:', error);
+      
+      // Try fallback with Electron
+      if (isElectronAvailable) {
+        window.electron.ipcRenderer.send('end-game');
+      }
+      
+      // Exit after short delay
+      setTimeout(() => onExit(), 1000);
     }
   };
 
@@ -235,9 +227,14 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         </div>
       )}
 
-      <div className="fixed bottom-4 left-0 right-0 flex justify-center animate-fade-in-up">
-        <TimerKeyboard onKeyPress={handleKeyPress} />
-      </div>
+      <Button
+        variant="destructive"
+        size="lg"
+        className="mt-8 px-8 py-6 text-xl"
+        onClick={handleEmergencyExit}
+      >
+        Emergency Stop
+      </Button>
     </div>
   );
 }
