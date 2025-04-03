@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from functools import wraps
@@ -72,6 +71,21 @@ def handle_keypress():
         key = data.get('key', '').lower()
         print(f"Processing key: {key}") # Debug print
         
+        # Detailed key press logging
+        key_messages = {
+            'f': 'F Key received - Launching Fruit Ninja VR',
+            'c': 'C Key received - Launching Crisis Brigade 2',
+            's': 'S Key received - Launching Subside',
+            'p': 'P Key received - Launching Propagation VR',
+            'i': 'I Key received - Launching iB Cricket',
+            'a': 'A Key received - Launching Arizona Sunshine',
+            'u': 'U Key received - Launching Undead Citadel',
+            'e': 'E Key received - Launching Elven Assassin',
+            'r': 'R Key received - Launching Richie\'s Plank Experience',
+            'v': 'V Key received - Launching All-in-One Sports VR',
+            'x': 'X Key received - Terminating all games'
+        }
+        
         # Special handling for STOP_GAME command
         if key == 'stop' or key == 'stop_game':
             print("STOP_GAME command received! Killing game...")
@@ -81,32 +95,16 @@ def handle_keypress():
                 "message": "STOP_GAME command processed"
             }), 200
         
-        # Map keys to game codes
-        key_to_game = {
-            'f': 'FNJ',  # Fruit Ninja
-            'c': 'CBR',  # Crisis Brigade
-            's': 'SBS',  # Subside
-            'p': 'PVR',  # Propagation
-            'i': 'IBC',  # iB Cricket
-            'a': 'ARS',  # Arizona Sunshine
-            'u': 'UDC',  # Undead Citadel
-            'e': 'EAX',  # Elven Assassin
-            'r': 'RPE',  # Richie's Plank
-            'v': 'AIO'   # All-in-One Sports
-        }
-
         # Simulate the key press
         print(f"Simulating keypress for: {key}") # Debug print
         keyboard.press_and_release(key)
         
-        # Check if this key maps to a game code
-        if key in key_to_game:
-            game_code = key_to_game[key]
-            print(f"Matched game code: {game_code}") # Debug print
+        # Get the specific message for the key, default to generic message
+        message = key_messages.get(key, f"{key.upper()} Key received")
         
         return jsonify({
             "status": "success",
-            "message": f"Key '{key}' received and pressed successfully",
+            "message": message,
             "key": key
         }), 200
         
