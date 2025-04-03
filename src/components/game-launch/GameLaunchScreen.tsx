@@ -1,212 +1,212 @@
 
-import { useEffect, useState } from 'react';
-import { useToast } from '../ui/use-toast';
-import { VirtualKeyboard } from './VirtualKeyboard';
-import { ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { GameLaunchHeader } from './GameLaunchHeader';
 import { Button } from '../ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { Play, ArrowRight } from 'lucide-react';
+
+interface GameData {
+  title: string;
+  description: string;
+  thumbnail: string;
+  genre: string;
+  trailer?: string;
+}
 
 interface GameLaunchScreenProps {
-  game: {
-    title: string;
-    description: string;
-    thumbnail: string;
-    genre: string;
-  };
+  game: GameData;
   onContinue: () => void;
 }
 
-export function GameLaunchScreen({
-  game,
-  onContinue
-}: GameLaunchScreenProps) {
-  const [showLaunchScreen, setShowLaunchScreen] = useState(false);
-  const [rfidInput, setRfidInput] = useState('');
+export function GameLaunchScreen({ game, onContinue }: GameLaunchScreenProps) {
+  const [showTrailer, setShowTrailer] = useState(false);
+  const [trailerLoaded, setTrailerLoaded] = useState(false);
+  const [trailerError, setTrailerError] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const gameLaunchKeys: Record<string, string> = {
-    "Fruit Ninja VR": "f",
-    "Crisis Brigade 2 Reloaded": "c",
-    "Subside": "s",
-    "Propagation VR": "p",
-    "iB Cricket": "i",
-    "Arizona Sunshine II": "a",
-    "Undead Citadel": "u",
-    "Elven Assassin": "e",
-    "Richies Plank Experience": "r",
-    "All-in-One Sports VR": "v",
-    "Creed: Rise to Glory Championship Edition": "g",
-    "Beat Saber": "w",
-    "RollerCoaster Legends": "p"
-  };
-
-  const currentLaunchKey = gameLaunchKeys[game.title] || "x";
-
-  useEffect(() => {
-    if (!gameLaunchKeys[game.title]) {
-      navigate('/unknown-game');
-      return;
-    }
-
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (/^\d$/.test(event.key)) {
-        setRfidInput(prev => {
-          const newInput = prev + event.key;
-          // Check if we have a complete RFID number (10+ digits)
-          if (newInput.length >= 10) {
-            setShowLaunchScreen(true);
-            toast({
-              title: "✅ RFID Card Detected",
-              description: "You can now launch the game"
-            });
-            return '';
-          }
-          return newInput;
-        });
-        return;
-      }
-
-      if (event.key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
-        handleGameStart();
-      }
-    };
+  const trailerUrl = getYouTubeEmbedUrl(game.trailer);
+  
+  // Handle sending game info to C++ server
+  const sendGameInfoToServer = () => {
+    console.log(`Sending game info to C++ server for: ${game.title}`);
     
-    window.addEventListener('keypress', handleKeyPress);
-    return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [game.title, showLaunchScreen, toast, onContinue, currentLaunchKey, navigate]);
-
-  const handleGameStart = () => {
-    toast({
-      title: "🎮 Game Starting",
-      description: "Starting your VR session"
+    fetch('http://localhost:5001/keypress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        command: 'GAME_LAUNCH',
+        game: game.title
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      console.log(`Successfully sent game info to C++ server for: ${game.title}`);
+      return response.text().then(text => {
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          return { message: text || 'Command received' };
+        }
+      });
+    })
+    .then(data => {
+      console.log('C++ server response:', data);
+      toast({
+        title: "Game Launch",
+        description: `Launching ${game.title}...`
+      });
+      
+      // Continue with the normal flow
+      onContinue();
+    })
+    .catch(error => {
+      console.error('Error sending game info to C++ server:', error);
+      toast({
+        variant: "destructive",
+        title: "Connection Error",
+        description: "Could not connect to the game launcher"
+      });
+      
+      // Continue with the normal flow even if there's an error
+      // This ensures the user experience isn't blocked
+      onContinue();
+      
+      // Try Electron method as fallback if available
+      if (window.electron) {
+        console.log("Falling back to Electron for game launch notification");
+        window.electron.ipcRenderer.send('game-launch', game.title);
+      }
     });
-    onContinue();
   };
 
-  const simulateKeyPress = (key: string) => {
-    try {
-      const button = document.getElementById('myButton');
-      if (button) {
-        button.click();
-      }
-
-      if (key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
-        handleGameStart();
-      }
-
-      toast({
-        title: "Key Pressed",
-        description: `${key.toUpperCase()} key press simulated`
-      });
-    } catch (error) {
-      console.error('Error simulating key press:', error);
-      toast({
-        title: "Error",
-        description: "Failed to simulate key press",
-        variant: "destructive"
-      });
+  function getYouTubeEmbedUrl(url?: string) {
+    if (!url) return null;
+    
+    // Extract YouTube video ID
+    const videoIdMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+    const videoId = videoIdMatch ? videoIdMatch[1] : null;
+    
+    if (videoId) {
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&modestbranding=1&showinfo=0&rel=0&loop=1&playlist=${videoId}`;
     }
-  };
-
-  const handleKeyPress = (key: string) => {
-    simulateKeyPress(key);
-  };
-
-  if (!showLaunchScreen) {
-    return (
-      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80" />
-          <div className="absolute inset-0 mix-blend-overlay opacity-30">
-            <img src={game.thumbnail} alt={`${game.title} Background`} className="w-full h-full object-cover" />
-          </div>
-        </div>
-
-        <div className="relative z-10 max-w-4xl w-full mx-auto p-8">
-          <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-white/20">
-            <div className="text-center">
-              <h1 className="text-6xl font-bold text-white mb-4 font-display" style={{
-                textShadow: '0 0 20px rgba(59,130,246,0.5), 0 0 40px rgba(59,130,246,0.3)'
-              }}>
-                {game.title}
-              </h1>
-            </div>
-
-            <div className="space-y-8">
-              <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-4xl font-bold py-4 text-center tracking-wide">
-                TAP RFID CARD TO START
-              </div>
-              <div className="flex justify-center">
-                <button 
-                  onClick={() => navigate('/')}
-                  className="w-64 h-32 flex flex-col items-center justify-center bg-white/80 text-black hover:bg-white rounded-2xl border-4 border-white/20 backdrop-blur-sm gap-2 font-bold shadow-lg transition-all duration-200 hover:scale-105"
-                  style={{
-                    boxShadow: '0 0 25px 5px rgba(255, 255, 255, 0.4), 0 0 10px 1px rgba(255, 255, 255, 0.7)'
-                  }}
-                >
-                  <ArrowLeft className="h-8 w-8" />
-                  <span>Back to Games</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    
+    return url; // Return original URL if not YouTube
   }
+  
+  const handleTrailerError = () => {
+    console.error("Error loading trailer");
+    setTrailerError(true);
+    setTrailerLoaded(false);
+  };
+  
+  const handleTrailerLoad = () => {
+    console.log("Trailer loaded successfully");
+    setTrailerLoaded(true);
+    setTrailerError(false);
+  };
+  
+  useEffect(() => {
+    // If trailer URL is provided, automatically show it after a short delay
+    if (trailerUrl) {
+      const timer = setTimeout(() => {
+        setShowTrailer(true);
+      }, 500); // Short delay for smoother transition
+      
+      return () => clearTimeout(timer);
+    }
+  }, [trailerUrl]);
 
   return (
-    <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80" />
-        <div className="absolute inset-0 mix-blend-overlay opacity-30">
-          <img src={game.thumbnail} alt={`${game.title} Background`} className="w-full h-full object-cover" />
+    <div className="relative min-h-screen bg-gradient-to-tr from-gray-900 via-black to-gray-800 overflow-hidden flex flex-col">
+      {/* Background effect */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+      
+      {/* Header */}
+      <GameLaunchHeader 
+        activeGame={game.title} 
+        inputWord="" 
+        targetWord=""
+      />
+      
+      {/* Main content */}
+      <div className="flex flex-col md:flex-row flex-grow pt-16 px-4 md:px-8 items-center justify-center gap-8 relative z-10 max-w-7xl mx-auto w-full">
+        {/* Left side - Game info */}
+        <div className="md:w-1/2 space-y-6 max-w-xl">
+          <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight">
+            {game.title}
+          </h1>
+          
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 bg-blue-500 text-white text-sm rounded-full">
+              {game.genre}
+            </span>
+          </div>
+          
+          <p className="text-gray-300 text-lg">
+            {game.description}
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <Button 
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white gap-2 px-8 py-6 text-xl"
+              onClick={sendGameInfoToServer}
+            >
+              <Play className="h-6 w-6" />
+              Play Now
+            </Button>
+          </div>
+        </div>
+        
+        {/* Right side - Visuals (Trailer or Image) */}
+        <div className="md:w-1/2 aspect-video flex items-center justify-center">
+          {trailerUrl && showTrailer ? (
+            <div className={`w-full aspect-video rounded-xl overflow-hidden transition-all duration-500 ${trailerLoaded ? 'opacity-100' : 'opacity-0'}`}>
+              <iframe
+                src={trailerUrl}
+                title={`${game.title} trailer`}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                onLoad={handleTrailerLoad}
+                onError={handleTrailerError}
+              />
+            </div>
+          ) : (
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-800 border border-gray-700">
+              <img 
+                src={game.thumbnail || "/placeholder.svg"} 
+                alt={game.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = "/placeholder.svg";
+                }}
+              />
+              
+              {game.trailer && !showTrailer && (
+                <div 
+                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 cursor-pointer group"
+                  onClick={() => setShowTrailer(true)}
+                >
+                  <div className="w-20 h-20 rounded-full bg-blue-600 group-hover:bg-blue-500 flex items-center justify-center transition-all duration-200 group-hover:scale-110">
+                    <Play className="h-10 w-10 text-white" />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
-
-      <div className="relative z-10 max-w-4xl w-full mx-auto p-8">
-        <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-white/20">
-          <div className="text-center">
-            <h1 className="text-6xl font-bold text-white mb-4 font-display" style={{
-              textShadow: '0 0 20px rgba(59,130,246,0.5), 0 0 40px rgba(59,130,246,0.3)'
-            }}>
-              {game.title}
-            </h1>
-            <div className="flex justify-center gap-4">
-              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-blue-500/30 backdrop-blur-sm border border-blue-500/30">
-                Virtual Reality
-              </span>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <p className="text-white/90 text-xl leading-relaxed">
-              {game.description}
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center gap-4 mt-8">
-            <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
-              Press {currentLaunchKey.toUpperCase()} When Ready
-            </div>
-            <button 
-              onClick={() => simulateKeyPress(currentLaunchKey)} 
-              className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
-            >
-              {currentLaunchKey.toUpperCase()}
-            </button>
-          </div>
-
-          <div className="mt-8">
-            <VirtualKeyboard
-              onKeyPress={handleKeyPress}
-              onBackspace={() => {}}
-              onEnter={() => {}}
-              inputWord=""
-            />
-          </div>
-        </div>
+      
+      {/* Continue button */}
+      <div className="absolute bottom-8 right-8 animate-bounce">
+        <Button 
+          className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
+          onClick={sendGameInfoToServer}
+        >
+          <ArrowRight className="h-14 w-14" />
+        </Button>
       </div>
     </div>
   );
