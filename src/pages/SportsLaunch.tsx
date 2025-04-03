@@ -35,32 +35,33 @@ export default function SportsLaunch() {
           setServerResponse(text);
           
           // Parse and display specific server responses
-          const responseLines = text.split('\n').filter(line => line.trim() !== '');
-          responseLines.forEach(line => {
-            if (line.includes('[≡ƒÆÇ] Terminating all games...')) {
-              toast({
-                title: "Game Termination",
-                description: "Closing all active games...",
-                variant: "destructive"
-              });
-            } else if (line.includes('[≡ƒöÑ] Killed:')) {
-              const gameName = line.split('Killed:')[1].trim();
-              toast({
-                title: "Game Closed",
-                description: `Terminated: ${gameName}`,
-                variant: "destructive"
-              });
-            } else if (line.includes('[≡ƒÆÇ] All games terminated.')) {
-              toast({
-                title: "Termination Complete",
-                description: "All games have been successfully closed.",
-                variant: "default"
-              });
-            }
-          });
+          if (text.includes('[≡ƒÆÇ] Terminating all games...')) {
+            toast({
+              title: "Game Termination",
+              description: "Closing all active games...",
+              variant: "destructive"
+            });
+          }
           
-          // Navigate back after short delay
-          setTimeout(() => navigate('/'), 1500);
+          const gameKilledMatch = text.match(/\[≡ƒöÑ\] Killed: (.+)/);
+          if (gameKilledMatch && gameKilledMatch[1]) {
+            toast({
+              title: "Game Closed",
+              description: `Terminated: ${gameKilledMatch[1].trim()}`,
+              variant: "destructive"
+            });
+          }
+          
+          if (text.includes('[≡ƒÆÇ] All games terminated.')) {
+            toast({
+              title: "Termination Complete",
+              description: "All games have been successfully closed.",
+              variant: "default"
+            });
+          }
+          
+          // Navigate back after short delay to allow toasts to be visible
+          setTimeout(() => navigate('/'), 2000);
         })
         .catch(error => {
           console.error('Error closing game:', error);
@@ -99,7 +100,7 @@ export default function SportsLaunch() {
       </Button>
       
       {serverResponse && (
-        <div className="fixed top-24 left-8 z-50 bg-black/80 text-green-500 p-4 rounded-md font-mono whitespace-pre">
+        <div className="fixed top-24 left-8 z-50 bg-black/80 text-green-500 p-4 rounded-md font-mono whitespace-pre max-w-lg overflow-auto max-h-[80vh]">
           {serverResponse}
         </div>
       )}

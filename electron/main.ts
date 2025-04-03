@@ -1,7 +1,9 @@
+
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
 import fetch from 'node-fetch';
+import http from 'http';
 
 let mainWindow: BrowserWindow;
 
@@ -32,29 +34,9 @@ function createWindow() {
     e.preventDefault();
   });
 
-  initRFIDReader();
   initExternalButtonListener();
   initStopEndpoint();
   initWebhookEndpoint();
-}
-
-function initRFIDReader() {
-  const port = new SerialPort({
-    path: 'COM3',
-    baudRate: 9600,
-  });
-
-  const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
-
-  port.on('error', (err) => {
-    console.error('Serial Port Error:', err);
-  });
-
-  parser.on('data', (data: string) => {
-    if (data.trim()) {
-      mainWindow.webContents.send('rfid-detected', data.trim());
-    }
-  });
 }
 
 function initExternalButtonListener() {

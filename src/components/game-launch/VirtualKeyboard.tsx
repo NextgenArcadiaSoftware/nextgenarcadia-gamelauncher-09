@@ -85,14 +85,38 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
       // Set the formatted response message with special formatting preserved
       setLastResponse(text);
       
-      // Check for specific response patterns
-      if (text.includes("[🎮] Launched:")) {
+      // Process specific response patterns from C++ server
+      if (text.includes('[🎮] Launched:') || text.includes('[≡ƒÄ«] Launched:')) {
+        const gamePath = text.match(/Launched: (.+)/)?.[1] || '';
         toast({
           title: "Game Launched",
-          description: text.split("[🎮] Launched:")[1].trim(),
+          description: gamePath.split('\\').pop() || gamePath,
           variant: "default"
         });
-      } else if (text.includes("[💀] Terminating") || text.includes("[🔥] Killed:")) {
+      }  
+      else if (text.includes('[≡ƒÆÇ] Terminating all games...')) {
+        toast({
+          title: "Game Termination",
+          description: "Closing all active games...",
+          variant: "destructive"
+        });
+      }
+      else if (text.match(/\[≡ƒöÑ\] Killed: (.+)/)) {
+        const killedGame = text.match(/\[≡ƒöÑ\] Killed: (.+)/)?.[1] || '';
+        toast({
+          title: "Game Closed",
+          description: `Terminated: ${killedGame}`,
+          variant: "destructive"
+        });
+      }
+      else if (text.includes('[≡ƒÆÇ] All games terminated.')) {
+        toast({
+          title: "Termination Complete",
+          description: "All games have been successfully closed.",
+          variant: "default"
+        });
+      }
+      else if (text.includes('[💀] Terminating') || text.includes('[🔥] Killed:')) {
         toast({
           title: "Game Closed",
           description: key === 'X' ? "Terminating all games..." : text,
