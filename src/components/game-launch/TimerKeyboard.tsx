@@ -19,52 +19,18 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   ];
 
-  // Map keys to game codes and descriptive names
-  const keyToGameMap: Record<string, {code: string, name: string}> = {
-    'E': {code: 'EAX', name: 'Elven Assassin'},
-    'F': {code: 'FNJ', name: 'Fruit Ninja VR'},
-    'C': {code: 'CBR', name: 'Crisis Brigade 2'},
-    'V': {code: 'AIO', name: 'All-in-One Sports VR'},
-    'P': {code: 'RPE', name: 'Richies Plank Experience'},
-    'I': {code: 'IBC', name: 'iB Cricket'},
-    'U': {code: 'UDC', name: 'Undead Citadel'},
-    'A': {code: 'ARS', name: 'Arizona Sunshine'},
-    'S': {code: 'SBS', name: 'Subside'},
-    'G': {code: 'PVR', name: 'Propagation VR'},
-    'R': {code: 'CRD', name: 'Creed Rise to Glory'},
-    'W': {code: 'BTS', name: 'Beat Saber'}
-  };
-
   const handleKeyClick = (key: string) => {
     console.log(`Timer Keyboard - Key pressed: ${key}`);
     
     // Use port 5001 for the C++ server
-    const serverUrl = 'http://localhost:5001';
+    const serverUrl = 'http://localhost:5001'; 
     
-    // Check if this is a special game launch key
-    const isGameKey = keyToGameMap[key] !== undefined;
-    
-    // Determine endpoint and payload based on key
-    let endpoint = 'keypress';
-    let payload = { command: `KEY_${key.toUpperCase()}_PRESSED` };
-    let description = `Sent command: KEY_${key.toUpperCase()}_PRESSED`;
-    
-    if (key === 'X') {
-      // X key is special - close all games
-      endpoint = 'close';
-      payload = { command: "CLOSE_GAME" };
-      description = "Terminating all games...";
-    } 
-    else if (isGameKey) {
-      // For game launch keys, include game information
-      const gameInfo = keyToGameMap[key];
-      payload = { 
-        command: `LAUNCH_GAME_${gameInfo.code}`,
-        gameCode: gameInfo.code,
-        key: key.toLowerCase() 
-      };
-      description = `Launching ${gameInfo.name} (${gameInfo.code})`;
-    }
+    // For X key, use the close endpoint instead of keypress
+    const endpoint = key === 'X' ? 'close' : 'keypress';
+    const command = `KEY_${key.toUpperCase()}_PRESSED`;
+    const payload = key === 'X' ? 
+      { command: "CLOSE_GAME" } : 
+      { command };
     
     console.log(`Sending to C++ server:`, payload);
     
@@ -84,17 +50,17 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
           return JSON.parse(text);
         } catch (e) {
           // If not JSON, return as text
-          return { message: text || `Command received` };
+          return { message: text || `Command ${command} received` };
         }
       });
     })
     .then(data => {
       console.log('C++ server response:', data);
-      setLastResponse(data.message || `Command sent: ${JSON.stringify(payload.command)}`);
+      setLastResponse(data.message || `Command sent: ${command}`);
       
       toast({
         title: "Game Command",
-        description: description
+        description: key === 'X' ? "Terminating all games..." : `Sent command: ${command}`
       });
       
       // Create and dispatch a real DOM keyboard event
@@ -151,40 +117,22 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       <div className="grid gap-2">
         {rows.map((row, rowIndex) => (
           <div key={rowIndex} className="flex justify-center gap-1">
-            {row.map((key) => {
-              const isGameKey = keyToGameMap[key] !== undefined;
-              return (
-                <button
-                  key={key}
-                  onClick={() => handleKeyClick(key)}
-                  className={`w-12 h-12 rounded-lg ${
-                    key === 'X'
-                      ? 'bg-[#ea384c] text-white animate-pulse shadow-[0_0_15px_rgba(234,56,76,0.7)]'
-                      : isGameKey 
-                        ? 'bg-[#34D399] text-white hover:bg-[#10B981] shadow-[0_0_10px_rgba(52,211,153,0.5)]'
-                        : 'bg-white/10 text-white hover:bg-white/20'
-                  } font-bold text-lg transition-colors 
-                  duration-200 flex items-center justify-center
-                  border ${
-                    key === 'X' 
-                      ? 'border-[#ea384c]/50' 
-                      : isGameKey 
-                        ? 'border-[#34D399]/50'
-                        : 'border-white/10'
-                  } backdrop-blur-sm
-                  active:scale-95 transform`}
-                  title={
-                    key === 'X' 
-                      ? 'Close all games' 
-                      : isGameKey 
-                        ? `Launch ${keyToGameMap[key].name}` 
-                        : `Press ${key}`
-                  }
-                >
-                  {key}
-                </button>
-              );
-            })}
+            {row.map((key) => (
+              <button
+                key={key}
+                onClick={() => handleKeyClick(key)}
+                className={`w-12 h-12 rounded-lg ${
+                  key === 'X'
+                    ? 'bg-[#ea384c] text-white animate-pulse shadow-[0_0_15px_rgba(234,56,76,0.7)]'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                } font-bold text-lg transition-colors 
+                duration-200 flex items-center justify-center
+                border ${key === 'X' ? 'border-[#ea384c]/50' : 'border-white/10'} backdrop-blur-sm
+                active:scale-95 transform`}
+              >
+                {key}
+              </button>
+            ))}
           </div>
         ))}
         <div className="flex justify-center gap-1 mt-2">
