@@ -178,7 +178,10 @@ ipcMain.on('simulate-keypress', async (event, key) => {
     
     const response = await fetch(`${serverUrl}/${endpoint}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json; charset=utf-8',
+        'Accept-Charset': 'UTF-8'
+      },
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(5000)
     });
@@ -208,7 +211,10 @@ ipcMain.on('simulate-keypress', async (event, key) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const text = await response.text();
+    const text = await response.text().then(text => 
+      new TextDecoder('utf-8').decode(new TextEncoder().encode(text))
+    );
+    
     console.log('C++ server response:', text);
     
     // Forward the response to renderer
@@ -274,7 +280,10 @@ ipcMain.on('end-game', async (event) => {
   try {
     const response = await fetch('http://localhost:5001/close', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json; charset=utf-8',
+        'Accept-Charset': 'UTF-8'
+      },
       body: JSON.stringify({}),
       signal: AbortSignal.timeout(5000)
     });
@@ -288,7 +297,9 @@ ipcMain.on('end-game', async (event) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      responseText = await response.text();
+      responseText = await response.text().then(text => 
+        new TextDecoder('utf-8').decode(new TextEncoder().encode(text))
+      );
     }
     
     console.log('End game command response:', responseText);

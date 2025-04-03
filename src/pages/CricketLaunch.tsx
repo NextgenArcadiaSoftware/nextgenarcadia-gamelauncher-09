@@ -23,15 +23,24 @@ export default function CricketLaunch() {
         // Send close command to C++ server
         fetch("http://localhost:5001/close", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json; charset=utf-8",
+            "Accept-Charset": "UTF-8"
+          },
           body: JSON.stringify({ 
             command: "CLOSE_GAME",
             gameName: "iB Cricket" 
           })
         })
         .then(response => {
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          return response.json();
+          if (!response.ok && response.status !== 204) throw new Error(`HTTP error! status: ${response.status}`);
+          
+          if (response.status === 204) {
+            console.log('Close game command successful');
+            return "Game close command successful";
+          }
+          
+          return response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
         })
         .then(data => console.log('Close game response:', data))
         .catch(error => {

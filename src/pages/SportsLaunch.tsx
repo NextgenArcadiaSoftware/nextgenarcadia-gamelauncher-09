@@ -25,7 +25,10 @@ export default function SportsLaunch() {
         // Send close command to C++ server
         fetch("http://localhost:5001/close", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json; charset=utf-8",
+            "Accept-Charset": "UTF-8" 
+          },
           body: JSON.stringify({}),
           signal: AbortSignal.timeout(3000)
         })
@@ -47,7 +50,7 @@ export default function SportsLaunch() {
           // For 204 responses, we don't need to parse the body
           return response.status === 204 ? 
             "Game close command successful" : 
-            response.text();
+            response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
         })
         .then(text => {
           console.log('Close game response:', text);

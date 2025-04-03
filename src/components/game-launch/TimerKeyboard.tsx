@@ -35,7 +35,8 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
 
   const checkServerConnectivity = () => {
     fetch('http://localhost:5001/health', {
-      signal: AbortSignal.timeout(2000)
+      signal: AbortSignal.timeout(2000),
+      headers: { 'Accept-Charset': 'UTF-8' }
     })
       .then(response => {
         if (response.ok || response.status === 204) {
@@ -75,7 +76,10 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     
     fetch(`${serverUrl}/${endpoint}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json; charset=utf-8",
+        "Accept-Charset": "UTF-8"
+      },
       body: JSON.stringify(payload),
       // Set timeout to avoid hanging requests
       signal: AbortSignal.timeout(2000)
@@ -96,7 +100,8 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return response.text();
+      // Ensure UTF-8 decoding of response text
+      return response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
     })
     .then(text => {
       console.log('C++ server response:', text);

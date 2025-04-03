@@ -1,4 +1,5 @@
-
+import sys
+import codecs
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from functools import wraps
@@ -56,12 +57,22 @@ GAME_NAMES = {
 # Track currently running games
 active_processes = {}
 
+# Ensure stdout and stderr use UTF-8 encoding
+sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer)
+sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer)
+
 @app.before_request
 def log_request_info():
     logger.info(f"Request: {request.method} {request.path}")
     logger.debug(f"Headers: {request.headers}")
     if request.path != '/health':  # Don't log health check bodies
-        logger.debug(f"Body: {request.get_data()}")
+        try:
+            # Try to decode as UTF-8
+            body_data = request.get_data(as_text=True)
+            logger.debug(f"Body: {body_data}")
+        except UnicodeDecodeError:
+            # In case of binary or non-UTF-8 data
+            logger.debug("Body: [Binary data or non-UTF-8 encoding]")
 
 def notify_electron_app(command):
     """Send a command to the Electron app's HTTP server"""
@@ -128,13 +139,13 @@ def handle_keypress():
     if request.method == 'OPTIONS':
         response = jsonify({"status": "ok"})
         response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accept-Charset')
         response.headers.add('Access-Control-Allow-Methods', 'POST')
         return response
 
     try:
         logger.info("Received keypress request") 
-        data = request.get_json()
+        data = request.get_json(force=True)  # Force decoding as JSON
         
         if not data:
             logger.warning("No data received in request")
@@ -164,35 +175,44 @@ def handle_keypress():
         if key in key_to_game:
             game_code = key_to_game[key]
             result = launch_game(game_code)
-            return jsonify(result), 200
+            response = jsonify(result)
+            response.headers['Content-Type'] = 'application/json; charset=utf-8'
+            return response, 200
         
         # Handle special STOP_GAME command
         elif key == 'stop' or key == 'stop_game' or key == 'x':
             result = terminate_games()
             notify_electron_app("STOP_GAME")
-            return jsonify(result), 200
+            response = jsonify(result)
+            response.headers['Content-Type'] = 'application/json; charset=utf-8'
+            return response, 200
         
         # Default behavior - just simulate the key press
         else:
             logger.info(f"[≡ƒå«] Simulating keypress for: {key}")
             keyboard.press_and_release(key)
             
-            return jsonify({
+            result = {
                 "status": "success", 
                 "message": f"[≡ƒå«] Key {key.upper()} pressed",
                 "key": key,
                 "command": command
-            }), 200
+            }
+            response = jsonify(result)
+            response.headers['Content-Type'] = 'application/json; charset=utf-8'
+            return response, 200
         
     except Exception as e:
         logger.error(f"Error processing keypress: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        response = jsonify({"error": str(e)})
+        response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        return response, 500
 
 @app.route('/close', methods=['POST'])
 def handle_close():
     logger.info("[≡ƒÆÇ] Terminating all games...")
     try:
-        data = request.get_json()
+        data = request.get_json(force=True) if request.get_data() else {}
         game_name = data.get('gameName', '') if data else ''
         
         if game_name:
@@ -200,10 +220,14 @@ def handle_close():
         
         result = terminate_games()
         notify_electron_app("STOP_GAME")
-        return jsonify(result), 200
+        response = jsonify(result)
+        response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        return response, 200
     except Exception as e:
         logger.error(f"Error processing close command: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        response = jsonify({"error": str(e)})
+        response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        return response, 500
 
 @app.route('/health', methods=['GET', 'OPTIONS'])
 def health_check():
@@ -215,9 +239,10 @@ def health_check():
         response.headers.add('Access-Control-Allow-Methods', '*')
         return response, 200
     
-    return jsonify({"status": "healthy"}), 200
+    response = jsonify({"status": "healthy"})
+    response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    return response, 200
 
-# Add a new endpoint to handle STOP_GAME commands
 @app.route('/stop', methods=['GET', 'POST'])
 def stop_game():
     """Endpoint to handle STOP_GAME command"""
@@ -226,7 +251,9 @@ def stop_game():
     result = terminate_games()
     notify_electron_app("STOP_GAME")
     
-    return jsonify(result), 200
+    response = jsonify(result)
+    response.headers['Content-Type'] = 'application/json; charset=utf-8'
+    return response, 200
 
 if __name__ == '__main__':
     logger.info("\n=== Game Launcher Server ===")

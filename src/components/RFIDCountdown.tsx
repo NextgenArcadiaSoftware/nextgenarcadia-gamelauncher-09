@@ -19,10 +19,8 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   const [lastServerStatus, setLastServerStatus] = useState<number | null>(null);
   const { toast } = useToast();
 
-  // Check if Electron is available
   const isElectronAvailable = Boolean(window.electron);
 
-  // Initial timer duration fetch and subscription setup
   useEffect(() => {
     let isMounted = true;
 
@@ -36,27 +34,24 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
 
         if (error) {
           console.error('Error fetching timer duration:', error);
-          // Set a default value if fetching fails
-          if (isMounted) setTimeLeft(5 * 60); // 5 minutes in seconds
+          if (isMounted) setTimeLeft(5 * 60);
           throw error;
         }
 
         if (data && isMounted) {
           console.log('Setting initial timer duration:', data.timer_duration);
-          setTimeLeft(data.timer_duration * 60); // Convert minutes to seconds
+          setTimeLeft(data.timer_duration * 60);
         } else if (isMounted) {
-          // Set a default value if no data
           console.log('No timer data found, using default of 5 minutes');
-          setTimeLeft(5 * 60); // 5 minutes in seconds
+          setTimeLeft(5 * 60);
         }
       } catch (error) {
         console.error('Error fetching timer duration:', error);
       }
     };
 
-    fetchTimerDuration(); // Make sure to call the function
+    fetchTimerDuration();
 
-    // Set up real-time subscription for timer updates
     const channel = supabase
       .channel('settings_changes')
       .on(
@@ -71,7 +66,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
           if (isMounted) {
             const newDuration = payload.new.timer_duration;
             console.log('Received new timer duration:', newDuration);
-            setTimeLeft(newDuration * 60); // Convert minutes to seconds
+            setTimeLeft(newDuration * 60);
             toast({
               title: "Timer Updated",
               description: `Session time updated to ${newDuration} minutes`,
@@ -87,11 +82,9 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
     };
   }, [toast]);
 
-  // Convert game title to launch code
   const getGameCode = (gameTitle: string | null | undefined): string => {
     if (!gameTitle) return "XXX";
     
-    // These codes match exactly with the Python backend GAMES dictionary
     const codeMap: Record<string, string> = {
       "Elven Assassin": "EAX",
       "Fruit Ninja VR": "FNJ",
@@ -112,37 +105,36 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
 
   useEffect(() => {
     if (!showGameScreen && timeLeft !== null) {
-      // Launch logic using selected method based on game type
       if (steamUrl && isElectronAvailable) {
         console.log(`Launching Steam game with URL: ${steamUrl}`);
         window.electron.ipcRenderer.send('launch-steam-game', steamUrl);
       } 
       else if (targetWord && isElectronAvailable) {
-        // For regular games, use the C++ server via keypress API
         try {
           const keyMapping: Record<string, string> = {
-            'EAX': 'e', // Elven Assassin
-            'FNJ': 'f', // Fruit Ninja
-            'CBR': 'c', // Crisis Brigade
-            'AIO': 'v', // All-in-One Sports VR
-            'RPE': 'p', // Richies Plank
-            'IBC': 'i', // iB Cricket
-            'UDC': 'u', // Undead Citadel
-            'ARS': 'a', // Arizona Sunshine
-            'SBS': 's', // Subside
-            'PVR': 'g'  // Propagation VR
+            'EAX': 'e',
+            'FNJ': 'f',
+            'CBR': 'c',
+            'AIO': 'v',
+            'RPE': 'p',
+            'IBC': 'i',
+            'UDC': 'u',
+            'ARS': 'a',
+            'SBS': 's',
+            'PVR': 'g'
           };
           
-          // Get the appropriate launch key
           const launchKey = keyMapping[targetWord];
           
           if (launchKey) {
             console.log(`Launching game with key: ${launchKey} for game: ${activeGame}`);
             
-            // Send to C++ server
             fetch("http://localhost:5001/keypress", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { 
+                "Content-Type": "application/json; charset=utf-8",
+                "Accept-Charset": "UTF-8"
+              },
               body: JSON.stringify({ key: launchKey }),
               signal: AbortSignal.timeout(3000)
             })
@@ -157,7 +149,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
                 });
                 return response.status === 204 ? 
                   `Successfully launched ${activeGame}` : 
-                  response.text();
+                  response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
               } else {
                 throw new Error(`HTTP error: ${response.status}`);
               }
@@ -173,7 +165,6 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
                 description: "Failed to connect to game launcher service"
               });
               
-              // Fall back to Electron method if C++ server fails
               console.log("Falling back to Electron keypress simulation");
               window.electron.ipcRenderer.send('simulate-keypress', launchKey);
             });
@@ -194,7 +185,6 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
     }
   }, [showGameScreen, timeLeft, targetWord, steamUrl, toast, isElectronAvailable, activeGame]);
 
-  // Setup webhook listener for timer stop command
   useEffect(() => {
     if (isElectronAvailable) {
       console.log('Setting up webhook stop timer listener');
@@ -207,14 +197,11 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
           description: "Timer stopped via webhook command",
         });
         
-        // Show the rating screen instead of just exiting
         setShowRating(true);
       };
       
-      // Register the webhook listener
       window.electron.ipcRenderer.on('webhook-stop-timer', handleWebhookStopTimer);
       
-      // Clean up the listener when component unmounts
       return () => {
         window.electron.ipcRenderer.removeAllListeners('webhook-stop-timer');
       };
@@ -222,13 +209,14 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   }, [toast, isElectronAvailable]);
 
   const handleRatingSubmit = async (rating: number) => {
-    // When exiting, send the stop command
     if (isElectronAvailable) {
       try {
-        // Send the close command to the C++ server
         fetch("http://localhost:5001/close", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json; charset=utf-8",
+            "Accept-Charset": "UTF-8"
+          },
           signal: AbortSignal.timeout(3000)
         })
         .then(response => {
@@ -245,7 +233,6 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
         })
         .catch(error => {
           console.error('Error closing games:', error);
-          // Fall back to Electron method
           window.electron.ipcRenderer.send('end-game');
         });
       } catch (error) {
@@ -255,7 +242,6 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
     
     if (activeGame) {
       try {
-        // Get game ID first
         const { data: gameData } = await supabase
           .from('games')
           .select('id')
@@ -263,7 +249,6 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
           .single();
 
         if (gameData) {
-          // Record the rating
           await supabase
             .from('game_ratings')
             .insert({
@@ -288,7 +273,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
     description: activeGame ? `Get ready to experience ${activeGame} in virtual reality!` : '',
     thumbnail: `/lovable-uploads/${activeGame?.toLowerCase().replace(/\s+/g, '-')}.png`,
     genre: 'VR Game',
-    trailer: trailer // Pass the trailer to the game data
+    trailer: trailer
   };
 
   if (showRating) {
@@ -304,7 +289,6 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
     );
   }
 
-  // Show loading state if timer hasn't been fetched yet
   if (timeLeft === null) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -318,8 +302,6 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
       timeLeft={timeLeft}
       activeGame={activeGame}
       onExit={() => {
-        // We'll show the rating screen when the timer is complete
-        // otherwise we'll just exit directly
         if (showGameScreen) {
           onExit();
         } else {
