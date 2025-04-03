@@ -1,10 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
-import { SerialPort } from 'serialport';
-import { ReadlineParser } from '@serialport/parser-readline';
 import fetch from 'node-fetch';
-import http from 'http';
 
 let mainWindow: BrowserWindow;
 
@@ -201,7 +198,8 @@ ipcMain.on('simulate-keypress', async (event, key) => {
     const response = await fetch(`${serverUrl}/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(5000)
     });
 
     if (!response.ok) {
@@ -221,23 +219,13 @@ ipcMain.on('simulate-keypress', async (event, key) => {
   } catch (error) {
     console.error('Error sending key press to C++ server:', error);
     
-    // Fallback to Python approach for key simulation
-    const pythonScript = `
-    import keyboard
-    import time
-
-    keyboard.press('${key}')
-    time.sleep(0.1)
-    keyboard.release('${key}')
-    `;
-    
-    exec(`python -c "${pythonScript}"`, (error, stdout, stderr) => {
-      if (error) {
-        console.error('Error in fallback key simulation:', error);
-        return;
-      }
-      console.log('Fallback key simulation successful');
-    });
+    // Send a generic error event to renderer
+    if (mainWindow) {
+      mainWindow.webContents.send('cpp-server-error', {
+        key,
+        error: error.message
+      });
+    }
   }
 });
 
@@ -281,11 +269,11 @@ ipcMain.on('end-game', async (event) => {
   console.log('Received end-game command in main process');
 
   try {
-    // Direct request to C++ server's close endpoint
     const response = await fetch('http://localhost:5001/close', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({})  // C++ server doesn't need any payload for close
+      body: JSON.stringify({}),
+      signal: AbortSignal.timeout(5000)
     });
 
     if (!response.ok) {
@@ -304,39 +292,11 @@ ipcMain.on('end-game', async (event) => {
   } catch (error) {
     console.error('Error sending end-game command:', error);
     
-    // Fallback method if C++ server is unavailable
-    try {
-      // Try to use keyboard simulation as a fallback
-      const pythonScript = `
-      import keyboard
-      import time
-      
-      # Send ESC key to try and close the active window
-      keyboard.press('esc')
-      time.sleep(0.1)
-      keyboard.release('esc')
-      
-      # Also try Alt+F4
-      keyboard.press('alt')
-      keyboard.press('f4')
-      time.sleep(0.1)
-      keyboard.release('f4')
-      keyboard.release('alt')
-      `;
-      
-      exec(`python -c "${pythonScript}"`, (error, stdout, stderr) => {
-        if (error) {
-          console.error('Error in fallback key simulation:', error);
-        } else {
-          console.log('Fallback game termination successful');
-        }
-      });
-    } catch (innerError) {
-      console.error('Error with fallback termination:', innerError);
-    }
-    
     if (mainWindow) {
-      mainWindow.webContents.send('webhook-stop-timer', { source: 'end-game-button-fallback' });
+      mainWindow.webContents.send('webhook-stop-timer', { 
+        source: 'end-game-button-fallback',
+        error: error.message
+      });
     }
   }
 });
