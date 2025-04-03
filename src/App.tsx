@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,38 +21,44 @@ import CreedLaunch from "./pages/CreedLaunch";
 import BeatSaberLaunch from "./pages/BeatSaberLaunch";
 import RollerCoasterLaunch from "./pages/RollerCoasterLaunch";
 import UnknownGameLaunch from "./pages/UnknownGameLaunch";
+import GameKeyboard from "./pages/GameKeyboard";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <TooltipProvider>
-        <Screensaver />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/fruitninjalaunch" element={<FruitNinjaLaunch />} />
-          <Route path="/elvenassassinlaunch" element={<ElvenAssassinLaunch />} />
-          <Route path="/crisisbrigadelaunch" element={<CrisBrigadeLaunch />} />
-          <Route path="/sportslaunch" element={<SportsLaunch />} />
-          <Route path="/planklaunch" element={<PlankLaunch />} />
-          <Route path="/cricketlaunch" element={<CricketLaunch />} />
-          <Route path="/undeadcitadellaunch" element={<UndeadCitadelLaunch />} />
-          <Route path="/arizonalaunch" element={<ArizonaSunshineLaunch />} />
-          <Route path="/subsidelaunch" element={<SubsideLaunch />} />
-          <Route path="/propagationlaunch" element={<PropagationLaunch />} />
-          <Route path="/creedlaunch" element={<CreedLaunch />} />
-          <Route path="/beatlaunch" element={<BeatSaberLaunch />} />
-          <Route path="/rollerlaunch" element={<RollerCoasterLaunch />} />
-          <Route path="/unknown-game" element={<UnknownGameLaunch />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-        <Sonner />
-      </TooltipProvider>
-    </BrowserRouter>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <TooltipProvider>
+            <Screensaver />
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/keyboard" element={<GameKeyboard />} />
+              <Route path="/fruit-ninja" element={<FruitNinjaLaunch />} />
+              <Route path="/elven-assassin" element={<ElvenAssassinLaunch />} />
+              <Route path="/crisis-brigade" element={<CrisBrigadeLaunch />} />
+              <Route path="/sports" element={<SportsLaunch />} />
+              <Route path="/plank" element={<PlankLaunch />} />
+              <Route path="/cricket" element={<CricketLaunch />} />
+              <Route path="/undead-citadel" element={<UndeadCitadelLaunch />} />
+              <Route path="/arizona-sunshine" element={<ArizonaSunshineLaunch />} />
+              <Route path="/subside" element={<SubsideLaunch />} />
+              <Route path="/propagation" element={<PropagationLaunch />} />
+              <Route path="/creed" element={<CreedLaunch />} />
+              <Route path="/beat-saber" element={<BeatSaberLaunch />} />
+              <Route path="/roller-coaster" element={<RollerCoasterLaunch />} />
+              <Route path="/unknown-game" element={<UnknownGameLaunch />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </>
+  );
+}
 
 export default App;
