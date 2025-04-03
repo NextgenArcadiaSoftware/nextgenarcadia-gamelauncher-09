@@ -9,16 +9,29 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 export default function FruitNinjaLaunch() {
   const navigate = useNavigate();
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Check for CORS issues
   useEffect(() => {
     const checkConnection = async () => {
       try {
+        // Use a timeout to avoid hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
         await fetch('http://localhost:5001/health', {
           method: 'GET',
-          headers: { 'Accept-Charset': 'UTF-8' },
+          headers: { 
+            'Accept-Charset': 'UTF-8',
+            'Accept': 'application/json'
+          },
           mode: 'cors',
+          credentials: 'same-origin',
+          signal: controller.signal,
+          cache: 'no-cache'
         });
+
+        clearTimeout(timeoutId);
         setConnectionError(null);
       } catch (error) {
         console.error('Connection test error:', error);
@@ -29,7 +42,25 @@ export default function FruitNinjaLaunch() {
     };
     
     checkConnection();
-  }, []);
+
+    // Set up an interval to retry the connection
+    const intervalId = setInterval(() => {
+      if (connectionError) {
+        setRetryCount(prev => prev + 1);
+        checkConnection();
+      }
+    }, 10000); // Retry every 10 seconds
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [connectionError]);
+
+  const handleRetryConnection = () => {
+    setRetryCount(prev => prev + 1);
+    // Force a new connection check
+    setConnectionError("Checking connection...");
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -51,6 +82,16 @@ export default function FruitNinjaLaunch() {
             <p className="mt-2 font-mono text-xs">
               If running locally, make sure the C++ server has CORS headers enabled.
             </p>
+            <div className="mt-3">
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={handleRetryConnection}
+                className="text-xs"
+              >
+                Retry Connection {retryCount > 0 ? `(${retryCount})` : ''}
+              </Button>
+            </div>
           </AlertDescription>
         </Alert>
       )}
