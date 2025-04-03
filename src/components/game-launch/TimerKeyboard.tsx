@@ -44,7 +44,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         description: key === 'X' ? "Terminating all games..." : `Key sent: ${key}`
       });
       
-      // Also dispatch a DOM keyboard event to simulate the key
+      // Create and dispatch a real DOM keyboard event
       const event = new KeyboardEvent("keydown", {
         key: key.toLowerCase(),
         code: `Key${key}`,
