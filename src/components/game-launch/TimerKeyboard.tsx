@@ -30,7 +30,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     const command = `KEY_${key.toUpperCase()}_PRESSED`;
     const payload = key === 'X' ? 
       { command: "CLOSE_GAME" } : 
-      { command };
+      { command, key: key.toLowerCase() };
     
     console.log(`Sending to C++ server:`, payload);
     

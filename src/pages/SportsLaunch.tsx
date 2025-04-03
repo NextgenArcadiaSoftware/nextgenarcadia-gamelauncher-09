@@ -4,15 +4,40 @@ import { RFIDCountdown } from '@/components/RFIDCountdown';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function SportsLaunch() {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Set up global key event listener for the C++ program
+  // Set up global key event listener for both the X key and C++ program
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       console.log(`Global keydown detected: ${e.key}`);
-      // The C++ program will listen for these events
+      
+      // Special handling for X key to end the game
+      if (e.key.toLowerCase() === 'x') {
+        console.log('X key detected, ending game');
+        toast({
+          title: "Game Ended",
+          description: "Ending current game session..."
+        });
+        
+        // Send close command to C++ server
+        fetch("http://localhost:5001/close", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command: "CLOSE_GAME" })
+        })
+        .then(response => response.json())
+        .then(data => console.log('Close game response:', data))
+        .catch(error => console.error('Error closing game:', error));
+        
+        // Navigate back after short delay
+        setTimeout(() => navigate('/'), 1000);
+      }
+      
+      // The C++ program will listen for other key events
     };
 
     // Add the global event listener
@@ -22,7 +47,7 @@ export default function SportsLaunch() {
       // Clean up
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
-  }, []);
+  }, [navigate, toast]);
 
   return (
     <div className="relative min-h-screen">
