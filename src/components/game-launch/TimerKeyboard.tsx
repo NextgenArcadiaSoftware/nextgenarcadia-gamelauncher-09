@@ -11,6 +11,7 @@ interface TimerKeyboardProps {
 export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   const { toast } = useToast();
   const [connectionError, setConnectionError] = React.useState(false);
+  const [lastResponse, setLastResponse] = React.useState<string | null>(null);
   const rows = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -35,13 +36,23 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       setConnectionError(false);
-      return response.json();
+      return response.text().then(text => {
+        // Try to parse as JSON if possible
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          // If not JSON, return as text
+          return { message: text || `Key ${key} received` };
+        }
+      });
     })
     .then(data => {
       console.log('C++ server response:', data);
+      setLastResponse(data.message || `Key ${key} received`);
+      
       toast({
         title: "Game Command",
-        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key}`
+        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key} - ${data.message || "Key received"}`
       });
       
       // Create and dispatch a real DOM keyboard event
@@ -82,6 +93,15 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
           <AlertTitle>Connection Error</AlertTitle>
           <AlertDescription>
             Unable to connect to the game launcher service. Please check that the C++ server is running on port 5001.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {lastResponse && (
+        <Alert className="mb-4 bg-green-500/20 border-green-500">
+          <AlertTitle>Server Response</AlertTitle>
+          <AlertDescription>
+            {lastResponse}
           </AlertDescription>
         </Alert>
       )}

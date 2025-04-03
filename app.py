@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from functools import wraps
@@ -105,12 +106,29 @@ def handle_keypress():
         
         return jsonify({
             "status": "success",
-            "message": f"Key {key} received and processed",
+            "message": f"Key '{key}' received and pressed successfully",
             "key": key
         }), 200
         
     except Exception as e:
         print(f"Error processing keypress: {str(e)}") # Debug print
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/close', methods=['POST'])
+def handle_close():
+    print("Close command received, terminating all games...")
+    # Implement your game closing logic here
+    try:
+        # Simulate the Alt+F4 key press
+        keyboard.press_and_release('alt+f4')
+        # Notify Electron app about the close command
+        notify_electron_app("STOP_GAME")
+        return jsonify({
+            "status": "success", 
+            "message": "Close command received, terminating all games"
+        }), 200
+    except Exception as e:
+        print(f"Error processing close command: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/health', methods=['GET', 'OPTIONS'])

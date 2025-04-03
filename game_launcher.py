@@ -124,7 +124,27 @@ def handle_keypress():
     key = data['key'].lower()
     print(f"Simulating key press: {key}")
     keyboard.press_and_release(key)
-    return jsonify({"status": "success", "message": f"Key {key} pressed"}), 200
+    return jsonify({
+        "status": "success", 
+        "message": f"Key '{key}' received and pressed successfully"
+    }), 200
+
+@app.route('/close', methods=['POST'])
+def handle_close():
+    print("Close command received, terminating all games...")
+    # Implement your game closing logic here
+    try:
+        # Simulate the X key press
+        keyboard.press_and_release('alt+f4')
+        # Notify Electron app about the close command
+        notify_electron_app("STOP_GAME")
+        return jsonify({
+            "status": "success", 
+            "message": "Close command received, terminating all games"
+        }), 200
+    except Exception as e:
+        print(f"Error processing close command: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/')
 def index():
