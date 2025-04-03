@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { closeGames } from '@/services/GameService';
+import { closeGames, sendKeyPress } from '@/services/GameService';
+import { CppServerStatus } from '@/components/game-launch/CppServerStatus';
 
 export default function CricketLaunch() {
   const navigate = useNavigate();
@@ -52,6 +53,33 @@ export default function CricketLaunch() {
           setTimeout(() => navigate('/'), 1000);
         }
       }
+
+      // Handle 'i' key for direct launch
+      if (e.key.toLowerCase() === 'i') {
+        console.log('Launch key I detected for iB Cricket');
+        
+        try {
+          const result = await sendKeyPress('i');
+          setServerResponse(result.message || "Game launch command sent");
+          
+          toast({
+            title: "Launch Command Sent",
+            description: "Launching iB Cricket..."
+          });
+        } catch (error) {
+          console.error('Error sending launch command:', error);
+          
+          toast({
+            title: "Launch Error",
+            description: "Could not send launch command to server",
+            variant: "destructive"
+          });
+          
+          if (window.electron) {
+            window.electron.ipcRenderer.send('simulate-keypress', 'i');
+          }
+        }
+      }
     };
 
     // Add global event listener
@@ -75,11 +103,15 @@ export default function CricketLaunch() {
         Back to Games
       </Button>
       
-      {serverResponse && (
-        <div className="fixed top-24 left-8 z-50 bg-black/80 text-green-500 p-4 rounded-md font-mono max-w-md">
-          {serverResponse}
-        </div>
-      )}
+      <div className="fixed top-24 left-8 right-8 mx-auto max-w-xl z-50">
+        <CppServerStatus />
+        
+        {serverResponse && (
+          <div className="mt-4 bg-black/80 text-green-500 p-4 rounded-md font-mono max-w-md">
+            {serverResponse}
+          </div>
+        )}
+      </div>
       
       <RFIDCountdown 
         onExit={() => navigate('/')} 
