@@ -19,16 +19,11 @@ export default function SportsLaunch() {
       // Special handling for X key to end the game
       if (e.key.toLowerCase() === 'x') {
         console.log('X key detected, ending game');
-        toast({
-          title: "Game Ending",
-          description: "Sending termination command..."
-        });
         
         // Send close command to C++ server
         fetch("http://localhost:5001/close", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          // Empty body is fine for the C++ server
           body: JSON.stringify({})
         })
         .then(response => {
@@ -39,27 +34,45 @@ export default function SportsLaunch() {
           console.log('Close game response:', text);
           setServerResponse(text);
           
-          // Show game termination toast with the C++ server response
-          toast({
-            variant: "destructive",
-            title: "Games Terminated",
-            description: text || "All games closed successfully"
+          // Parse and display specific server responses
+          const responseLines = text.split('\n').filter(line => line.trim() !== '');
+          responseLines.forEach(line => {
+            if (line.includes('[≡ƒÆÇ] Terminating all games...')) {
+              toast({
+                title: "Game Termination",
+                description: "Closing all active games...",
+                variant: "destructive"
+              });
+            } else if (line.includes('[≡ƒöÑ] Killed:')) {
+              const gameName = line.split('Killed:')[1].trim();
+              toast({
+                title: "Game Closed",
+                description: `Terminated: ${gameName}`,
+                variant: "destructive"
+              });
+            } else if (line.includes('[≡ƒÆÇ] All games terminated.')) {
+              toast({
+                title: "Termination Complete",
+                description: "All games have been successfully closed.",
+                variant: "default"
+              });
+            }
           });
           
           // Navigate back after short delay
-          setTimeout(() => navigate('/'), 1000);
+          setTimeout(() => navigate('/'), 1500);
         })
         .catch(error => {
           console.error('Error closing game:', error);
           
-          // Try Electron fallback method
+          // Fallback Electron method
           if (window.electron) {
             console.log("Falling back to Electron method for game termination");
             window.electron.ipcRenderer.send('end-game');
+            
+            // Still navigate back
+            setTimeout(() => navigate('/'), 1500);
           }
-          
-          // Even if the C++ server is unavailable, still navigate back
-          setTimeout(() => navigate('/'), 1000);
         });
       }
     };
