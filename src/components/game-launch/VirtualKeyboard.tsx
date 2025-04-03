@@ -32,7 +32,11 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
     const endpoint = key === 'X' ? 'close' : 'keypress';
     const payload = key === 'X' ? {} : { key: keyToSend };
     
-    fetch(`http://localhost:5001/${endpoint}`, {
+    // Update this URL to point to your C++ server
+    // Replace the port with your C++ server's port (e.g., 5002 instead of 5001)
+    const serverUrl = 'http://localhost:5002'; // Change this to your C++ server URL
+    
+    fetch(`${serverUrl}/${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -83,7 +87,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
       toast({
         variant: "destructive",
         title: "Connection Error",
-        description: "Could not connect to the game launcher service"
+        description: "Could not connect to the C++ server"
       });
       
       // Try electron method as fallback
@@ -103,7 +107,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
         <Alert variant="destructive" className="mb-4">
           <AlertTitle>Connection Error</AlertTitle>
           <AlertDescription>
-            Unable to connect to the game launcher service. Please check that the C++ server is running on port 5001.
+            Unable to connect to the C++ server. Please check that the C++ server is running.
           </AlertDescription>
         </Alert>
       )}

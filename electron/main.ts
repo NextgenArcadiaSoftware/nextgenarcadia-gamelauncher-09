@@ -188,7 +188,9 @@ ipcMain.on('simulate-keypress', async (event, key) => {
   console.log('Received key press in main process:', key);
 
   try {
-    const response = await fetch('http://localhost:5001/keypress', {
+    const serverUrl = 'http://localhost:5002'; // Change this to your C++ server URL
+    
+    const response = await fetch(`${serverUrl}/keypress`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key })
@@ -201,7 +203,7 @@ ipcMain.on('simulate-keypress', async (event, key) => {
     const data = await response.json();
     console.log('Key press simulation response:', data);
   } catch (error) {
-    console.error('Error sending key press to Python server:', error);
+    console.error('Error sending key press to C++ server:', error);
     
     const pythonScript = `
     import keyboard
