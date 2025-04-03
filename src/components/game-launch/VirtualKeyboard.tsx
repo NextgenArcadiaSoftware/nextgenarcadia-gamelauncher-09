@@ -89,12 +89,28 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
     })
     .then(data => {
       console.log('C++ server response:', data);
-      setLastResponse(data.message || `Key ${key} received, command: KEY_${key.toUpperCase()}_PRESSED`);
       
-      toast({
-        title: "Game Command",
-        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key} - Command: KEY_${key.toUpperCase()}_PRESSED`
-      });
+      // Set the formatted response message
+      const responseMessage = data.message || `Key ${key} received, command: KEY_${key.toUpperCase()}_PRESSED`;
+      setLastResponse(responseMessage);
+      
+      // Display a toast notification based on response type
+      if (responseMessage.includes("Launched")) {
+        toast({
+          title: "Game Launched",
+          description: responseMessage
+        });
+      } else if (responseMessage.includes("Terminating")) {
+        toast({
+          title: "Game Command",
+          description: key === 'X' ? "Terminating all games..." : responseMessage
+        });
+      } else {
+        toast({
+          title: "Game Command",
+          description: responseMessage
+        });
+      }
       
       // Create and dispatch a real DOM keyboard event
       try {

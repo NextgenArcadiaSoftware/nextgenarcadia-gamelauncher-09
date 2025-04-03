@@ -84,12 +84,28 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     })
     .then(data => {
       console.log('C++ server response:', data);
-      setLastResponse(data.message || `Command sent: ${command}`);
       
-      toast({
-        title: "Game Command",
-        description: key === 'X' ? "Terminating all games..." : `Sent command: ${command}`
-      });
+      // Set the formatted response message
+      const responseMessage = data.message || `Command sent: ${command}`;
+      setLastResponse(responseMessage);
+      
+      // Display a toast notification based on response type
+      if (responseMessage.includes("Launched")) {
+        toast({
+          title: "Game Launched",
+          description: responseMessage
+        });
+      } else if (responseMessage.includes("Terminating")) {
+        toast({
+          title: "Game Command",
+          description: key === 'X' ? "Terminating all games..." : responseMessage
+        });
+      } else {
+        toast({
+          title: "Game Command",
+          description: responseMessage
+        });
+      }
       
       // Create and dispatch a real DOM keyboard event
       const event = new KeyboardEvent("keydown", {

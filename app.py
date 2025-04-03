@@ -53,6 +53,9 @@ GAME_NAMES = {
     "PVR": "Propagation VR"
 }
 
+# Track currently running games
+active_processes = {}
+
 @app.before_request
 def log_request_info():
     logger.info(f"Request: {request.method} {request.path}")
@@ -76,6 +79,49 @@ def notify_electron_app(command):
     except Exception as e:
         logger.error(f"Error sending command to Electron app: {str(e)}")
         return False
+
+def launch_game(game_code):
+    """Launch a game by its code"""
+    if game_code in GAMES:
+        executable_path = GAMES[game_code]
+        game_name = GAME_NAMES.get(game_code, game_code)
+        
+        # Format the log message like the example
+        launch_message = f"[≡ƒÄ«] Launched: {executable_path}"
+        logger.info(launch_message)
+        
+        try:
+            # Launch the game and store the process
+            process = subprocess.Popen([executable_path])
+            process_name = os.path.basename(executable_path)
+            active_processes[process_name] = process
+            
+            return {"status": "success", "message": launch_message}
+        except Exception as e:
+            error_message = f"[≡ƒöÑ] Error launching {game_name}: {str(e)}"
+            logger.error(error_message)
+            return {"status": "error", "message": error_message}
+    else:
+        return {"status": "error", "message": f"Unknown game code: {game_code}"}
+
+def terminate_games():
+    """Terminate all running games"""
+    logger.info("[≡ƒÆÇ] Terminating all games...")
+    
+    # Try to close using Alt+F4 for any active window
+    keyboard.press_and_release('alt+f4')
+    
+    # Terminate any tracked processes
+    for name, process in list(active_processes.items()):
+        try:
+            process.terminate()
+            logger.info(f"[≡ƒöÑ] Killed: {name}")
+            del active_processes[name]
+        except Exception as e:
+            logger.error(f"Error terminating {name}: {str(e)}")
+    
+    logger.info("[≡ƒÆÇ] All games terminated.")
+    return {"status": "success", "message": "[≡ƒÆÇ] All games terminated."}
 
 @app.route('/keypress', methods=['POST', 'OPTIONS'])
 def handle_keypress():
@@ -114,37 +160,29 @@ def handle_keypress():
             'v': 'AIO',  # All-in-One Sports
         }
         
-        display_info = ""
+        # Handle game launch
         if key in key_to_game:
             game_code = key_to_game[key]
-            game_title = GAME_NAMES.get(game_code, game_code)
-            display_info = f" - Launching {game_title}"
-        elif game_name:
-            display_info = f" - For game: {game_name}"
+            result = launch_game(game_code)
+            return jsonify(result), 200
         
-        # Clean key message format
-        received_message = f"{key.upper()} key received{display_info}"
-        logger.info(received_message)
-        
-        # Special handling for STOP_GAME command
-        if key == 'stop' or key == 'stop_game':
-            logger.info("STOP_GAME command received! Killing game...")
+        # Handle special STOP_GAME command
+        elif key == 'stop' or key == 'stop_game' or key == 'x':
+            result = terminate_games()
             notify_electron_app("STOP_GAME")
+            return jsonify(result), 200
+        
+        # Default behavior - just simulate the key press
+        else:
+            logger.info(f"[≡ƒå«] Simulating keypress for: {key}")
+            keyboard.press_and_release(key)
+            
             return jsonify({
-                "status": "success",
-                "message": "STOP_GAME command processed"
+                "status": "success", 
+                "message": f"[≡ƒå«] Key {key.upper()} pressed",
+                "key": key,
+                "command": command
             }), 200
-        
-        # Simulate the key press
-        logger.info(f"Simulating keypress for: {key}")
-        keyboard.press_and_release(key)
-        
-        return jsonify({
-            "status": "success", 
-            "message": received_message,
-            "key": key,
-            "command": command
-        }), 200
         
     except Exception as e:
         logger.error(f"Error processing keypress: {str(e)}")
@@ -152,7 +190,7 @@ def handle_keypress():
 
 @app.route('/close', methods=['POST'])
 def handle_close():
-    logger.info("Close command received, terminating all games...")
+    logger.info("[≡ƒÆÇ] Terminating all games...")
     try:
         data = request.get_json()
         game_name = data.get('gameName', '') if data else ''
@@ -160,14 +198,9 @@ def handle_close():
         if game_name:
             logger.info(f"Closing game: {game_name}")
         
-        # Simulate the Alt+F4 key press
-        keyboard.press_and_release('alt+f4')
-        # Notify Electron app about the close command
+        result = terminate_games()
         notify_electron_app("STOP_GAME")
-        return jsonify({
-            "status": "success", 
-            "message": f"Close command received, terminating games{' for ' + game_name if game_name else ''}"
-        }), 200
+        return jsonify(result), 200
     except Exception as e:
         logger.error(f"Error processing close command: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -188,15 +221,12 @@ def health_check():
 @app.route('/stop', methods=['GET', 'POST'])
 def stop_game():
     """Endpoint to handle STOP_GAME command"""
-    logger.info("STOP_GAME command received! Killing game...")
+    logger.info("[≡ƒÆÇ] Terminating all games...")
     
-    # Forward the command to the Electron app
+    result = terminate_games()
     notify_electron_app("STOP_GAME")
     
-    return jsonify({
-        "status": "success",
-        "message": "Game stopping command processed"
-    }), 200
+    return jsonify(result), 200
 
 if __name__ == '__main__':
     logger.info("\n=== Game Launcher Server ===")
