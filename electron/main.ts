@@ -188,7 +188,7 @@ ipcMain.on('simulate-keypress', async (event, key) => {
   console.log('Received key press in main process:', key);
 
   try {
-    const serverUrl = 'http://localhost:5002'; // Change this to your C++ server URL
+    const serverUrl = 'http://localhost:5001'; // Updated to port 5001
     
     const response = await fetch(`${serverUrl}/keypress`, {
       method: 'POST',

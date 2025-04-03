@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { X } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
@@ -22,9 +21,8 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   const handleKeyClick = (key: string) => {
     console.log(`Timer Keyboard - Key pressed: ${key}`);
     
-    // Update this URL to point to your C++ server
-    // Replace the port with your C++ server's port (e.g., 5002 instead of 5001)
-    const serverUrl = 'http://localhost:5002'; // Change this to your C++ server URL
+    // Use port 5001 for the C++ server
+    const serverUrl = 'http://localhost:5001'; 
     
     // For X key, use the close endpoint instead of keypress
     const endpoint = key === 'X' ? 'close' : 'keypress';

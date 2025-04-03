@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Delete, CornerDownLeft } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
@@ -32,9 +31,8 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
     const endpoint = key === 'X' ? 'close' : 'keypress';
     const payload = key === 'X' ? {} : { key: keyToSend };
     
-    // Update this URL to point to your C++ server
-    // Replace the port with your C++ server's port (e.g., 5002 instead of 5001)
-    const serverUrl = 'http://localhost:5002'; // Change this to your C++ server URL
+    // Use port 5001 for the C++ server
+    const serverUrl = 'http://localhost:5001';
     
     fetch(`${serverUrl}/${endpoint}`, {
       method: "POST",
