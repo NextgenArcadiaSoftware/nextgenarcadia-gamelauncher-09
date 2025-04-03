@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
@@ -112,18 +111,68 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
 
   useEffect(() => {
     if (!showGameScreen && timeLeft !== null) {
-      // For Steam URL games, launch directly via the Steam protocol
+      // Launch logic using selected method based on game type
       if (steamUrl && isElectronAvailable) {
         console.log(`Launching Steam game with URL: ${steamUrl}`);
         window.electron.ipcRenderer.send('launch-steam-game', steamUrl);
       } 
-      // For regular games, simulate typing the launch code
       else if (targetWord && isElectronAvailable) {
-        targetWord.split('').forEach((char, index) => {
-          setTimeout(() => {
-            window.electron.ipcRenderer.send('simulate-keypress', char);
-          }, index * 100); // Type each character with a small delay
-        });
+        // For regular games, use the C++ server via keypress API
+        try {
+          const keyMapping: Record<string, string> = {
+            'EAX': 'e', // Elven Assassin
+            'FNJ': 'f', // Fruit Ninja
+            'CBR': 'c', // Crisis Brigade
+            'AIO': 'v', // All-in-One Sports VR
+            'RPE': 'p', // Richies Plank
+            'IBC': 'i', // iB Cricket
+            'UDC': 'u', // Undead Citadel
+            'ARS': 'a', // Arizona Sunshine
+            'SBS': 's', // Subside
+            'PVR': 'g'  // Propagation VR
+          };
+          
+          // Get the appropriate launch key
+          const launchKey = keyMapping[targetWord];
+          
+          if (launchKey) {
+            console.log(`Launching game with key: ${launchKey} for game: ${activeGame}`);
+            
+            // Send to C++ server
+            fetch("http://localhost:5001/keypress", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ key: launchKey })
+            })
+            .then(response => {
+              if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+              return response.json();
+            })
+            .then(data => {
+              console.log('Game launch response:', data);
+              toast({
+                title: "Game Launching",
+                description: `Launching ${activeGame}...`,
+              });
+            })
+            .catch(error => {
+              console.error('Error launching game:', error);
+              toast({
+                variant: "destructive",
+                title: "Launch Error",
+                description: "Failed to connect to game launcher service"
+              });
+              
+              // Fall back to Electron method if C++ server fails
+              console.log("Falling back to Electron keypress simulation");
+              window.electron.ipcRenderer.send('simulate-keypress', launchKey);
+            });
+          } else {
+            console.log(`No launch key mapping found for game: ${activeGame}`);
+          }
+        } catch (error) {
+          console.error('Error in game launch logic:', error);
+        }
       } else if (!isElectronAvailable) {
         console.log('Electron API not available - in browser preview mode');
         toast({
@@ -133,7 +182,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
         });
       }
     }
-  }, [showGameScreen, timeLeft, targetWord, steamUrl, toast, isElectronAvailable]);
+  }, [showGameScreen, timeLeft, targetWord, steamUrl, toast, isElectronAvailable, activeGame]);
 
   // Setup webhook listener for timer stop command
   useEffect(() => {
@@ -163,10 +212,22 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   }, [toast, isElectronAvailable]);
 
   const handleRatingSubmit = async (rating: number) => {
-    // When exiting, send the stop command to the Python backend
+    // When exiting, send the stop command
     if (isElectronAvailable) {
-      // Use the proper stop-game command
-      window.electron.ipcRenderer.send('simulate-keypress', 'stop');
+      try {
+        // Send the close command to the C++ server
+        fetch("http://localhost:5001/close", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        })
+        .catch(error => {
+          console.error('Error closing games:', error);
+          // Fall back to Electron method
+          window.electron.ipcRenderer.send('simulate-keypress', 'stop');
+        });
+      } catch (error) {
+        console.error('Error in stop command:', error);
+      }
     }
     
     if (activeGame) {
