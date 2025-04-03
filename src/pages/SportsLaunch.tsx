@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { closeGames, sendKeyPress, checkServerHealth, launchGameByCode } from '@/services/GameService';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { CppServerStatus } from '@/components/game-launch/CppServerStatus';
 
 export default function SportsLaunch() {
   const navigate = useNavigate();
@@ -16,12 +17,12 @@ export default function SportsLaunch() {
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
 
-  // Check server connectivity on mount
+  // Check server connectivity on mount, but only once
   useEffect(() => {
     const checkConnection = async () => {
       setConnectionStatus('connecting');
       try {
-        const isHealthy = await checkServerHealth();
+        const isHealthy = await checkServerHealth(0, true); // Use silent mode
         
         if (isHealthy) {
           setConnectionStatus('connected');
@@ -45,7 +46,7 @@ export default function SportsLaunch() {
           throw new Error('Health check failed');
         }
       } catch (error) {
-        console.error('Connection test error:', error);
+        // In silent mode, just set the status without logging
         setConnectionStatus('error');
         setReconnectAttempts(prev => prev + 1);
       }
@@ -53,12 +54,7 @@ export default function SportsLaunch() {
     
     checkConnection();
     
-    // Set up periodic connectivity checks
-    const intervalId = setInterval(checkConnection, 10000);
-    
-    return () => {
-      clearInterval(intervalId);
-    };
+    // No need for periodic checks here, we'll let CppServerStatus handle that
   }, [navigate, toast]);
 
   // Set up event handler for ending the game
@@ -137,7 +133,7 @@ export default function SportsLaunch() {
     setConnectionStatus('connecting');
     
     try {
-      const isHealthy = await checkServerHealth();
+      const isHealthy = await checkServerHealth(0, false);
       
       if (isHealthy) {
         setConnectionStatus('connected');
@@ -164,7 +160,6 @@ export default function SportsLaunch() {
         throw new Error('Health check failed');
       }
     } catch (error) {
-      console.error('Manual retry failed:', error);
       setConnectionStatus('error');
       setReconnectAttempts(prev => prev + 1);
       
@@ -221,33 +216,17 @@ export default function SportsLaunch() {
         Back to Games
       </Button>
       
-      {connectionStatus === 'error' && (
-        <Alert variant="destructive" className="fixed top-24 left-8 z-50 max-w-md">
-          <AlertTitle>C++ Server Connection Error</AlertTitle>
-          <AlertDescription>
-            Cannot connect to the C++ game server at http://localhost:5001
-            {reconnectAttempts > 0 && ` (${reconnectAttempts} reconnect attempts)`}
-            <div className="mt-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleManualRetry}
-              >
-                Retry Connection
-              </Button>
-            </div>
-            <p className="mt-2 font-mono text-xs">
-              Make sure the C++ server is running with proper CORS headers enabled.
-            </p>
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Use the CppServerStatus component instead of inline alerts */}
+      <div className="fixed top-24 left-8 z-50 max-w-md">
+        <CppServerStatus 
+          onRetry={handleManualRetry}
+        />
+      </div>
       
       {connectionStatus === 'connected' && (
-        <Alert variant="default" className="fixed top-24 left-8 z-50 max-w-md bg-green-100 border-green-500">
-          <AlertTitle className="text-green-800">Server Connected</AlertTitle>
+        <Alert variant="default" className="fixed top-24 right-8 z-50 max-w-md bg-green-100 border-green-500">
+          <AlertTitle className="text-green-800">Controls</AlertTitle>
           <AlertDescription className="text-green-700 space-y-2">
-            <p>Successfully connected to C++ game server</p>
             <div className="flex gap-2">
               <Button 
                 size="sm" 

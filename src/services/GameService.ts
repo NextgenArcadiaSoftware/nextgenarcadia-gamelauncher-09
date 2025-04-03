@@ -1,3 +1,4 @@
+
 /**
  * GameService - Handles direct communication with the C++ game server
  */
@@ -11,8 +12,11 @@ const SERVER_URL = 'http://localhost:5001';
 // Max number of retries for failed requests
 const MAX_RETRIES = 2;
 
-// Delay between retries in milliseconds
+// Retry delay in milliseconds
 const RETRY_DELAY = 1000;
+
+// Flag to reduce console error spam for health checks
+let hasLoggedConnectionError = false;
 
 /**
  * Custom fetch function with better error handling and CORS options
@@ -171,9 +175,10 @@ export const closeGames = async (gameName?: string, retries = 0): Promise<any> =
 /**
  * Checks the health of the C++ game server directly
  * @param retries Number of retries attempted
+ * @param silent If true, suppresses console errors for expected connection failures
  * @returns Promise with boolean indicating if server is healthy
  */
-export const checkServerHealth = async (retries = 0): Promise<boolean> => {
+export const checkServerHealth = async (retries = 0, silent = false): Promise<boolean> => {
   try {
     // Use a shorter timeout for health checks
     const controller = new AbortController();
@@ -185,16 +190,26 @@ export const checkServerHealth = async (retries = 0): Promise<boolean> => {
     
     clearTimeout(timeoutId);
     
+    // Reset the error flag when connection is successful
+    if (hasLoggedConnectionError) {
+      hasLoggedConnectionError = false;
+      console.log("C++ server connection restored");
+    }
+    
     // C++ server might return 404 for health endpoint but still be working
     return response.ok || response.status === 204 || response.status === 404;
   } catch (error) {
-    console.error('C++ server health check failed:', error);
+    // Only log errors if we haven't already logged one recently and if not in silent mode
+    if (!hasLoggedConnectionError && !silent) {
+      console.error('C++ server health check failed:', error);
+      hasLoggedConnectionError = true;
+    }
     
     // Implement retry logic for health checks
     if (retries < MAX_RETRIES && error.name !== 'AbortError') {
-      console.log(`Retrying health check in ${RETRY_DELAY}ms...`);
+      if (!silent) console.log(`Retrying health check in ${RETRY_DELAY}ms...`);
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-      return checkServerHealth(retries + 1);
+      return checkServerHealth(retries + 1, silent);
     }
     
     return false;

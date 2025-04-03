@@ -27,7 +27,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     checkServerConnectivity();
     
     // Set up periodic connectivity checks
-    const intervalId = setInterval(checkServerConnectivity, 10000);
+    const intervalId = setInterval(checkServerConnectivity, 30000); // Check every 30 seconds
     
     return () => {
       clearInterval(intervalId);
@@ -35,7 +35,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   }, []);
 
   const checkServerConnectivity = async () => {
-    const isHealthy = await checkServerHealth();
+    const isHealthy = await checkServerHealth(0, true); // Use silent mode
     setConnectionError(!isHealthy);
     
     if (isHealthy) {

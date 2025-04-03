@@ -7,9 +7,10 @@ import { useToast } from '../ui/use-toast';
 
 interface CppServerStatusProps {
   onRetry?: () => void;
+  silent?: boolean;
 }
 
-export function CppServerStatus({ onRetry }: CppServerStatusProps) {
+export function CppServerStatus({ onRetry, silent = false }: CppServerStatusProps) {
   const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const { toast } = useToast();
@@ -18,7 +19,7 @@ export function CppServerStatus({ onRetry }: CppServerStatusProps) {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const isHealthy = await checkServerHealth();
+        const isHealthy = await checkServerHealth(0, silent);
         
         if (isHealthy) {
           setConnectionStatus('connected');
@@ -27,7 +28,6 @@ export function CppServerStatus({ onRetry }: CppServerStatusProps) {
           throw new Error('Health check failed');
         }
       } catch (error) {
-        console.error('C++ server connection test error:', error);
         setConnectionStatus('error');
         setReconnectAttempts(prev => prev + 1);
       }
@@ -35,19 +35,19 @@ export function CppServerStatus({ onRetry }: CppServerStatusProps) {
     
     checkConnection();
     
-    // Set up periodic connectivity checks
-    const intervalId = setInterval(checkConnection, 15000);
+    // Set up periodic connectivity checks, but with a longer interval
+    const intervalId = setInterval(checkConnection, 30000); // Check every 30 seconds instead of 15
     
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [silent]);
 
   const handleManualRetry = async () => {
     setConnectionStatus('checking');
     
     try {
-      const isHealthy = await checkServerHealth();
+      const isHealthy = await checkServerHealth(0, false);
       
       if (isHealthy) {
         setConnectionStatus('connected');
@@ -63,7 +63,6 @@ export function CppServerStatus({ onRetry }: CppServerStatusProps) {
         throw new Error('Health check failed');
       }
     } catch (error) {
-      console.error('Manual retry failed:', error);
       setConnectionStatus('error');
       setReconnectAttempts(prev => prev + 1);
       
@@ -74,6 +73,11 @@ export function CppServerStatus({ onRetry }: CppServerStatusProps) {
       });
     }
   };
+
+  // If silent mode is enabled, don't show any UI during checking or error states
+  if (silent && connectionStatus !== 'connected') {
+    return null;
+  }
 
   if (connectionStatus === 'checking') {
     return (
