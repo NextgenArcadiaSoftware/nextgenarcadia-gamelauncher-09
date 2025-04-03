@@ -1,4 +1,3 @@
-
 /**
  * GameService - Handles direct communication with the C++ game server
  */
@@ -210,8 +209,23 @@ export const checkServerHealth = async (retries = 0): Promise<boolean> => {
 export const launchGameByCode = async (gameCode: string): Promise<any> => {
   console.log(`Launching game with code: ${gameCode}`);
   
-  // This just calls sendKeyPress since the C++ server uses the same endpoint
-  return sendKeyPress(gameCode);
+  try {
+    const response = await safeFetch(`${SERVER_URL}/keypress`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json; charset=utf-8',
+        'Accept-Charset': 'UTF-8'
+      },
+      body: JSON.stringify({ key: gameCode.toLowerCase() })
+    });
+    
+    return await processResponse(response, `Successfully launched game with code ${gameCode}`);
+  } catch (error) {
+    console.error(`Error launching game with code ${gameCode}:`, error);
+    
+    // If we exceed the maximum number of retries or it was an abort, throw the error
+    throw error;
+  }
 };
 
 /**

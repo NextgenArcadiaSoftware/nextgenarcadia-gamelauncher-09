@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { closeGames, sendKeyPress, checkServerHealth } from '@/services/GameService';
+import { closeGames, sendKeyPress, checkServerHealth, launchGameByCode } from '@/services/GameService';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 export default function SportsLaunch() {
@@ -27,6 +27,20 @@ export default function SportsLaunch() {
           setConnectionStatus('connected');
           setReconnectAttempts(0);
           console.log('Successfully connected to C++ game server');
+          
+          // Auto-launch the game when connection is established
+          try {
+            const result = await launchGameByCode('v'); // 'v' is for All-in-One Sports VR
+            setServerResponse(result.message || "Sports game launch initiated");
+            setRequestStatus(`Server responded with status: ${result.status}`);
+            
+            toast({
+              title: "Game Launching",
+              description: "Launching All-in-One Sports VR..."
+            });
+          } catch (launchError) {
+            console.error('Error auto-launching game:', launchError);
+          }
         } else {
           throw new Error('Health check failed');
         }
@@ -45,100 +59,68 @@ export default function SportsLaunch() {
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [navigate, toast]);
+
+  // Set up event handler for ending the game
+  const handleEndGame = async () => {
+    console.log('End game requested');
+    
+    toast({
+      title: "Game Ending",
+      description: "Ending current game session..."
+    });
+    
+    try {
+      // Send close command using our GameService
+      const result = await closeGames("All-in-One Sports VR");
+      
+      // Display server response
+      setServerResponse(result.message || "Game successfully closed");
+      setRequestStatus(`Server responded with status: ${result.status}`);
+      
+      console.log('Close game response:', result);
+      
+      // Show another toast with the server's response
+      toast({
+        title: "Server Response",
+        description: result.message || "Game closed successfully"
+      });
+      
+      // Navigate back after short delay
+      setTimeout(() => navigate('/'), 1500);
+    } catch (error) {
+      console.error('Error closing game:', error);
+      setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Even if the C++ server is unavailable, still navigate back
+      toast({
+        title: "Error",
+        description: "Could not communicate with game server",
+        variant: "destructive"
+      });
+      
+      // Try fallback method through Electron
+      if (window.electron) {
+        console.log("Falling back to Electron method for game termination");
+        window.electron.ipcRenderer.send('end-game');
+        
+        toast({
+          title: "Fallback Method",
+          description: "Using Electron to terminate games",
+          variant: "default"
+        });
+      }
+      
+      setTimeout(() => navigate('/'), 1000);
+    }
+  };
 
   // Set up key event listener for X key to end game
   useEffect(() => {
     const handleKeyDown = async (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'x') {
         console.log('X key detected, ending game');
-        
-        toast({
-          title: "Game Ended",
-          description: "Ending current game session..."
-        });
-        
-        try {
-          // Send close command using our GameService
-          const result = await closeGames("All-in-One Sports VR");
-          
-          // Display server response
-          setServerResponse(result.message || "Game successfully closed");
-          setRequestStatus(`Server responded with status: ${result.status}`);
-          
-          console.log('Close game response:', result);
-          
-          // Show another toast with the server's response
-          toast({
-            title: "Server Response",
-            description: result.message || "Game closed successfully"
-          });
-          
-          // Navigate back after short delay
-          setTimeout(() => navigate('/'), 1500);
-        } catch (error) {
-          console.error('Error closing game:', error);
-          setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
-          
-          // Even if the C++ server is unavailable, still navigate back
-          toast({
-            title: "Error",
-            description: "Could not communicate with game server",
-            variant: "destructive"
-          });
-          
-          // Try fallback method through Electron
-          if (window.electron) {
-            console.log("Falling back to Electron method for game termination");
-            window.electron.ipcRenderer.send('end-game');
-            
-            toast({
-              title: "Fallback Method",
-              description: "Using Electron to terminate games",
-              variant: "default"
-            });
-          }
-          
-          setTimeout(() => navigate('/'), 1000);
-        }
-      }
-      
-      // Handle direct launch key
-      const launchKeys = ['v', 'f', 'c', 'e', 'i', 'r', 'p', 'a', 's', 'u', 'g', 'w'];
-      const launchKey = e.key.toLowerCase();
-      
-      if (launchKeys.includes(launchKey)) {
-        console.log(`Launch key detected: ${launchKey}`);
-        
-        try {
-          // Send keypress command to C++ server
-          const result = await sendKeyPress(launchKey);
-          
-          // Display server response
-          setServerResponse(result.message || `Game launch command sent: ${launchKey}`);
-          setRequestStatus(`Server responded with status: ${result.status}`);
-          
-          toast({
-            title: "Launch Command Sent",
-            description: `Launching game with key: ${launchKey.toUpperCase()}`
-          });
-          
-        } catch (error) {
-          console.error('Error sending launch command:', error);
-          setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
-          
-          toast({
-            title: "Launch Error",
-            description: "Could not send launch command to server",
-            variant: "destructive"
-          });
-          
-          // Try fallback method through Electron
-          if (window.electron) {
-            console.log("Falling back to Electron method for game launch");
-            window.electron.ipcRenderer.send('simulate-keypress', launchKey);
-          }
-        }
+        handleEndGame();
       }
     };
 
@@ -166,6 +148,18 @@ export default function SportsLaunch() {
           description: "Successfully connected to game server"
         });
         
+        // Try to launch the game after successful connection
+        try {
+          const result = await launchGameByCode('v');
+          setServerResponse(result.message || "Sports game launch initiated");
+          
+          toast({
+            title: "Game Launching",
+            description: "Launching All-in-One Sports VR..."
+          });
+        } catch (launchError) {
+          console.error('Error launching game after reconnect:', launchError);
+        }
       } else {
         throw new Error('Health check failed');
       }
@@ -179,6 +173,39 @@ export default function SportsLaunch() {
         description: "Could not connect to game server",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleManualLaunch = async () => {
+    try {
+      const result = await launchGameByCode('v');
+      setServerResponse(result.message || "Sports game launch initiated");
+      setRequestStatus(`Server responded with status: ${result.status}`);
+      
+      toast({
+        title: "Game Launching",
+        description: "Launching All-in-One Sports VR..."
+      });
+    } catch (error) {
+      console.error('Error launching game manually:', error);
+      setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
+      
+      toast({
+        title: "Launch Error",
+        description: "Could not launch game via API",
+        variant: "destructive"
+      });
+      
+      // Try fallback method through Electron
+      if (window.electron) {
+        window.electron.ipcRenderer.send('simulate-keypress', 'v');
+        
+        toast({
+          title: "Fallback Method",
+          description: "Using Electron to launch game",
+          variant: "default"
+        });
+      }
     }
   };
 
@@ -219,8 +246,26 @@ export default function SportsLaunch() {
       {connectionStatus === 'connected' && (
         <Alert variant="default" className="fixed top-24 left-8 z-50 max-w-md bg-green-100 border-green-500">
           <AlertTitle className="text-green-800">Server Connected</AlertTitle>
-          <AlertDescription className="text-green-700">
-            Successfully connected to C++ game server
+          <AlertDescription className="text-green-700 space-y-2">
+            <p>Successfully connected to C++ game server</p>
+            <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                onClick={handleManualLaunch}
+                variant="default"
+                className="bg-green-700 hover:bg-green-800"
+              >
+                Launch Game
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleEndGame}
+                variant="outline"
+                className="border-red-500 text-red-500 hover:bg-red-50"
+              >
+                End Game
+              </Button>
+            </div>
           </AlertDescription>
         </Alert>
       )}
