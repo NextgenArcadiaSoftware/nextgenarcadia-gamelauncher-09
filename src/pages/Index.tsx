@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Game } from '@/types/game';
@@ -17,7 +18,7 @@ export default function Index() {
   const [showScreensaver, setShowScreensaver] = useState(false);
   const [timer, setTimer] = useState(null);
   const containerRef = useRef(null);
-  const { selectedCategory } = useCategory();
+  const { categories, selectedCategory, setSelectedCategory } = useCategory();
   const { searchTerm } = useSearch();
   const { games, error } = useGames(selectedCategory, searchTerm);
   const { settings } = useSettings();
@@ -58,9 +59,17 @@ export default function Index() {
       <Header />
       
       <div className="container px-4 py-8 mx-auto mt-8">
-        <CategoryBar />
+        <CategoryBar 
+          categories={categories} 
+          selectedCategory={selectedCategory} 
+          onCategorySelect={setSelectedCategory} 
+        />
         <SearchBar />
-        <GameGrid games={games} error={error} />
+        <GameGrid 
+          games={games} 
+          onPlayGame={() => {}} 
+          canPlayGames={true}
+        />
       </div>
       
       {/* Add keyboard link */}
@@ -73,7 +82,7 @@ export default function Index() {
         </Link>
       </div>
       
-      <Screensaver show={showScreensaver} />
+      {showScreensaver && <Screensaver />}
     </div>
   );
 }
