@@ -29,7 +29,11 @@ export function GameLaunchScreen({ game, onContinue }: GameLaunchScreenProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#0f172a] to-black text-white">
-      <GameLaunchHeader game={game} />
+      <GameLaunchHeader 
+        activeGame={game.title} 
+        inputWord="" 
+        targetWord={game.title}
+      />
       
       <div className="flex-1 flex flex-col items-center justify-center p-8">
         <div className="max-w-4xl w-full bg-black/30 backdrop-blur-sm rounded-lg p-6 shadow-lg border border-white/10">
