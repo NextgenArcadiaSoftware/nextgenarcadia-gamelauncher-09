@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import { closeGames } from '@/services/GameService';
 
 export default function SportsLaunch() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function SportsLaunch() {
 
   // Set up global key event listener for both the X key and C++ program
   useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+    const handleGlobalKeyDown = async (e: KeyboardEvent) => {
       console.log(`Global keydown detected: ${e.key}`);
       
       // Special handling for X key to end the game
@@ -22,53 +23,28 @@ export default function SportsLaunch() {
         console.log('X key detected, ending game');
         setRequestStatus('Sending close command to server...');
         
-        // Send close command to C++ server
-        fetch("http://localhost:5001/close", {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json; charset=utf-8",
-            "Accept-Charset": "UTF-8" 
-          },
-          body: JSON.stringify({}),
-          signal: AbortSignal.timeout(3000)
-        })
-        .then(response => {
-          console.log('Server responded with status:', response.status);
-          setRequestStatus(`Server responded with status: ${response.status}`);
+        try {
+          // Send close command using our GameService
+          const result = await closeGames("All-in-One Sports VR");
           
-          if (response.status === 204) {
-            // 204 = Success with No Content response
-            toast({
-              title: "Game Termination",
-              description: "Successfully sent close command to server",
-              variant: "default"
-            });
-          } else if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
+          // Display server response
+          setServerResponse(result.message || "Game successfully closed");
+          setRequestStatus(`Server responded with status: ${result.status}`);
           
-          // For 204 responses, we don't need to parse the body
-          return response.status === 204 ? 
-            "Game close command successful" : 
-            response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
-        })
-        .then(text => {
-          console.log('Close game response:', text);
-          setServerResponse(text);
+          console.log('Close game response:', result);
           
-          // Show a toast for successful game termination
+          // Show toast for successful game termination
           toast({
             title: "Game Closed",
-            description: "All running games have been terminated",
+            description: result.message || "All running games have been terminated",
             variant: "default"
           });
           
           // Navigate back after short delay to allow toasts to be visible
           setTimeout(() => navigate('/'), 2000);
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('Error closing game:', error);
-          setServerResponse(`Error: ${error.message}`);
+          setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
           
           // Fallback Electron method
           if (window.electron) {
@@ -83,8 +59,10 @@ export default function SportsLaunch() {
             
             // Still navigate back
             setTimeout(() => navigate('/'), 1500);
+          } else {
+            setTimeout(() => navigate('/'), 1500);
           }
-        });
+        }
       }
     };
 

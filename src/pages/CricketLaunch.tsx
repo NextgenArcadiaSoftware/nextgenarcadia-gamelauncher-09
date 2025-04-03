@@ -3,54 +3,54 @@ import { useNavigate } from 'react-router-dom';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import { closeGames } from '@/services/GameService';
 
 export default function CricketLaunch() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [serverResponse, setServerResponse] = useState<string | null>(null);
 
   // Set up key event listener for X key to end game
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'x') {
         console.log('X key detected, ending game');
+        
         toast({
           title: "Game Ended",
           description: "Ending current game session..."
         });
         
-        // Send close command to C++ server
-        fetch("http://localhost:5001/close", {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json; charset=utf-8",
-            "Accept-Charset": "UTF-8"
-          },
-          body: JSON.stringify({ 
-            command: "CLOSE_GAME",
-            gameName: "iB Cricket" 
-          })
-        })
-        .then(response => {
-          if (!response.ok && response.status !== 204) throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+          // Send close command using our GameService
+          const result = await closeGames("iB Cricket");
           
-          if (response.status === 204) {
-            console.log('Close game command successful');
-            return "Game close command successful";
-          }
+          // Display server response
+          setServerResponse(result.message || "Game successfully closed");
+          console.log('Close game response:', result);
           
-          return response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
-        })
-        .then(data => console.log('Close game response:', data))
-        .catch(error => {
+          // Show another toast with the server's response
+          toast({
+            title: "Server Response",
+            description: result.message || "Game closed successfully"
+          });
+          
+          // Navigate back after short delay
+          setTimeout(() => navigate('/'), 1500);
+        } catch (error) {
           console.error('Error closing game:', error);
+          
           // Even if the C++ server is unavailable, still navigate back
+          toast({
+            title: "Error",
+            description: "Could not communicate with game server",
+            variant: "destructive"
+          });
+          
           setTimeout(() => navigate('/'), 1000);
-        });
-        
-        // Navigate back after short delay
-        setTimeout(() => navigate('/'), 1000);
+        }
       }
     };
 
@@ -74,6 +74,13 @@ export default function CricketLaunch() {
         <ArrowLeft className="h-6 w-6" />
         Back to Games
       </Button>
+      
+      {serverResponse && (
+        <div className="fixed top-24 left-8 z-50 bg-black/80 text-green-500 p-4 rounded-md font-mono max-w-md">
+          {serverResponse}
+        </div>
+      )}
+      
       <RFIDCountdown 
         onExit={() => navigate('/')} 
         activeGame="iB Cricket"

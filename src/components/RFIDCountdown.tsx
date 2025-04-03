@@ -1,9 +1,11 @@
+
 import { useEffect, useState } from 'react';
 import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
 import { RatingScreen } from './game-launch/RatingScreen';
 import { GameLaunchScreen } from './game-launch/GameLaunchScreen';
 import { supabase } from '@/integrations/supabase/client';
+import { sendKeyPress, closeGames } from '@/services/GameService';
 
 interface RFIDCountdownProps {
   onExit: () => void;
@@ -17,6 +19,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   const [showRating, setShowRating] = useState(false);
   const [showGameScreen, setShowGameScreen] = useState(true);
   const [lastServerStatus, setLastServerStatus] = useState<number | null>(null);
+  const [serverResponse, setServerResponse] = useState<string | null>(null);
   const { toast } = useToast();
 
   const isElectronAvailable = Boolean(window.electron);
@@ -129,45 +132,34 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
           if (launchKey) {
             console.log(`Launching game with key: ${launchKey} for game: ${activeGame}`);
             
-            fetch("http://localhost:5001/keypress", {
-              method: "POST",
-              headers: { 
-                "Content-Type": "application/json; charset=utf-8",
-                "Accept-Charset": "UTF-8"
-              },
-              body: JSON.stringify({ key: launchKey }),
-              signal: AbortSignal.timeout(3000)
-            })
-            .then(response => {
-              console.log(`Server responded with status: ${response.status}`);
-              setLastServerStatus(response.status);
-              
-              if (response.status === 204 || response.ok) {
+            // Use the GameService to send the key press
+            sendKeyPress(launchKey)
+              .then(result => {
+                setLastServerStatus(result.status || 200);
+                setServerResponse(result.message || `Successfully launched ${activeGame}`);
+                
                 toast({
                   title: "Game Launching",
                   description: `Launching ${activeGame}...`,
                 });
-                return response.status === 204 ? 
-                  `Successfully launched ${activeGame}` : 
-                  response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
-              } else {
-                throw new Error(`HTTP error: ${response.status}`);
-              }
-            })
-            .then(data => {
-              console.log('Game launch response:', data);
-            })
-            .catch(error => {
-              console.error('Error launching game:', error);
-              toast({
-                variant: "destructive",
-                title: "Launch Error",
-                description: "Failed to connect to game launcher service"
+                
+                console.log('Game launch response:', result);
+              })
+              .catch(error => {
+                console.error('Error launching game:', error);
+                setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
+                
+                toast({
+                  variant: "destructive",
+                  title: "Launch Error",
+                  description: "Failed to connect to game launcher service"
+                });
+                
+                if (window.electron) {
+                  console.log("Falling back to Electron keypress simulation");
+                  window.electron.ipcRenderer.send('simulate-keypress', launchKey);
+                }
               });
-              
-              console.log("Falling back to Electron keypress simulation");
-              window.electron.ipcRenderer.send('simulate-keypress', launchKey);
-            });
           } else {
             console.log(`No launch key mapping found for game: ${activeGame}`);
           }
@@ -211,32 +203,23 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   const handleRatingSubmit = async (rating: number) => {
     if (isElectronAvailable) {
       try {
-        fetch("http://localhost:5001/close", {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json; charset=utf-8",
-            "Accept-Charset": "UTF-8"
-          },
-          signal: AbortSignal.timeout(3000)
-        })
-        .then(response => {
-          console.log(`Server responded with status: ${response.status}`);
-          if (response.status === 204 || response.ok) {
-            toast({
-              title: "Game Session Ended",
-              description: "Closing all active games",
-              variant: "default"
-            });
-          } else {
-            throw new Error(`Server error: ${response.status}`);
-          }
-        })
-        .catch(error => {
-          console.error('Error closing games:', error);
-          window.electron.ipcRenderer.send('end-game');
+        // Use the GameService to close the games
+        const result = await closeGames(activeGame || undefined);
+        console.log('Close games response:', result);
+        
+        setServerResponse(result.message || "Games closed successfully");
+        
+        toast({
+          title: "Game Session Ended",
+          description: "Closing all active games",
+          variant: "default"
         });
       } catch (error) {
-        console.error('Error in stop command:', error);
+        console.error('Error closing games:', error);
+        
+        if (window.electron) {
+          window.electron.ipcRenderer.send('end-game');
+        }
       }
     }
     
@@ -298,16 +281,24 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   }
 
   return (
-    <TimerDisplay
-      timeLeft={timeLeft}
-      activeGame={activeGame}
-      onExit={() => {
-        if (showGameScreen) {
-          onExit();
-        } else {
-          setShowRating(true);
-        }
-      }}
-    />
+    <>
+      {serverResponse && (
+        <div className="fixed top-24 right-8 z-50 bg-black/80 text-green-500 p-4 rounded-md font-mono max-w-md overflow-auto">
+          {serverResponse}
+        </div>
+      )}
+      
+      <TimerDisplay
+        timeLeft={timeLeft}
+        activeGame={activeGame}
+        onExit={() => {
+          if (showGameScreen) {
+            onExit();
+          } else {
+            setShowRating(true);
+          }
+        }}
+      />
+    </>
   );
 }
