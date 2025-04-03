@@ -23,21 +23,6 @@ GAMES = {
     "CRD": r"C:\Program Files (x86)\Steam\steamapps\common\Creed Rise to Glory\Creed.exe"
 }
 
-# Dictionary for readable game names from keys
-GAME_NAMES = {
-    'f': 'Fruit Ninja VR',
-    'c': 'Crisis Brigade 2',
-    's': 'Subside',
-    'p': 'Propagation VR',
-    'i': 'iB Cricket',
-    'a': 'Arizona Sunshine',
-    'u': 'Undead Citadel',
-    'e': 'Elven Assassin',
-    'r': 'Richie\'s Plank Experience',
-    'v': 'All-in-One Sports VR',
-    'g': 'Creed Rise to Glory'
-}
-
 app = Flask(__name__)
 # Configure CORS to allow all origins and methods
 CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS"]}})
@@ -67,8 +52,7 @@ def notify_electron_app(command):
 
 def on_key_event(event):
     key = event.name.lower()
-    game_name = GAME_NAMES.get(key, "Unknown Game")
-    print(f"Key detected: {key} - Game: {game_name}")
+    print(f"Key detected: {key}")
     
     # Map keys to game codes
     key_to_game = {
@@ -87,7 +71,7 @@ def on_key_event(event):
     
     if key in key_to_game:
         game_code = key_to_game[key]
-        print(f"Matched game code: {game_code} for {GAME_NAMES.get(key)}")
+        print(f"Matched game code: {game_code}")
 
 # Add a new route to handle the STOP_GAME command
 @app.route('/stop-game', methods=['POST'])
@@ -134,50 +118,16 @@ def end_game():
 @app.route('/keypress', methods=['POST'])
 def handle_keypress():
     data = request.get_json()
-    
-    # Enhanced logging of the request payload
-    print(f"Received keypress request: {data}")
-    
-    # Get the key from the payload or default values
-    key = data.get('key', '').lower() if data and 'key' in data else None
-    command = data.get('command', '') if data else ''
-    game_name = data.get('game', '') if data else ''
-    
-    # Log rich information about what we're processing
-    if key:
-        mapped_game = GAME_NAMES.get(key, "Unknown Game")
-        print(f"Simulating key press: {key} for game: {mapped_game if not game_name else game_name}")
-        keyboard.press_and_release(key)
-        return jsonify({
-            "status": "success", 
-            "message": f"Key '{key}' received and pressed successfully",
-            "game": mapped_game if not game_name else game_name
-        }), 200
-    elif command == 'GAME_LAUNCH' and game_name:
-        # Handle the GAME_LAUNCH command with explicit game name
-        print(f"Game launch command received for: {game_name}")
-        
-        # Find the corresponding key for this game
-        game_key = None
-        for k, name in GAME_NAMES.items():
-            if name.lower() == game_name.lower():
-                game_key = k
-                break
-        
-        if game_key:
-            print(f"Found key {game_key} for game {game_name}, simulating keypress")
-            keyboard.press_and_release(game_key)
-            return jsonify({
-                "status": "success", 
-                "message": f"Game '{game_name}' launched successfully",
-                "game": game_name
-            }), 200
-        else:
-            print(f"No key mapping found for game: {game_name}")
-            return jsonify({"error": f"No key mapping found for game: {game_name}"}), 400
-    else:
-        print("Invalid keypress request format")
+    if not data or 'key' not in data:
         return jsonify({"error": "Key not provided"}), 400
+    
+    key = data['key'].lower()
+    print(f"Simulating key press: {key}")
+    keyboard.press_and_release(key)
+    return jsonify({
+        "status": "success", 
+        "message": f"Key '{key}' received and pressed successfully"
+    }), 200
 
 @app.route('/close', methods=['POST'])
 def handle_close():
