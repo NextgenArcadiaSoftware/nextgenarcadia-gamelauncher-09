@@ -1,3 +1,4 @@
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from functools import wraps
@@ -71,8 +72,8 @@ def handle_keypress():
         key = data.get('key', '').lower()
         print(f"Processing key: {key}") # Debug print
         
-        # Simple key received message
-        received_message = f"Received {key.upper()} key"
+        # Clean key message format
+        received_message = f"{key.upper()} received"
         print(received_message)
         
         # Special handling for STOP_GAME command
