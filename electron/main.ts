@@ -1,4 +1,3 @@
-
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
@@ -192,7 +191,7 @@ ipcMain.on('simulate-keypress', async (event, key) => {
     const serverUrl = 'http://localhost:5001';
     const endpoint = key.toLowerCase() === 'x' ? 'close' : 'keypress';
     
-    // For regular keypresses use the key parameter
+    // Simplified payload for C++ server
     const payload = key.toLowerCase() === 'x' ? 
       {} : 
       { key: key.toLowerCase() };
@@ -282,9 +281,12 @@ ipcMain.on('end-game', async (event) => {
   console.log('Received end-game command in main process');
 
   try {
+    // Direct request to C++ server's close endpoint
     const response = await fetch('http://localhost:5001/close', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
+      // C++ server doesn't need any payload for the close endpoint
+      body: JSON.stringify({})  
     });
 
     if (!response.ok) {
@@ -302,6 +304,37 @@ ipcMain.on('end-game', async (event) => {
     }
   } catch (error) {
     console.error('Error sending end-game command:', error);
+    
+    // Fallback method if C++ server is unavailable
+    try {
+      // Try to use keyboard simulation as a fallback
+      const pythonScript = `
+      import keyboard
+      import time
+      
+      # Send ESC key to try and close the active window
+      keyboard.press('esc')
+      time.sleep(0.1)
+      keyboard.release('esc')
+      
+      # Also try Alt+F4
+      keyboard.press('alt')
+      keyboard.press('f4')
+      time.sleep(0.1)
+      keyboard.release('f4')
+      keyboard.release('alt')
+      `;
+      
+      exec(`python -c "${pythonScript}"`, (error, stdout, stderr) => {
+        if (error) {
+          console.error('Error in fallback key simulation:', error);
+        } else {
+          console.log('Fallback game termination successful');
+        }
+      });
+    } catch (innerError) {
+      console.error('Error with fallback termination:', innerError);
+    }
     
     if (mainWindow) {
       mainWindow.webContents.send('webhook-stop-timer', { source: 'end-game-button-fallback' });

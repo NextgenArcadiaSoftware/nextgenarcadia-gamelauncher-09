@@ -26,7 +26,9 @@ export default function SportsLaunch() {
         // Send close command to C++ server
         fetch("http://localhost:5001/close", {
           method: "POST",
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
+          // Empty body is fine for the C++ server
+          body: JSON.stringify({})
         })
         .then(response => {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -46,12 +48,17 @@ export default function SportsLaunch() {
         })
         .catch(error => {
           console.error('Error closing game:', error);
+          
+          // Try Electron fallback method
+          if (window.electron) {
+            console.log("Falling back to Electron method for game termination");
+            window.electron.ipcRenderer.send('end-game');
+          }
+          
           // Even if the C++ server is unavailable, still navigate back
           setTimeout(() => navigate('/'), 1000);
         });
       }
-      
-      // The C++ program will listen for other key events
     };
 
     // Add the global event listener

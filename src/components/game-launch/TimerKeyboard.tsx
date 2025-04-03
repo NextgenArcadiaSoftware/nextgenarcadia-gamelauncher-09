@@ -53,9 +53,11 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     
     // For X key, use the close endpoint instead of keypress
     const endpoint = key === 'X' ? 'close' : 'keypress';
-    const payload = key === 'X' ? 
-      {} : 
-      { key: key.toLowerCase() };
+    
+    // Simplified payload for C++ server
+    const payload = key === 'X' 
+      ? {} // C++ server doesn't need any payload for close
+      : { key: key.toLowerCase() };
     
     console.log(`Sending to C++ server:`, payload);
     
@@ -128,6 +130,12 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       if (window.electron) {
         console.log("Falling back to Electron keypress simulation");
         window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
+        
+        // For X key specifically, also send the end-game command
+        if (key === 'X') {
+          console.log("Sending end-game command via Electron");
+          window.electron.ipcRenderer.send('end-game');
+        }
       }
       
       // For X key specifically, still try to navigate back
