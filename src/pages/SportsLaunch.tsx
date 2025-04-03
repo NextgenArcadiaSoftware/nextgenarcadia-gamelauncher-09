@@ -10,6 +10,7 @@ export default function SportsLaunch() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [serverResponse, setServerResponse] = useState<string | null>(null);
+  const [requestStatus, setRequestStatus] = useState<string | null>(null);
 
   // Set up global key event listener for both the X key and C++ program
   useEffect(() => {
@@ -19,57 +20,63 @@ export default function SportsLaunch() {
       // Special handling for X key to end the game
       if (e.key.toLowerCase() === 'x') {
         console.log('X key detected, ending game');
+        setRequestStatus('Sending close command to server...');
         
         // Send close command to C++ server
         fetch("http://localhost:5001/close", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({})
+          body: JSON.stringify({}),
+          signal: AbortSignal.timeout(3000)
         })
         .then(response => {
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          return response.text();
+          console.log('Server responded with status:', response.status);
+          setRequestStatus(`Server responded with status: ${response.status}`);
+          
+          if (response.status === 204) {
+            // 204 = Success with No Content response
+            toast({
+              title: "Game Termination",
+              description: "Successfully sent close command to server",
+              variant: "default"
+            });
+          } else if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          // For 204 responses, we don't need to parse the body
+          return response.status === 204 ? 
+            "Game close command successful" : 
+            response.text();
         })
         .then(text => {
           console.log('Close game response:', text);
           setServerResponse(text);
           
-          // Parse and display specific server responses
-          if (text.includes('[≡ƒÆÇ] Terminating all games...')) {
-            toast({
-              title: "Game Termination",
-              description: "Closing all active games...",
-              variant: "destructive"
-            });
-          }
-          
-          const gameKilledMatch = text.match(/\[≡ƒöÑ\] Killed: (.+)/);
-          if (gameKilledMatch && gameKilledMatch[1]) {
-            toast({
-              title: "Game Closed",
-              description: `Terminated: ${gameKilledMatch[1].trim()}`,
-              variant: "destructive"
-            });
-          }
-          
-          if (text.includes('[≡ƒÆÇ] All games terminated.')) {
-            toast({
-              title: "Termination Complete",
-              description: "All games have been successfully closed.",
-              variant: "default"
-            });
-          }
+          // Show a toast for successful game termination
+          toast({
+            title: "Game Closed",
+            description: "All running games have been terminated",
+            variant: "default"
+          });
           
           // Navigate back after short delay to allow toasts to be visible
           setTimeout(() => navigate('/'), 2000);
         })
         .catch(error => {
           console.error('Error closing game:', error);
+          setServerResponse(`Error: ${error.message}`);
           
           // Fallback Electron method
           if (window.electron) {
             console.log("Falling back to Electron method for game termination");
             window.electron.ipcRenderer.send('end-game');
+            
+            toast({
+              title: "Fallback Method",
+              description: "Using Electron to terminate games",
+              variant: "destructive"
+            });
             
             // Still navigate back
             setTimeout(() => navigate('/'), 1500);
@@ -99,9 +106,10 @@ export default function SportsLaunch() {
         Back to Games
       </Button>
       
-      {serverResponse && (
+      {(serverResponse || requestStatus) && (
         <div className="fixed top-24 left-8 z-50 bg-black/80 text-green-500 p-4 rounded-md font-mono whitespace-pre max-w-lg overflow-auto max-h-[80vh]">
-          {serverResponse}
+          {requestStatus && <div className="mb-2 text-yellow-300">{requestStatus}</div>}
+          {serverResponse && <div>{serverResponse}</div>}
         </div>
       )}
       

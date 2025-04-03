@@ -12,6 +12,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   const { toast } = useToast();
   const [connectionError, setConnectionError] = useState(false);
   const [lastResponse, setLastResponse] = useState<string | null>(null);
+  const [lastStatus, setLastStatus] = useState<number | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const rows = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
@@ -33,11 +34,22 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   }, []);
 
   const checkServerConnectivity = () => {
-    fetch('http://localhost:5001/health')
+    fetch('http://localhost:5001/health', {
+      signal: AbortSignal.timeout(2000)
+    })
       .then(response => {
-        if (response.ok) {
+        if (response.ok || response.status === 204) {
           setConnectionError(false);
           setReconnectAttempts(0);
+        } else {
+          // Handle 404 status which might still mean server is running but endpoint not available
+          if (response.status === 404) {
+            console.log("Server running but health endpoint is missing");
+            setConnectionError(false);
+            setReconnectAttempts(0);
+          } else {
+            throw new Error(`Server returned: ${response.status}`);
+          }
         }
       })
       .catch(() => {
@@ -69,57 +81,61 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       signal: AbortSignal.timeout(2000)
     })
     .then(response => {
+      console.log(`Server responded with status: ${response.status}`);
+      setLastStatus(response.status);
+      setConnectionError(false);
+      
+      // Handle empty responses (204 No Content)
+      if (response.status === 204) {
+        return key === 'X' ? 
+          "Game close command successful" : 
+          `Key ${key} sent successfully`;
+      }
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      setConnectionError(false);
+      
       return response.text();
     })
     .then(text => {
-      console.log('C++ server raw response:', text);
+      console.log('C++ server response:', text);
       
-      // Set the formatted response message with special formatting preserved
+      // Set the response message
       setLastResponse(text);
       
-      // Process specific response patterns from C++ server
-      if (text.includes('[🎮] Launched:') || text.includes('[≡ƒÄ«] Launched:')) {
-        const gamePath = text.match(/Launched: (.+)/)?.[1] || '';
-        toast({
-          title: "Game Launched",
-          description: gamePath.split('\\').pop() || gamePath,
-          variant: "default"
-        });
-      } 
-      else if (text.includes('[≡ƒÆÇ] Terminating all games...')) {
+      // Show toast based on key and status
+      if (key === 'X') {
         toast({
           title: "Game Termination",
           description: "Closing all active games...",
           variant: "destructive"
         });
-      }
-      else if (text.match(/\[≡ƒöÑ\] Killed: (.+)/)) {
-        const killedGame = text.match(/\[≡ƒöÑ\] Killed: (.+)/)?.[1] || '';
+      } else if (key === 'F') { // Fruit Ninja
         toast({
-          title: "Game Closed",
-          description: `Terminated: ${killedGame}`,
-          variant: "destructive"
-        });
-      }
-      else if (text.includes('[≡ƒÆÇ] All games terminated.')) {
-        toast({
-          title: "Termination Complete",
-          description: "All games have been successfully closed.",
+          title: "Game Launched",
+          description: "Launching Fruit Ninja VR...",
           variant: "default"
         });
-      }
-      else if (text.includes('[💀] Terminating') || text.includes('[🔥] Killed:')) {
+      } else if (key === 'E') { // Elven Assassin
         toast({
-          title: "Game Closed",
-          description: key === 'X' ? "Terminating all games..." : text,
-          variant: "destructive"
+          title: "Game Launched",
+          description: "Launching Elven Assassin...",
+          variant: "default"
         });
-      } 
-      else {
+      } else if (key === 'C') { // Crisis Brigade
+        toast({
+          title: "Game Launched",
+          description: "Launching Crisis Brigade 2...",
+          variant: "default"
+        });
+      } else if (key === 'V') { // All-in-One Sports
+        toast({
+          title: "Game Launched",
+          description: "Launching All-in-One Sports VR...",
+          variant: "default"
+        });
+      } else {
         toast({
           title: "Command Sent",
           description: `Key ${key} command processed`,
@@ -185,11 +201,12 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         </Alert>
       )}
       
-      {lastResponse && !connectionError && (
+      {(lastResponse || lastStatus) && !connectionError && (
         <Alert className="mb-4 bg-black/50 border-green-500">
           <AlertTitle>Server Response</AlertTitle>
-          <AlertDescription className="whitespace-pre-line font-mono text-green-500">
-            {lastResponse}
+          <AlertDescription className="font-mono text-green-500">
+            {lastStatus && <div>Status: {lastStatus}</div>}
+            {lastResponse && <div className="whitespace-pre-line">{lastResponse}</div>}
           </AlertDescription>
         </Alert>
       )}

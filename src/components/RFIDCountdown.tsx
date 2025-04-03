@@ -16,6 +16,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showRating, setShowRating] = useState(false);
   const [showGameScreen, setShowGameScreen] = useState(true);
+  const [lastServerStatus, setLastServerStatus] = useState<number | null>(null);
   const { toast } = useToast();
 
   // Check if Electron is available
@@ -142,18 +143,27 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
             fetch("http://localhost:5001/keypress", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ key: launchKey })
+              body: JSON.stringify({ key: launchKey }),
+              signal: AbortSignal.timeout(3000)
             })
             .then(response => {
-              if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-              return response.json();
+              console.log(`Server responded with status: ${response.status}`);
+              setLastServerStatus(response.status);
+              
+              if (response.status === 204 || response.ok) {
+                toast({
+                  title: "Game Launching",
+                  description: `Launching ${activeGame}...`,
+                });
+                return response.status === 204 ? 
+                  `Successfully launched ${activeGame}` : 
+                  response.text();
+              } else {
+                throw new Error(`HTTP error: ${response.status}`);
+              }
             })
             .then(data => {
               console.log('Game launch response:', data);
-              toast({
-                title: "Game Launching",
-                description: `Launching ${activeGame}...`,
-              });
             })
             .catch(error => {
               console.error('Error launching game:', error);
@@ -218,12 +228,25 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
         // Send the close command to the C++ server
         fetch("http://localhost:5001/close", {
           method: "POST",
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(3000)
+        })
+        .then(response => {
+          console.log(`Server responded with status: ${response.status}`);
+          if (response.status === 204 || response.ok) {
+            toast({
+              title: "Game Session Ended",
+              description: "Closing all active games",
+              variant: "default"
+            });
+          } else {
+            throw new Error(`Server error: ${response.status}`);
+          }
         })
         .catch(error => {
           console.error('Error closing games:', error);
           // Fall back to Electron method
-          window.electron.ipcRenderer.send('simulate-keypress', 'stop');
+          window.electron.ipcRenderer.send('end-game');
         });
       } catch (error) {
         console.error('Error in stop command:', error);

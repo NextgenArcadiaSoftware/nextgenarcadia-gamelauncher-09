@@ -1,4 +1,3 @@
-
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
@@ -184,6 +183,27 @@ ipcMain.on('simulate-keypress', async (event, key) => {
       signal: AbortSignal.timeout(5000)
     });
 
+    console.log('C++ server status:', response.status);
+    
+    // Special handling for 204 No Content responses
+    if (response.status === 204) {
+      const successMessage = key.toLowerCase() === 'x' ? 
+        "Game close command successful" : 
+        `Key ${key} sent successfully`;
+      
+      console.log(successMessage);
+      
+      // Forward the response to renderer
+      if (mainWindow) {
+        mainWindow.webContents.send('cpp-server-response', {
+          key,
+          status: response.status,
+          response: successMessage
+        });
+      }
+      return;
+    }
+    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -195,6 +215,7 @@ ipcMain.on('simulate-keypress', async (event, key) => {
     if (mainWindow) {
       mainWindow.webContents.send('cpp-server-response', {
         key,
+        status: response.status,
         response: text
       });
     }
@@ -258,17 +279,25 @@ ipcMain.on('end-game', async (event) => {
       signal: AbortSignal.timeout(5000)
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    console.log('End game command status:', response.status);
+    
+    // Handle 204 No Content responses
+    let responseText = "Game close command successful";
+    
+    if (response.status !== 204) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      responseText = await response.text();
     }
-
-    const text = await response.text();
-    console.log('End game command response:', text);
+    
+    console.log('End game command response:', responseText);
     
     if (mainWindow) {
       mainWindow.webContents.send('webhook-stop-timer', { 
         source: 'end-game-button',
-        response: text 
+        status: response.status,
+        response: responseText 
       });
     }
   } catch (error) {
