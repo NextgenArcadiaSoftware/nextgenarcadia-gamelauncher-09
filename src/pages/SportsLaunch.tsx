@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function SportsLaunch() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [serverResponse, setServerResponse] = useState<string | null>(null);
 
   // Set up global key event listener for both the X key and C++ program
   useEffect(() => {
@@ -19,8 +20,8 @@ export default function SportsLaunch() {
       if (e.key.toLowerCase() === 'x') {
         console.log('X key detected, ending game');
         toast({
-          title: "Game Ended",
-          description: "Ending current game session..."
+          title: "Game Ending",
+          description: "Sending termination command..."
         });
         
         // Send close command to C++ server
@@ -36,6 +37,8 @@ export default function SportsLaunch() {
         })
         .then(text => {
           console.log('Close game response:', text);
+          setServerResponse(text);
+          
           // Show game termination toast with the C++ server response
           toast({
             variant: "destructive",
@@ -81,6 +84,13 @@ export default function SportsLaunch() {
         <ArrowLeft className="h-6 w-6" />
         Back to Games
       </Button>
+      
+      {serverResponse && (
+        <div className="fixed top-24 left-8 z-50 bg-black/80 text-green-500 p-4 rounded-md font-mono whitespace-pre">
+          {serverResponse}
+        </div>
+      )}
+      
       <RFIDCountdown 
         onExit={() => navigate('/')} 
         activeGame="All-in-One Sports VR"

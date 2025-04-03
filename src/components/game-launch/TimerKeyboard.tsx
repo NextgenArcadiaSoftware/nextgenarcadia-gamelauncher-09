@@ -78,17 +78,19 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     .then(text => {
       console.log('C++ server raw response:', text);
       
-      // Set the formatted response message
+      // Set the formatted response message with special formatting preserved
       setLastResponse(text);
       
+      let displayMessage = text;
+      
       // Check for specific response patterns from C++ server
-      if (text.includes("Launched:")) {
+      if (text.includes("[🎮] Launched:")) {
         toast({
           title: "Game Launched",
-          description: `Game successfully launched`,
+          description: text.split("[🎮] Launched:")[1].trim(),
           variant: "default"
         });
-      } else if (text.includes("Killed:") || text.includes("terminated")) {
+      } else if (text.includes("[💀] Terminating") || text.includes("[🔥] Killed:")) {
         toast({
           title: "Game Closed",
           description: key === 'X' ? "Terminating all games..." : text,
@@ -167,9 +169,9 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       )}
       
       {lastResponse && !connectionError && (
-        <Alert className="mb-4 bg-green-500/20 border-green-500">
+        <Alert className="mb-4 bg-black/50 border-green-500">
           <AlertTitle>Server Response</AlertTitle>
-          <AlertDescription className="whitespace-pre-line">
+          <AlertDescription className="whitespace-pre-line font-mono text-green-500">
             {lastResponse}
           </AlertDescription>
         </Alert>

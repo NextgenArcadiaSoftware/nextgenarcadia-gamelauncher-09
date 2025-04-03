@@ -285,8 +285,7 @@ ipcMain.on('end-game', async (event) => {
     const response = await fetch('http://localhost:5001/close', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // C++ server doesn't need any payload for the close endpoint
-      body: JSON.stringify({})  
+      body: JSON.stringify({})  // C++ server doesn't need any payload for close
     });
 
     if (!response.ok) {
