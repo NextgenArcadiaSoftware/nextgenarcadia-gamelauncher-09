@@ -24,8 +24,8 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   const handleKeyClick = (key: string) => {
     console.log(`Virtual Keyboard - Sending key: ${key}`);
     
-    // For the 'U' key, ensure we're sending the correct case
-    const keyToSend = key === 'U' ? 'u' : key.toLowerCase();
+    // Convert key to lowercase for consistency
+    const keyToSend = key.toLowerCase();
     
     // For X key, use the close endpoint instead of keypress
     const endpoint = key === 'X' ? 'close' : 'keypress';
@@ -47,8 +47,24 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
       console.log('C++ server response:', data);
       toast({
         title: "Game Command",
-        description: key === 'X' ? "Terminating all games..." : `Launching game with key: ${key}`
+        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key}`
       });
+      
+      // Create and dispatch a real DOM keyboard event
+      try {
+        const keyboardEvent = new KeyboardEvent('keydown', {
+          key: keyToSend,
+          code: `Key${key.toUpperCase()}`,
+          keyCode: key.toUpperCase().charCodeAt(0),
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        document.dispatchEvent(keyboardEvent);
+        console.log(`DOM keyboard event dispatched for key: ${key}`);
+      } catch (err) {
+        console.error('Error dispatching keyboard event:', err);
+      }
     })
     .catch(error => {
       console.error('Error sending keypress to C++ server:', error);
@@ -58,18 +74,13 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
         title: "Connection Error",
         description: "Could not connect to the game launcher service"
       });
+      
+      // Try electron method as fallback
+      if (window.electron) {
+        console.log("Falling back to Electron keypress simulation");
+        window.electron.ipcRenderer.send('simulate-keypress', keyToSend);
+      }
     });
-
-    // Create and dispatch keyboard event
-    const keyboardEvent = new KeyboardEvent('keydown', {
-      key: keyToSend,
-      code: `Key${key.toUpperCase()}`,
-      keyCode: key.toUpperCase().charCodeAt(0),
-      bubbles: true,
-      cancelable: true,
-      composed: true
-    });
-    document.dispatchEvent(keyboardEvent);
 
     // Call the provided callback
     onKeyPress(key);

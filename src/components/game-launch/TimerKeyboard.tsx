@@ -41,8 +41,19 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       console.log('C++ server response:', data);
       toast({
         title: "Game Command",
-        description: key === 'X' ? "Terminating all games..." : `Launch command: ${key}`
+        description: key === 'X' ? "Terminating all games..." : `Key sent: ${key}`
       });
+      
+      // Also dispatch a DOM keyboard event to simulate the key
+      const event = new KeyboardEvent("keydown", {
+        key: key.toLowerCase(),
+        code: `Key${key}`,
+        keyCode: key.charCodeAt(0),
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      document.dispatchEvent(event);
     })
     .catch(error => {
       console.error('Error sending keypress to C++ server:', error);
@@ -52,6 +63,12 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         title: "Connection Error",
         description: "Could not connect to the game launcher service"
       });
+      
+      // Try electron method as fallback
+      if (window.electron) {
+        console.log("Falling back to Electron keypress simulation");
+        window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
+      }
     });
     
     // Call the original onKeyPress handler

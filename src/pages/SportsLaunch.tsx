@@ -3,9 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function SportsLaunch() {
   const navigate = useNavigate();
+
+  // Set up global key event listener for the C++ program
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      console.log(`Global keydown detected: ${e.key}`);
+      // The C++ program will listen for these events
+    };
+
+    // Add the global event listener
+    document.addEventListener('keydown', handleGlobalKeyDown);
+
+    return () => {
+      // Clean up
+      document.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, []);
 
   return (
     <div className="relative min-h-screen">
