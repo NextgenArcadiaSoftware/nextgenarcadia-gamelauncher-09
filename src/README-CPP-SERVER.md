@@ -1,5 +1,4 @@
 
-
 # C++ Game Launcher Server Integration
 
 This document explains how to set up and use the C++ game launcher server with the React front-end.
@@ -63,6 +62,40 @@ Optionally, provide a game name:
 ### 3. `/health` (GET)
 
 Health check endpoint to verify the server is running.
+
+### 4. `/webhook/game-event` (POST)
+
+Direct webhook to launch or close a specific game by name.
+
+**Request Format:**
+```json
+{
+  "event": "start",
+  "game": "Fruit Ninja VR"
+}
+```
+
+For stopping a game:
+```json
+{
+  "event": "stop",
+  "game": "Fruit Ninja VR"
+}
+```
+
+Supported game names:
+- "Fruit Ninja VR"
+- "Crisis Brigade 2"
+- "Subside"
+- "Richie's Plank Experience"
+- "iB Cricket"
+- "Arizona Sunshine"
+- "Undead Citadel"
+- "Elven Assassin"
+- "RollerCoaster Legends"
+- "All-in-One Sports VR"
+- "Creed Rise to Glory"
+- "Beat Saber"
 
 ## CORS Configuration
 
@@ -146,4 +179,3 @@ This means your C++ server is not correctly configured for CORS. Add the headers
 When using the Lovable preview environment (or any other non-localhost domain), the app will automatically switch to "Preview Mode" where it simulates C++ server interactions. This is normal behavior since the browser cannot connect to your local machine's services from a remote website.
 
 For production use, the app should be running locally on the same machine as the C++ server.
-
