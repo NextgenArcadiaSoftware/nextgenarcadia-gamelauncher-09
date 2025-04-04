@@ -10,9 +10,10 @@ interface TimerDisplayProps {
   timeLeft: number;
   activeGame: string | null | undefined;
   onExit: () => void;
+  useWebhookOnly?: boolean; // Add the missing prop with optional flag
 }
 
-export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
+export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit, useWebhookOnly }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [gameClosing, setGameClosing] = useState(false);
