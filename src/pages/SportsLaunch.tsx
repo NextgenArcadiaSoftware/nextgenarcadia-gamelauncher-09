@@ -5,204 +5,97 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { closeGames, sendKeyPress, checkServerHealth, launchGameByCode } from '@/services/GameService';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { CppServerStatus } from '@/components/game-launch/CppServerStatus';
 
 export default function SportsLaunch() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [serverResponse, setServerResponse] = useState<string | null>(null);
   const [requestStatus, setRequestStatus] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'error'>('connecting');
-  const [reconnectAttempts, setReconnectAttempts] = useState(0);
 
-  // Check server connectivity on mount, but only once
+  // Set up global key event listener for both the X key and C++ program
   useEffect(() => {
-    const checkConnection = async () => {
-      setConnectionStatus('connecting');
-      try {
-        const isHealthy = await checkServerHealth(0, true); // Use silent mode
-        
-        if (isHealthy) {
-          setConnectionStatus('connected');
-          setReconnectAttempts(0);
-          console.log('Successfully connected to C++ game server');
-          
-          // Auto-launch the game when connection is established
-          try {
-            const result = await launchGameByCode('v'); // 'v' is for All-in-One Sports VR
-            setServerResponse(result.message || "Sports game launch initiated");
-            setRequestStatus(`Server responded with status: ${result.status}`);
-            
-            toast({
-              title: "Game Launching",
-              description: "Launching All-in-One Sports VR..."
-            });
-          } catch (launchError) {
-            console.error('Error auto-launching game:', launchError);
-          }
-        } else {
-          throw new Error('Health check failed');
-        }
-      } catch (error) {
-        // In silent mode, just set the status without logging
-        setConnectionStatus('error');
-        setReconnectAttempts(prev => prev + 1);
-      }
-    };
-    
-    checkConnection();
-    
-    // No need for periodic checks here, we'll let CppServerStatus handle that
-  }, [navigate, toast]);
-
-  // Set up event handler for ending the game
-  const handleEndGame = async () => {
-    console.log('End game requested');
-    
-    toast({
-      title: "Game Ending",
-      description: "Ending current game session..."
-    });
-    
-    try {
-      // Send close command using our GameService
-      const result = await closeGames("All-in-One Sports VR");
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      console.log(`Global keydown detected: ${e.key}`);
       
-      // Display server response
-      setServerResponse(result.message || "Game successfully closed");
-      setRequestStatus(`Server responded with status: ${result.status}`);
-      
-      console.log('Close game response:', result);
-      
-      // Show another toast with the server's response
-      toast({
-        title: "Server Response",
-        description: result.message || "Game closed successfully"
-      });
-      
-      // Navigate back after short delay
-      setTimeout(() => navigate('/'), 1500);
-    } catch (error) {
-      console.error('Error closing game:', error);
-      setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
-      
-      // Even if the C++ server is unavailable, still navigate back
-      toast({
-        title: "Error",
-        description: "Could not communicate with game server",
-        variant: "destructive"
-      });
-      
-      // Try fallback method through Electron
-      if (window.electron) {
-        console.log("Falling back to Electron method for game termination");
-        window.electron.ipcRenderer.send('end-game');
-        
-        toast({
-          title: "Fallback Method",
-          description: "Using Electron to terminate games",
-          variant: "default"
-        });
-      }
-      
-      setTimeout(() => navigate('/'), 1000);
-    }
-  };
-
-  // Set up key event listener for X key to end game
-  useEffect(() => {
-    const handleKeyDown = async (e: KeyboardEvent) => {
+      // Special handling for X key to end the game
       if (e.key.toLowerCase() === 'x') {
         console.log('X key detected, ending game');
-        handleEndGame();
+        setRequestStatus('Sending close command to server...');
+        
+        // Send close command to C++ server
+        fetch("http://localhost:5001/close", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json; charset=utf-8",
+            "Accept-Charset": "UTF-8" 
+          },
+          body: JSON.stringify({}),
+          signal: AbortSignal.timeout(3000)
+        })
+        .then(response => {
+          console.log('Server responded with status:', response.status);
+          setRequestStatus(`Server responded with status: ${response.status}`);
+          
+          if (response.status === 204) {
+            // 204 = Success with No Content response
+            toast({
+              title: "Game Termination",
+              description: "Successfully sent close command to server",
+              variant: "default"
+            });
+          } else if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          // For 204 responses, we don't need to parse the body
+          return response.status === 204 ? 
+            "Game close command successful" : 
+            response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
+        })
+        .then(text => {
+          console.log('Close game response:', text);
+          setServerResponse(text);
+          
+          // Show a toast for successful game termination
+          toast({
+            title: "Game Closed",
+            description: "All running games have been terminated",
+            variant: "default"
+          });
+          
+          // Navigate back after short delay to allow toasts to be visible
+          setTimeout(() => navigate('/'), 2000);
+        })
+        .catch(error => {
+          console.error('Error closing game:', error);
+          setServerResponse(`Error: ${error.message}`);
+          
+          // Fallback Electron method
+          if (window.electron) {
+            console.log("Falling back to Electron method for game termination");
+            window.electron.ipcRenderer.send('end-game');
+            
+            toast({
+              title: "Fallback Method",
+              description: "Using Electron to terminate games",
+              variant: "destructive"
+            });
+            
+            // Still navigate back
+            setTimeout(() => navigate('/'), 1500);
+          }
+        });
       }
     };
 
-    // Add global event listener
-    document.addEventListener('keydown', handleKeyDown);
-    
-    // Clean up
+    // Add the global event listener
+    document.addEventListener('keydown', handleGlobalKeyDown);
+
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      // Clean up
+      document.removeEventListener('keydown', handleGlobalKeyDown);
     };
   }, [navigate, toast]);
-
-  const handleManualRetry = async () => {
-    setConnectionStatus('connecting');
-    
-    try {
-      const isHealthy = await checkServerHealth(0, false);
-      
-      if (isHealthy) {
-        setConnectionStatus('connected');
-        setReconnectAttempts(0);
-        
-        toast({
-          title: "Connection Restored",
-          description: "Successfully connected to game server"
-        });
-        
-        // Try to launch the game after successful connection
-        try {
-          const result = await launchGameByCode('v');
-          setServerResponse(result.message || "Sports game launch initiated");
-          
-          toast({
-            title: "Game Launching",
-            description: "Launching All-in-One Sports VR..."
-          });
-        } catch (launchError) {
-          console.error('Error launching game after reconnect:', launchError);
-        }
-      } else {
-        throw new Error('Health check failed');
-      }
-    } catch (error) {
-      setConnectionStatus('error');
-      setReconnectAttempts(prev => prev + 1);
-      
-      toast({
-        title: "Connection Failed",
-        description: "Could not connect to game server",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleManualLaunch = async () => {
-    try {
-      const result = await launchGameByCode('v');
-      setServerResponse(result.message || "Sports game launch initiated");
-      setRequestStatus(`Server responded with status: ${result.status}`);
-      
-      toast({
-        title: "Game Launching",
-        description: "Launching All-in-One Sports VR..."
-      });
-    } catch (error) {
-      console.error('Error launching game manually:', error);
-      setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
-      
-      toast({
-        title: "Launch Error",
-        description: "Could not launch game via API",
-        variant: "destructive"
-      });
-      
-      // Try fallback method through Electron
-      if (window.electron) {
-        window.electron.ipcRenderer.send('simulate-keypress', 'v');
-        
-        toast({
-          title: "Fallback Method",
-          description: "Using Electron to launch game",
-          variant: "default"
-        });
-      }
-    }
-  };
 
   return (
     <div className="relative min-h-screen">
@@ -216,41 +109,8 @@ export default function SportsLaunch() {
         Back to Games
       </Button>
       
-      {/* Use the CppServerStatus component instead of inline alerts */}
-      <div className="fixed top-24 left-8 z-50 max-w-md">
-        <CppServerStatus 
-          onRetry={handleManualRetry}
-        />
-      </div>
-      
-      {connectionStatus === 'connected' && (
-        <Alert variant="default" className="fixed top-24 right-8 z-50 max-w-md bg-green-100 border-green-500">
-          <AlertTitle className="text-green-800">Controls</AlertTitle>
-          <AlertDescription className="text-green-700 space-y-2">
-            <div className="flex gap-2">
-              <Button 
-                size="sm" 
-                onClick={handleManualLaunch}
-                variant="default"
-                className="bg-green-700 hover:bg-green-800"
-              >
-                Launch Game
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={handleEndGame}
-                variant="outline"
-                className="border-red-500 text-red-500 hover:bg-red-50"
-              >
-                End Game
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-      
       {(serverResponse || requestStatus) && (
-        <div className="fixed top-40 left-8 z-50 bg-black/80 text-green-500 p-4 rounded-md font-mono whitespace-pre max-w-lg overflow-auto max-h-[80vh]">
+        <div className="fixed top-24 left-8 z-50 bg-black/80 text-green-500 p-4 rounded-md font-mono whitespace-pre max-w-lg overflow-auto max-h-[80vh]">
           {requestStatus && <div className="mb-2 text-yellow-300">{requestStatus}</div>}
           {serverResponse && <div>{serverResponse}</div>}
         </div>

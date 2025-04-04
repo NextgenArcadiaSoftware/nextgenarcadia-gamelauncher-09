@@ -4,26 +4,24 @@ import { Button } from '../ui/button';
 import { X } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { closeGames } from '@/services/GameService';
+import { TimerKeyboard } from './TimerKeyboard';
 
 interface TimerDisplayProps {
   timeLeft: number;
   activeGame: string | null | undefined;
   onExit: () => void;
-  useWebhookOnly?: boolean; // Add the missing prop with optional flag
 }
 
-export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit, useWebhookOnly }: TimerDisplayProps) {
+export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionCompleted, setSessionCompleted] = useState(false);
-  const [gameClosing, setGameClosing] = useState(false);
+  const [showKeyboard, setShowKeyboard] = useState(true);
   const sessionCompletionRef = useRef(false);
   const sessionCreatedRef = useRef(false);
   const { toast } = useToast();
 
   // Check if Electron is available
   const isElectronAvailable = Boolean(window.electron);
-  const isPreviewMode = !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1');
 
   // Create a session when the component mounts
   useEffect(() => {
@@ -177,72 +175,38 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit, useWeb
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  // Emergency exit handler
-  const handleEmergencyExit = async () => {
-    if (gameClosing) return; // Prevent multiple clicks
-    setGameClosing(true);
+  const handleKeyPress = (key: string) => {
+    console.log(`Key pressed from on-screen keyboard: ${key}`);
     
-    // Show initial toast
-    toast({
-      title: "Game Termination",
-      description: "Closing all active games...",
-      variant: "default"
-    });
-    
-    // For preview mode, simulate successful closure
-    if (isPreviewMode) {
-      console.log('Preview mode: Simulating game closure');
-      
-      setTimeout(() => {
-        toast({
-          title: "Game Closed",
-          description: "Simulation: Games closed successfully",
-          variant: "default"
-        });
-        onExit();
-      }, 1000);
-      
-      return;
-    }
-    
-    // Try C++ server first
-    try {
-      console.log('Attempting to close games via C++ server');
-      const result = await closeGames();
-      console.log('Close games response:', result);
-      
+    if (key === 'X') {
       toast({
-        title: "Game Terminated",
-        description: "All active games have been closed",
-        variant: "default"
+        title: "Exit Key Pressed",
+        description: "Exiting game session..."
       });
+      
+      // Send close command to C++ server
+      fetch("http://localhost:5001/close", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(response => response.json())
+      .then(data => console.log('Close games response:', data))
+      .catch(error => console.error('Error closing games:', error));
       
       // Exit after short delay
       setTimeout(() => onExit(), 1000);
-    } catch (error) {
-      console.error('Error closing games via C++ server:', error);
-      
-      // Try fallback with Electron
-      if (isElectronAvailable) {
-        console.log('Falling back to Electron for game closure');
-        window.electron.ipcRenderer.send('end-game');
-        
-        toast({
-          title: "Using Fallback",
-          description: "Closing games via Electron",
-          variant: "default"
-        });
-      } else {
-        console.log('No fallback available for game termination');
-        toast({
-          title: "Termination Failed",
-          description: "Unable to communicate with game launcher",
-          variant: "destructive"
-        });
-      }
-      
-      // Exit after short delay regardless
-      setTimeout(() => onExit(), 1500);
+    } else if (isElectronAvailable) {
+      window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
+      toast({
+        title: "Key Pressed",
+        description: `Sending ${key} key to the game`
+      });
+    } else {
+      toast({
+        variant: "default",
+        title: "Browser Preview Mode",
+        description: `Keypress simulation - Electron APIs unavailable in browser`
+      });
     }
   };
 
@@ -271,15 +235,9 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit, useWeb
         </div>
       )}
 
-      <Button
-        variant="destructive"
-        size="lg"
-        className="mt-8 px-8 py-6 text-xl"
-        onClick={handleEmergencyExit}
-        disabled={gameClosing}
-      >
-        {gameClosing ? 'Stopping...' : 'Emergency Stop'}
-      </Button>
+      <div className="fixed bottom-4 left-0 right-0 flex justify-center animate-fade-in-up">
+        <TimerKeyboard onKeyPress={handleKeyPress} />
+      </div>
     </div>
   );
 }

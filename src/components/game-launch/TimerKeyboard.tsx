@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
-import { sendKeyPress, closeGames, checkServerHealth } from '@/services/GameService';
 
 interface TimerKeyboardProps {
   onKeyPress: (key: string) => void;
@@ -27,89 +26,126 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     checkServerConnectivity();
     
     // Set up periodic connectivity checks
-    const intervalId = setInterval(checkServerConnectivity, 30000); // Check every 30 seconds
+    const intervalId = setInterval(checkServerConnectivity, 10000);
     
     return () => {
       clearInterval(intervalId);
     };
   }, []);
 
-  const checkServerConnectivity = async () => {
-    const isHealthy = await checkServerHealth(0, true); // Use silent mode
-    setConnectionError(!isHealthy);
-    
-    if (isHealthy) {
-      setReconnectAttempts(0);
-    }
+  const checkServerConnectivity = () => {
+    fetch('http://localhost:5001/health', {
+      signal: AbortSignal.timeout(2000),
+      headers: { 'Accept-Charset': 'UTF-8' }
+    })
+      .then(response => {
+        if (response.ok || response.status === 204) {
+          setConnectionError(false);
+          setReconnectAttempts(0);
+        } else {
+          // Handle 404 status which might still mean server is running but endpoint not available
+          if (response.status === 404) {
+            console.log("Server running but health endpoint is missing");
+            setConnectionError(false);
+            setReconnectAttempts(0);
+          } else {
+            throw new Error(`Server returned: ${response.status}`);
+          }
+        }
+      })
+      .catch(() => {
+        setConnectionError(true);
+      });
   };
 
-  const handleKeyClick = async (key: string) => {
+  const handleKeyClick = (key: string) => {
     console.log(`Timer Keyboard - Key pressed: ${key}`);
     
-    try {
-      // For X key, use the closeGames method
+    // Use port 5001 for the C++ server
+    const serverUrl = 'http://localhost:5001'; 
+    
+    // For X key, use the close endpoint instead of keypress
+    const endpoint = key === 'X' ? 'close' : 'keypress';
+    
+    // Simplified payload for C++ server
+    const payload = key === 'X' 
+      ? {} // C++ server doesn't need any payload for close
+      : { key: key.toLowerCase() };
+    
+    console.log(`Sending to C++ server:`, payload);
+    
+    fetch(`${serverUrl}/${endpoint}`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json; charset=utf-8",
+        "Accept-Charset": "UTF-8"
+      },
+      body: JSON.stringify(payload),
+      // Set timeout to avoid hanging requests
+      signal: AbortSignal.timeout(2000)
+    })
+    .then(response => {
+      console.log(`Server responded with status: ${response.status}`);
+      setLastStatus(response.status);
+      setConnectionError(false);
+      
+      // Handle empty responses (204 No Content)
+      if (response.status === 204) {
+        return key === 'X' ? 
+          "Game close command successful" : 
+          `Key ${key} sent successfully`;
+      }
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      // Ensure UTF-8 decoding of response text
+      return response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
+    })
+    .then(text => {
+      console.log('C++ server response:', text);
+      
+      // Set the response message
+      setLastResponse(text);
+      
+      // Show toast based on key and status
       if (key === 'X') {
-        const result = await closeGames();
-        console.log('Close games response:', result);
-        
-        // Set the status and response message
-        setLastStatus(result.status || 200);
-        setLastResponse(result.message || "Successfully closed all games");
-        setConnectionError(false);
-        
         toast({
           title: "Game Termination",
           description: "Closing all active games...",
           variant: "destructive"
         });
+      } else if (key === 'F') { // Fruit Ninja
+        toast({
+          title: "Game Launched",
+          description: "Launching Fruit Ninja VR...",
+          variant: "default"
+        });
+      } else if (key === 'E') { // Elven Assassin
+        toast({
+          title: "Game Launched",
+          description: "Launching Elven Assassin...",
+          variant: "default"
+        });
+      } else if (key === 'C') { // Crisis Brigade
+        toast({
+          title: "Game Launched",
+          description: "Launching Crisis Brigade 2...",
+          variant: "default"
+        });
+      } else if (key === 'V') { // All-in-One Sports
+        toast({
+          title: "Game Launched",
+          description: "Launching All-in-One Sports VR...",
+          variant: "default"
+        });
       } else {
-        // For other keys, use the sendKeyPress method
-        const result = await sendKeyPress(key);
-        console.log('Keypress response:', result);
-        
-        // Set the status and response message
-        setLastStatus(result.status || 200);
-        setLastResponse(result.message || `Successfully sent key ${key}`);
-        setConnectionError(false);
-        
-        // Show toast based on key
-        if (key === 'F') { // Fruit Ninja
-          toast({
-            title: "Game Launched",
-            description: "Launching Fruit Ninja VR...",
-            variant: "default"
-          });
-        } else if (key === 'E') { // Elven Assassin
-          toast({
-            title: "Game Launched",
-            description: "Launching Elven Assassin...",
-            variant: "default"
-          });
-        } else if (key === 'C') { // Crisis Brigade
-          toast({
-            title: "Game Launched",
-            description: "Launching Crisis Brigade 2...",
-            variant: "default"
-          });
-        } else if (key === 'V') { // All-in-One Sports
-          toast({
-            title: "Game Launched",
-            description: "Launching All-in-One Sports VR...",
-            variant: "default"
-          });
-        } else if (key === 'I') { // iB Cricket
-          toast({
-            title: "Game Launched",
-            description: "Launching iB Cricket...",
-            variant: "default"
-          });
-        } else {
-          toast({
-            title: "Command Sent",
-            description: `Key ${key} command processed`,
-            variant: "default"
-          });
-        }
+        toast({
+          title: "Command Sent",
+          description: `Key ${key} command processed`,
+          variant: "default"
+        });
       }
       
       // Create and dispatch a real DOM keyboard event
@@ -122,7 +158,8 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         view: window
       });
       document.dispatchEvent(event);
-    } catch (error) {
+    })
+    .catch(error => {
       console.error('Error sending keypress to C++ server:', error);
       setConnectionError(true);
       
@@ -146,7 +183,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
           window.electron.ipcRenderer.send('end-game');
         }
       }
-    }
+    });
     
     // Call the original onKeyPress handler
     onKeyPress(key);
