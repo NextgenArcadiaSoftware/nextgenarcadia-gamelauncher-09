@@ -1,20 +1,20 @@
-
 import { useEffect, useState } from 'react';
 import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
 import { RatingScreen } from './game-launch/RatingScreen';
 import { GameLaunchScreen } from './game-launch/GameLaunchScreen';
 import { supabase } from '@/integrations/supabase/client';
-import { sendKeyPress, closeGames } from '@/services/GameService';
+import { sendKeyPress, closeGames, sendGameWebhook } from '@/services/GameService';
 
 interface RFIDCountdownProps {
   onExit: () => void;
   activeGame?: string | null;
   trailer?: string;  
   steamUrl?: string; // Support for direct Steam URLs
+  useWebhookOnly?: boolean; // New prop to force webhook usage
 }
 
-export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCountdownProps) {
+export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl, useWebhookOnly = false }: RFIDCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showRating, setShowRating] = useState(false);
   const [showGameScreen, setShowGameScreen] = useState(true);
@@ -107,8 +107,35 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   const targetWord = getGameCode(activeGame);
 
   useEffect(() => {
-    if (!showGameScreen && timeLeft !== null) {
-      if (steamUrl && isElectronAvailable) {
+    if (!showGameScreen && timeLeft !== null && activeGame) {
+      if (useWebhookOnly) {
+        // Use webhook to start the game
+        console.log(`Using webhook to launch game: ${activeGame}`);
+        
+        sendGameWebhook(activeGame, 'start')
+          .then(result => {
+            setLastServerStatus(result.status || 200);
+            setServerResponse(result.message || `Successfully launched ${activeGame} via webhook`);
+            
+            toast({
+              title: "Game Launching",
+              description: `Launching ${activeGame} via webhook...`,
+            });
+            
+            console.log('Webhook game launch response:', result);
+          })
+          .catch(error => {
+            console.error('Error launching game via webhook:', error);
+            setServerResponse(`Error: ${error instanceof Error ? error.message : String(error)}`);
+            
+            toast({
+              variant: "destructive",
+              title: "Launch Error",
+              description: "Failed to launch game via webhook"
+            });
+          });
+      }
+      else if (steamUrl && isElectronAvailable) {
         console.log(`Launching Steam game with URL: ${steamUrl}`);
         window.electron.ipcRenderer.send('launch-steam-game', steamUrl);
       } 
@@ -175,7 +202,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
         });
       }
     }
-  }, [showGameScreen, timeLeft, targetWord, steamUrl, toast, isElectronAvailable, activeGame]);
+  }, [showGameScreen, timeLeft, targetWord, steamUrl, toast, isElectronAvailable, activeGame, useWebhookOnly]);
 
   useEffect(() => {
     if (isElectronAvailable) {
@@ -202,23 +229,44 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
 
   const handleRatingSubmit = async (rating: number) => {
     if (isElectronAvailable) {
-      try {
-        // Use the GameService to close the games
-        const result = await closeGames(activeGame || undefined);
-        console.log('Close games response:', result);
-        
-        setServerResponse(result.message || "Games closed successfully");
-        
-        toast({
-          title: "Game Session Ended",
-          description: "Closing all active games",
-          variant: "default"
-        });
-      } catch (error) {
-        console.error('Error closing games:', error);
-        
-        if (window.electron) {
-          window.electron.ipcRenderer.send('end-game');
+      if (useWebhookOnly && activeGame) {
+        try {
+          // Use webhook to stop the game
+          const result = await sendGameWebhook(activeGame, 'stop');
+          setServerResponse(result.message || `Game ${activeGame} stopped via webhook`);
+          
+          toast({
+            title: "Game Session Ended",
+            description: `Stopping ${activeGame} via webhook`,
+            variant: "default"
+          });
+        } catch (error) {
+          console.error('Error stopping game via webhook:', error);
+          toast({
+            title: "Error",
+            description: "Failed to stop game via webhook",
+            variant: "destructive"
+          });
+        }
+      } else {
+        try {
+          // Use the GameService to close the games
+          const result = await closeGames(activeGame || undefined);
+          console.log('Close games response:', result);
+          
+          setServerResponse(result.message || "Games closed successfully");
+          
+          toast({
+            title: "Game Session Ended",
+            description: "Closing all active games",
+            variant: "default"
+          });
+        } catch (error) {
+          console.error('Error closing games:', error);
+          
+          if (window.electron) {
+            window.electron.ipcRenderer.send('end-game');
+          }
         }
       }
     }
@@ -298,6 +346,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
             setShowRating(true);
           }
         }}
+        useWebhookOnly={useWebhookOnly}
       />
     </>
   );

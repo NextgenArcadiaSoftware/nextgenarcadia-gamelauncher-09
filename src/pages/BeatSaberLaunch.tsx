@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { sendGameWebhook } from '@/services/GameService'; // Import the new method
+import { sendGameWebhook } from '@/services/GameService'; // Import the webhook method
 import { useToast } from '@/components/ui/use-toast';
 
 export default function BeatSaberLaunch() {
@@ -77,8 +77,8 @@ export default function BeatSaberLaunch() {
         activeGame="Beat Saber"
         trailer="https://www.youtube.com/watch?v=vL39Sg2AqWg"
         steamUrl="steam://rungameid/620980"
+        useWebhookOnly={true}
       />
     </div>
   );
 }
-
