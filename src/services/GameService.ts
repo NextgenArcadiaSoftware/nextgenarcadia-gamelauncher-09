@@ -1,4 +1,3 @@
-
 /**
  * GameService - Handles direct communication with the C++ game server
  */
@@ -349,19 +348,57 @@ export const launchGameByCode = async (gameCode: string): Promise<any> => {
 };
 
 /**
+ * Send a webhook event to start or stop a specific game
+ * @param game The name of the game to start/stop
+ * @param event The event type ('start' or 'stop')
+ * @returns Promise with the server response
+ */
+export const sendGameWebhook = async (game: string, event: 'start' | 'stop'): Promise<any> => {
+  if (IS_PREVIEW_MODE) {
+    console.log(`Preview mode detected for game webhook. Simulating ${event} event for ${game}`);
+    
+    // In preview mode, return a simulated success response
+    return {
+      status: 200,
+      message: `Simulated: Successfully sent ${event} event for ${game} (preview mode)`
+    };
+  }
+  
+  console.log(`Sending webhook event: ${event} for game: ${game}`);
+  
+  try {
+    const response = await safeFetch(`${SERVER_URL}/webhook/game-event`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json; charset=utf-8',
+        'Accept-Charset': 'UTF-8'
+      },
+      body: JSON.stringify({ event, game })
+    });
+    
+    return await processResponse(response, `Successfully sent ${event} event for ${game}`);
+  } catch (error) {
+    console.error(`Error sending webhook event for ${game}:`, error);
+    
+    // If all retries failed or it was an abort, throw the error
+    throw error;
+  }
+};
+
+/**
  * Helper mapping to translate game titles to their launch codes
  */
 export const gameLaunchCodes: Record<string, string> = {
   "Fruit Ninja VR": "f",
-  "Crisis Brigade 2 Reloaded": "c",
+  "Crisis Brigade 2": "c",
   "Subside": "s",
-  "Richies Plank Experience": "p",
-  "iB Cricket": "i",
-  "Arizona Sunshine II": "a",
+  "Richie's Plank Experience": "p",
+  "iB Cricket": "i", 
+  "Arizona Sunshine": "a",
   "Undead Citadel": "u", 
   "Elven Assassin": "e",
   "RollerCoaster Legends": "r",
   "All-in-One Sports VR": "v",
-  "Creed: Rise to Glory Championship Edition": "g",
+  "Creed Rise to Glory": "g",
   "Beat Saber": "w"
 };
