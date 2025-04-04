@@ -150,7 +150,29 @@ function initWebhookEndpoint() {
           
           if (payload.event === 'start') {
             console.log(`Starting game: ${payload.game}`);
-            // Here you would add code to launch the C++ application
+            
+            // For C++ App, connect to local C++ server
+            if (payload.game === 'C++ App') {
+              fetch('http://localhost:5001/launch', {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json; charset=utf-8',
+                  'Accept-Charset': 'UTF-8'
+                },
+                body: JSON.stringify({}),
+                signal: AbortSignal.timeout(5000)
+              })
+              .then(response => {
+                console.log('C++ server launch response status:', response.status);
+                return response.text();
+              })
+              .then(text => {
+                console.log('C++ server launch response:', text);
+              })
+              .catch(error => {
+                console.error('Error communicating with C++ server (launch):', error);
+              });
+            }
             
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ 
@@ -162,16 +184,39 @@ function initWebhookEndpoint() {
           else if (payload.event === 'stop') {
             console.log(`Stopping game: ${payload.game}`);
             
-            // Try to send close command to C++ server
-            fetch('http://localhost:5001/close', {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json; charset=utf-8',
-                'Accept-Charset': 'UTF-8'
-              },
-              body: JSON.stringify({}),
-              signal: AbortSignal.timeout(5000)
-            }).catch(error => console.error('Error sending close command:', error));
+            // For C++ App, connect to local C++ server
+            if (payload.game === 'C++ App') {
+              fetch('http://localhost:5001/close', {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json; charset=utf-8',
+                  'Accept-Charset': 'UTF-8'
+                },
+                body: JSON.stringify({}),
+                signal: AbortSignal.timeout(5000)
+              })
+              .then(response => {
+                console.log('C++ server close response status:', response.status);
+                return response.text();
+              })
+              .then(text => {
+                console.log('C++ server close response:', text);
+              })
+              .catch(error => {
+                console.error('Error communicating with C++ server (close):', error);
+              });
+            } else {
+              // Try to send close command to C++ server (legacy support)
+              fetch('http://localhost:5001/close', {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json; charset=utf-8',
+                  'Accept-Charset': 'UTF-8'
+                },
+                body: JSON.stringify({}),
+                signal: AbortSignal.timeout(5000)
+              }).catch(error => console.error('Error sending close command:', error));
+            }
             
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ 
