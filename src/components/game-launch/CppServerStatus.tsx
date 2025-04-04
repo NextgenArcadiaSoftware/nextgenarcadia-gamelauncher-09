@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
@@ -11,13 +10,19 @@ interface CppServerStatusProps {
 }
 
 export function CppServerStatus({ onRetry, silent = false }: CppServerStatusProps) {
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'preview-mode'>('checking');
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const { toast } = useToast();
+  
+  const isPreviewMode = !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1');
 
-  // Check server connectivity
   useEffect(() => {
     const checkConnection = async () => {
+      if (isPreviewMode) {
+        setConnectionStatus('preview-mode');
+        return;
+      }
+      
       try {
         const isHealthy = await checkServerHealth(0, silent);
         
@@ -35,15 +40,26 @@ export function CppServerStatus({ onRetry, silent = false }: CppServerStatusProp
     
     checkConnection();
     
-    // Set up periodic connectivity checks, but with a longer interval
-    const intervalId = setInterval(checkConnection, 30000); // Check every 30 seconds instead of 15
+    const intervalId = setInterval(checkConnection, 30000);
     
     return () => {
       clearInterval(intervalId);
     };
-  }, [silent]);
+  }, [silent, isPreviewMode]);
 
   const handleManualRetry = async () => {
+    if (isPreviewMode) {
+      setConnectionStatus('preview-mode');
+      
+      toast({
+        title: "Preview Mode Active",
+        description: "Game launcher operations will be simulated"
+      });
+      
+      if (onRetry) onRetry();
+      return;
+    }
+    
     setConnectionStatus('checking');
     
     try {
@@ -74,8 +90,7 @@ export function CppServerStatus({ onRetry, silent = false }: CppServerStatusProp
     }
   };
 
-  // If silent mode is enabled, don't show any UI during checking or error states
-  if (silent && connectionStatus !== 'connected') {
+  if (silent && connectionStatus !== 'connected' && connectionStatus !== 'preview-mode') {
     return null;
   }
 
@@ -85,6 +100,18 @@ export function CppServerStatus({ onRetry, silent = false }: CppServerStatusProp
         <AlertTitle className="text-yellow-800">Checking Server Connection</AlertTitle>
         <AlertDescription className="text-yellow-700">
           Testing connection to C++ game server...
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (connectionStatus === 'preview-mode') {
+    return (
+      <Alert className="bg-blue-100 border-blue-500">
+        <AlertTitle className="text-blue-800">Preview Mode Active</AlertTitle>
+        <AlertDescription className="text-blue-700">
+          <p>Running in Lovable preview environment. C++ server interactions are simulated.</p>
+          <p className="mt-1 text-xs">In production, this will connect to your local C++ server.</p>
         </AlertDescription>
       </Alert>
     );
