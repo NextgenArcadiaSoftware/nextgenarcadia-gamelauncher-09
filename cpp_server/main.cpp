@@ -17,7 +17,9 @@
 #include "httplib.h"
 
 // Process handle for the launched game
+#ifdef _WIN32
 PROCESS_INFORMATION processInfo = {0};
+#endif
 
 bool launchCricketGame() {
     std::cout << "Launching VR Cricket game..." << std::endl;
@@ -85,7 +87,6 @@ int main() {
     httplib::Server server;
     
     // Configure CORS for all routes
-    server.set_base_dir("./");
     server.set_default_headers({
         {"Access-Control-Allow-Origin", "*"},
         {"Access-Control-Allow-Methods", "GET, POST, OPTIONS"},

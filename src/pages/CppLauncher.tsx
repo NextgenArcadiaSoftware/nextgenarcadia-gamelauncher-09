@@ -2,7 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Play, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
 export default function CppLauncher() {
@@ -10,67 +10,16 @@ export default function CppLauncher() {
   const [isLaunching, setIsLaunching] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
-  useEffect(() => {
-    // Listen for server responses from Electron main process
-    const handleServerResponse = (response: any) => {
-      console.log('Server response:', response);
-      
-      if (response.key === 'launch') {
-        setIsLaunching(false);
-        toast({
-          title: 'VR Cricket',
-          description: 'Game launched successfully',
-          variant: 'default',
-        });
-      } else if (response.key === 'exit') {
-        setIsExiting(false);
-        toast({
-          title: 'VR Cricket',
-          description: 'Game exited successfully',
-          variant: 'default',
-        });
-      }
-    };
-
-    const handleServerError = (error: any) => {
-      console.error('Server error:', error);
-      setIsLaunching(false);
-      setIsExiting(false);
-      
-      toast({
-        title: 'Error',
-        description: `Failed to communicate with server: ${error.error}`,
-        variant: 'destructive',
-      });
-    };
-
-    // Add event listeners
-    if (window.electron) {
-      window.electron.ipcRenderer.on('cpp-server-response', handleServerResponse);
-      window.electron.ipcRenderer.on('cpp-server-error', handleServerError);
-    }
-
-    // Clean up
-    return () => {
-      if (window.electron) {
-        window.electron.ipcRenderer.removeAllListeners('cpp-server-response');
-        window.electron.ipcRenderer.removeAllListeners('cpp-server-error');
-      }
-    };
-  }, []);
-
   const handleLaunch = async () => {
     setIsLaunching(true);
     try {
-      const response = await fetch('http://localhost:5007/webhook/game-event', {
+      const response = await fetch('http://localhost:5001/launch', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
+          'Accept-Charset': 'UTF-8'
         },
-        body: JSON.stringify({
-          event: 'start',
-          game: 'C++ App'
-        }),
+        body: JSON.stringify({}),
         signal: AbortSignal.timeout(5000)
       });
 
@@ -78,16 +27,18 @@ export default function CppLauncher() {
         throw new Error(`Server responded with status: ${response.status}`);
       }
 
-      console.log('Launch command sent successfully');
+      const data = await response.text();
+      console.log('Launch response:', data);
+      
       toast({
         title: 'VR Cricket',
-        description: 'Launch command sent',
+        description: 'Game launched successfully',
       });
     } catch (error) {
-      console.error('Error sending launch command:', error);
+      console.error('Error launching VR Cricket:', error);
       toast({
         title: 'Error',
-        description: 'Failed to send launch command',
+        description: 'Failed to launch VR Cricket',
         variant: 'destructive',
       });
     } finally {
@@ -98,15 +49,13 @@ export default function CppLauncher() {
   const handleExit = async () => {
     setIsExiting(true);
     try {
-      const response = await fetch('http://localhost:5007/webhook/game-event', {
+      const response = await fetch('http://localhost:5001/close', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
+          'Accept-Charset': 'UTF-8'
         },
-        body: JSON.stringify({
-          event: 'stop',
-          game: 'C++ App'
-        }),
+        body: JSON.stringify({}),
         signal: AbortSignal.timeout(5000)
       });
 
@@ -114,16 +63,18 @@ export default function CppLauncher() {
         throw new Error(`Server responded with status: ${response.status}`);
       }
 
-      console.log('Exit command sent successfully');
+      const data = await response.text();
+      console.log('Exit response:', data);
+      
       toast({
         title: 'VR Cricket',
-        description: 'Exit command sent',
+        description: 'Game exited successfully',
       });
     } catch (error) {
-      console.error('Error sending exit command:', error);
+      console.error('Error exiting VR Cricket:', error);
       toast({
         title: 'Error',
-        description: 'Failed to send exit command',
+        description: 'Failed to exit VR Cricket',
         variant: 'destructive',
       });
     } finally {
