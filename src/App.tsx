@@ -22,6 +22,7 @@ import CreedLaunch from "./pages/CreedLaunch";
 import BeatSaberLaunch from "./pages/BeatSaberLaunch";
 import RollerCoasterLaunch from "./pages/RollerCoasterLaunch";
 import UnknownGameLaunch from "./pages/UnknownGameLaunch";
+import CppLauncher from "./pages/CppLauncher";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Route path="/beatlaunch" element={<BeatSaberLaunch />} />
           <Route path="/rollerlaunch" element={<RollerCoasterLaunch />} />
           <Route path="/unknown-game" element={<UnknownGameLaunch />} />
+          <Route path="/cpp-launcher" element={<CppLauncher />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

@@ -134,6 +134,68 @@ function initWebhookEndpoint() {
           }));
         }
       });
+    } else if (req.url === '/webhook/game-event' && req.method === 'POST') {
+      console.log('Game event webhook endpoint hit');
+      
+      let body = '';
+      
+      req.on('data', (chunk) => {
+        body += chunk.toString();
+      });
+      
+      req.on('end', () => {
+        try {
+          const payload = body ? JSON.parse(body) : {};
+          console.log('Game event webhook payload:', payload);
+          
+          if (payload.event === 'start') {
+            console.log(`Starting game: ${payload.game}`);
+            // Here you would add code to launch the C++ application
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              status: 'success', 
+              message: `Launch command received for ${payload.game}`,
+              timestamp: new Date().toISOString()
+            }));
+          } 
+          else if (payload.event === 'stop') {
+            console.log(`Stopping game: ${payload.game}`);
+            
+            // Try to send close command to C++ server
+            fetch('http://localhost:5001/close', {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json; charset=utf-8',
+                'Accept-Charset': 'UTF-8'
+              },
+              body: JSON.stringify({}),
+              signal: AbortSignal.timeout(5000)
+            }).catch(error => console.error('Error sending close command:', error));
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              status: 'success', 
+              message: `Stop command received for ${payload.game}`,
+              timestamp: new Date().toISOString()
+            }));
+          }
+          else {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              status: 'error', 
+              message: 'Invalid event type'
+            }));
+          }
+        } catch (error) {
+          console.error('Error processing game event webhook:', error);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            status: 'error', 
+            message: 'Server error processing webhook'
+          }));
+        }
+      });
     } else {
       res.writeHead(404);
       res.end(JSON.stringify({ status: 'error', message: 'Not found' }));
