@@ -1,4 +1,5 @@
 
+
 # C++ Game Launcher Server Integration
 
 This document explains how to set up and use the C++ game launcher server with the React front-end.

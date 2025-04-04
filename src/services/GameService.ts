@@ -33,45 +33,62 @@ async function safeFetch(url: string, options: RequestInit = {}): Promise<Respon
   const timeoutId = setTimeout(() => controller.abort(), options.signal instanceof AbortSignal ? undefined : DEFAULT_TIMEOUT);
 
   try {
+    // In preview mode, simulate a successful response for demo purposes
+    if (IS_PREVIEW_MODE) {
+      console.log(`Preview mode detected for ${url}. Simulating response.`);
+      
+      // Clear the timeout since we're not actually making a request
+      clearTimeout(timeoutId);
+      
+      // For health checks, always return success
+      if (url.includes('/health')) {
+        return new Response(JSON.stringify({ status: "healthy" }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // For keypress endpoints
+      if (url.includes('/keypress') && options.method === 'POST') {
+        const body = options.body ? JSON.parse(options.body.toString()) : {};
+        return new Response(JSON.stringify({ 
+          status: "success",
+          message: `Simulated: Successfully sent key ${body.key} command (preview mode)` 
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // For close endpoints
+      if (url.includes('/close')) {
+        return new Response(JSON.stringify({ 
+          status: "success", 
+          message: "Simulated: Successfully closed games (preview mode)" 
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      // For any other endpoint
+      return new Response(JSON.stringify({ 
+        status: "success", 
+        message: "Simulated response (preview mode)" 
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Set default headers for better CORS compatibility
     const headers = {
       ...(options.headers || {}),
       'Accept-Charset': 'UTF-8'
     };
 
-    // Handle CORS differently based on environment
-    let corsOptions: RequestInit;
-    
-    if (IS_PREVIEW_MODE) {
-      // In preview mode, try with 'no-cors' mode first
-      corsOptions = {
-        ...options,
-        headers,
-        mode: 'no-cors' as RequestMode,
-        credentials: 'same-origin' as RequestCredentials,
-        signal: options.signal || controller.signal
-      };
-      
-      // For health checks in no-cors mode, we can't read the response
-      // so we'll consider any non-error response as successful
-      if (url.includes('/health') && !options.method) {
-        try {
-          await fetch(url, corsOptions);
-          // If we get here without an error, the server is likely running
-          // Create a mock successful response
-          return new Response(JSON.stringify({ status: "healthy" }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        } catch (error) {
-          // If no-cors mode fails, we'll throw this error to be caught below
-          throw error;
-        }
-      }
-    }
-    
-    // For other requests or if not in preview mode
-    corsOptions = {
+    // Standard fetch options
+    const fetchOptions: RequestInit = {
       ...options,
       headers,
       mode: 'cors' as RequestMode,
@@ -80,11 +97,27 @@ async function safeFetch(url: string, options: RequestInit = {}): Promise<Respon
     };
 
     // Make the request
-    const response = await fetch(url, corsOptions);
+    const response = await fetch(url, fetchOptions);
     
     return response;
+  } catch (error) {
+    // If in preview mode and we get here (which shouldn't happen), return a simulated success
+    if (IS_PREVIEW_MODE) {
+      console.log(`Preview mode error fallback for ${url}`);
+      return new Response(JSON.stringify({ 
+        status: "success", 
+        message: "Simulated fallback response (preview mode)" 
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    throw error;
   } finally {
-    clearTimeout(timeoutId);
+    if (!IS_PREVIEW_MODE) {
+      clearTimeout(timeoutId);
+    }
   }
 }
 
@@ -144,6 +177,12 @@ async function processResponse(response: Response, defaultMessage: string): Prom
 export const sendKeyPress = async (key: string, retries = 0): Promise<any> => {
   if (IS_PREVIEW_MODE && !retries) {
     console.log(`Preview mode detected. Note: C++ server communications will be simulated.`);
+    
+    // In preview mode, return a simulated success response
+    return {
+      status: 200,
+      message: `Simulated: Successfully sent key ${key} to C++ server (preview mode)`
+    };
   }
 
   console.log(`Sending key ${key} directly to C++ game server${retries > 0 ? ` (retry ${retries}/${MAX_RETRIES})` : ''}`);
@@ -158,26 +197,9 @@ export const sendKeyPress = async (key: string, retries = 0): Promise<any> => {
       body: JSON.stringify({ key: key.toLowerCase() })
     });
     
-    if (IS_PREVIEW_MODE && response.status === 0) {
-      // In preview mode with no-cors, we can't read the response
-      // so we'll simulate a successful response
-      return {
-        status: 200,
-        message: `Simulated: Successfully sent key ${key} to C++ server (preview mode)`
-      };
-    }
-    
     return await processResponse(response, `Successfully sent key ${key} to C++ server`);
   } catch (error) {
     console.error('Error sending keypress to C++ server:', error);
-    
-    // In preview mode, return a simulated success response for better UX
-    if (IS_PREVIEW_MODE) {
-      return {
-        status: 200,
-        message: `Simulated: Successfully sent key ${key} to C++ server (preview mode)`
-      };
-    }
     
     // Implement retry logic
     if (retries < MAX_RETRIES && error.name !== 'AbortError') {
@@ -198,6 +220,16 @@ export const sendKeyPress = async (key: string, retries = 0): Promise<any> => {
  * @returns Promise with the server response
  */
 export const closeGames = async (gameName?: string, retries = 0): Promise<any> => {
+  if (IS_PREVIEW_MODE) {
+    console.log(`Preview mode detected for close games. Simulating response.`);
+    
+    // In preview mode, return a simulated success response
+    return {
+      status: 200,
+      message: `Simulated: Successfully closed ${gameName || 'all games'} (preview mode)`
+    };
+  }
+  
   console.log(`Closing games ${gameName ? `(${gameName})` : ''} - direct C++ server request${retries > 0 ? ` (retry ${retries}/${MAX_RETRIES})` : ''}`);
   
   try {
@@ -212,26 +244,9 @@ export const closeGames = async (gameName?: string, retries = 0): Promise<any> =
       body: JSON.stringify(payload)
     });
     
-    if (IS_PREVIEW_MODE && response.status === 0) {
-      // In preview mode with no-cors, we can't read the response
-      // so we'll simulate a successful response
-      return {
-        status: 200,
-        message: `Simulated: Successfully closed ${gameName || 'all games'} (preview mode)`
-      };
-    }
-    
     return await processResponse(response, `Successfully closed ${gameName || 'all games'} via C++ server`);
   } catch (error) {
     console.error('Error closing games via C++ server:', error);
-    
-    // In preview mode, return a simulated success response for better UX
-    if (IS_PREVIEW_MODE) {
-      return {
-        status: 200,
-        message: `Simulated: Successfully closed ${gameName || 'all games'} (preview mode)`
-      };
-    }
     
     // Implement retry logic
     if (retries < MAX_RETRIES && error.name !== 'AbortError') {
@@ -251,6 +266,14 @@ export const closeGames = async (gameName?: string, retries = 0): Promise<any> =
  * @returns Promise with boolean indicating if server is healthy
  */
 export const checkServerHealth = async (retries = 0, silent = false): Promise<boolean> => {
+  if (IS_PREVIEW_MODE) {
+    if (!silent) {
+      console.log("Preview mode detected, simulating C++ server availability");
+    }
+    // In preview mode, we'll always consider the server "healthy"
+    return true;
+  }
+  
   try {
     // Use a shorter timeout for health checks
     const controller = new AbortController();
@@ -261,15 +284,6 @@ export const checkServerHealth = async (retries = 0, silent = false): Promise<bo
     });
     
     clearTimeout(timeoutId);
-    
-    // In preview mode with no-cors, a status of 0 means we got an opaque response
-    // which doesn't tell us much, but at least the request didn't fail
-    if (IS_PREVIEW_MODE && response.status === 0) {
-      if (!silent) {
-        console.log("Preview mode detected, assuming C++ server is available for demo purposes");
-      }
-      return true;
-    }
     
     // Reset the error flag when connection is successful
     if (hasLoggedConnectionError) {
@@ -284,14 +298,6 @@ export const checkServerHealth = async (retries = 0, silent = false): Promise<bo
     if (!hasLoggedConnectionError && !silent) {
       console.error('C++ server health check failed:', error);
       hasLoggedConnectionError = true;
-    }
-    
-    // In preview mode, we'll consider the server "healthy" for demo purposes
-    if (IS_PREVIEW_MODE) {
-      if (!silent && !hasLoggedConnectionError) {
-        console.log("Preview mode detected, simulating C++ server availability for demo purposes");
-      }
-      return true;
     }
     
     // Implement retry logic for health checks
@@ -311,6 +317,16 @@ export const checkServerHealth = async (retries = 0, silent = false): Promise<bo
  * @returns Promise with the server response
  */
 export const launchGameByCode = async (gameCode: string): Promise<any> => {
+  if (IS_PREVIEW_MODE) {
+    console.log(`Preview mode detected for launch game. Simulating response.`);
+    
+    // In preview mode, return a simulated success response
+    return {
+      status: 200,
+      message: `Simulated: Successfully launched game with code ${gameCode} (preview mode)`
+    };
+  }
+  
   console.log(`Launching game with code: ${gameCode}`);
   
   try {
@@ -323,26 +339,9 @@ export const launchGameByCode = async (gameCode: string): Promise<any> => {
       body: JSON.stringify({ key: gameCode.toLowerCase() })
     });
     
-    if (IS_PREVIEW_MODE && response.status === 0) {
-      // In preview mode with no-cors, we can't read the response
-      // so we'll simulate a successful response
-      return {
-        status: 200,
-        message: `Simulated: Successfully launched game with code ${gameCode} (preview mode)`
-      };
-    }
-    
     return await processResponse(response, `Successfully launched game with code ${gameCode}`);
   } catch (error) {
     console.error(`Error launching game with code ${gameCode}:`, error);
-    
-    // In preview mode, return a simulated success response for better UX
-    if (IS_PREVIEW_MODE) {
-      return {
-        status: 200,
-        message: `Simulated: Successfully launched game with code ${gameCode} (preview mode)`
-      };
-    }
     
     // If we exceed the maximum number of retries or it was an abort, throw the error
     throw error;
@@ -366,4 +365,3 @@ export const gameLaunchCodes: Record<string, string> = {
   "Creed: Rise to Glory Championship Edition": "g",
   "Beat Saber": "w"
 };
-

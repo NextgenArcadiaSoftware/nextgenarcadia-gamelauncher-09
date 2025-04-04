@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
@@ -110,7 +111,7 @@ export function CppServerStatus({ onRetry, silent = false }: CppServerStatusProp
       <Alert className="bg-blue-100 border-blue-500">
         <AlertTitle className="text-blue-800">Preview Mode Active</AlertTitle>
         <AlertDescription className="text-blue-700">
-          <p>Running in Lovable preview environment. C++ server interactions are simulated.</p>
+          <p>Running in preview environment. C++ server interactions are simulated.</p>
           <p className="mt-1 text-xs">In production, this will connect to your local C++ server.</p>
         </AlertDescription>
       </Alert>
