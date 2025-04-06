@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 import { Button } from '@/components/ui/button';
@@ -35,14 +36,14 @@ export default function SportsLaunch() {
           console.log('Server responded with status:', response.status);
           setRequestStatus(`Server responded with status: ${response.status}`);
           
-          if (response.status === 204) {
-            // 204 = Success with No Content response
+          if (response.status === 204 || response.ok) {
+            // Success response
             toast({
               title: "Game Termination",
               description: "Successfully sent close command to server",
               variant: "default"
             });
-          } else if (!response.ok) {
+          } else {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           

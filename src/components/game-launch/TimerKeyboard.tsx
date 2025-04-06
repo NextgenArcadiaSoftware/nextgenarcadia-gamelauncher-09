@@ -20,11 +20,9 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   ];
 
-  // Check server connectivity on mount
   useEffect(() => {
     checkServerConnectivity();
     
-    // Set up periodic connectivity checks
     const intervalId = setInterval(checkServerConnectivity, 10000);
     
     return () => {
@@ -33,27 +31,16 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   }, []);
 
   const checkServerConnectivity = () => {
-    fetch('http://localhost:5002/close', {
-      method: 'POST',
+    fetch('http://localhost:5002/keypress', {
+      method: 'HEAD',
       signal: AbortSignal.timeout(2000),
-      headers: { 
-        'Accept-Charset': 'UTF-8',
-        'Content-Type': 'application/json'
-      }
     })
       .then(response => {
-        if (response.ok || response.status === 204) {
+        if (response.ok || response.status === 404) {
           setConnectionError(false);
           setReconnectAttempts(0);
         } else {
-          // Handle 404 status which might still mean server is running but endpoint not available
-          if (response.status === 404) {
-            console.log("Server running but endpoint is missing");
-            setConnectionError(false);
-            setReconnectAttempts(0);
-          } else {
-            throw new Error(`Server returned: ${response.status}`);
-          }
+          throw new Error(`Server returned: ${response.status}`);
         }
       })
       .catch(() => {
@@ -64,15 +51,12 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   const handleKeyClick = (key: string) => {
     console.log(`Timer Keyboard - Key pressed: ${key}`);
     
-    // Use port 5002 for the Python server
     const serverUrl = 'http://localhost:5002'; 
     
-    // For X key, use the close endpoint instead of keypress
     const endpoint = key === 'X' ? 'close' : 'keypress';
     
-    // Payload for Python server
     const payload = key === 'X' 
-      ? {} // Python server doesn't need any payload for close
+      ? {} 
       : { key: key.toLowerCase() };
     
     console.log(`Sending to Python server:`, payload);
@@ -84,7 +68,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         "Accept-Charset": "UTF-8"
       },
       body: JSON.stringify(payload),
-      // Set timeout to avoid hanging requests
       signal: AbortSignal.timeout(2000)
     })
     .then(response => {
@@ -92,7 +75,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       setLastStatus(response.status);
       setConnectionError(false);
       
-      // Handle empty responses (204 No Content)
       if (response.status === 204) {
         return key === 'X' ? 
           "Game close command successful" : 
@@ -103,41 +85,38 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      // Ensure UTF-8 decoding of response text
       return response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
     })
     .then(text => {
       console.log('Python server response:', text);
       
-      // Set the response message
       setLastResponse(text);
       
-      // Show toast based on key and status
       if (key === 'X') {
         toast({
           title: "Game Termination",
           description: "Closing all active games...",
           variant: "destructive"
         });
-      } else if (key === 'F') { // Fruit Ninja
+      } else if (key === 'F') {
         toast({
           title: "Game Launched",
           description: "Launching Fruit Ninja VR...",
           variant: "default"
         });
-      } else if (key === 'E') { // Elven Assassin
+      } else if (key === 'E') {
         toast({
           title: "Game Launched",
           description: "Launching Elven Assassin...",
           variant: "default"
         });
-      } else if (key === 'C') { // Crisis Brigade
+      } else if (key === 'C') {
         toast({
           title: "Game Launched",
           description: "Launching Crisis Brigade 2...",
           variant: "default"
         });
-      } else if (key === 'V') { // All-in-One Sports
+      } else if (key === 'V') {
         toast({
           title: "Game Launched",
           description: "Launching All-in-One Sports VR...",
@@ -151,7 +130,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         });
       }
       
-      // Create and dispatch a real DOM keyboard event
       const event = new KeyboardEvent("keydown", {
         key: key.toLowerCase(),
         code: `Key${key}`,
@@ -166,7 +144,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       console.error('Error sending keypress to Python server:', error);
       setConnectionError(true);
       
-      // Increment reconnect attempts
       setReconnectAttempts(prev => prev + 1);
       
       toast({
@@ -175,12 +152,10 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         description: "Could not connect to the Python server"
       });
       
-      // Try fallback methods through Electron
       if (window.electron) {
         console.log("Falling back to Electron keypress simulation");
         window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
         
-        // For X key specifically, also send the end-game command
         if (key === 'X') {
           console.log("Sending end-game command via Electron");
           window.electron.ipcRenderer.send('end-game');
@@ -188,7 +163,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       }
     });
     
-    // Call the original onKeyPress handler
     onKeyPress(key);
   };
 

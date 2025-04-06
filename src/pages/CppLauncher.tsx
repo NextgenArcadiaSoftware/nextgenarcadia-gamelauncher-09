@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { Keyboard } from 'lucide-react';
 
 // Using the Python server port now
@@ -42,18 +41,16 @@ const CppLauncher: React.FC = () => {
   const checkServerConnection = async () => {
     setServerStatus('checking');
     try {
-      const res = await fetch(`${API_URL}/close`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // Use a HEAD request instead of POST to /close
+      const res = await fetch(`${API_URL}/keypress`, {
+        method: 'HEAD',
         signal: AbortSignal.timeout(2000) // 2 second timeout
       });
       
-      if (res.ok) {
+      if (res.ok || res.status === 404) {
+        // Even a 404 means the server is running
         setServerStatus('connected');
-        const data = await res.json();
-        console.log("Server health check:", data);
+        console.log("Server health check successful");
       } else {
         setServerStatus('disconnected');
         console.error("Server returned error:", res.status, res.statusText);
