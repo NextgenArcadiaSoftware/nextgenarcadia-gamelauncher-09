@@ -9,6 +9,8 @@ import { OwnerDashboard } from "@/components/OwnerDashboard";
 import { GameShowcase } from "@/components/GameShowcase";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const GAME_TRIGGERS: Record<string, string> = {
   "Elven Assassin": "start_elven",
@@ -58,7 +60,7 @@ const CREED = {
   thumbnail: "/placeholder.svg",
   executable_path: "steam://rungameid/2147530",
   launch_code: "CREED",
-  status: "enabled" as const,
+  status: "enabled",
   trailer: "https://www.youtube.com/watch?v=EgbCMJ54xeM"
 };
 
@@ -192,6 +194,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const categories = ["All", "Action", "FPS", "Horror", "Sports", "Simulation", "Adventure", "Rhythm"];
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchGames();
@@ -395,6 +398,22 @@ const Index = () => {
         <div className="flex flex-col space-y-8">
           <div className="glass p-4 flex justify-between items-center rounded-3xl transition-all duration-300">
             <Header />
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                className="border-white/20 text-white hover:bg-white/10 hover:border-white/30"
+                onClick={() => navigate('/game-flow')}
+              >
+                New Game Flow
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-white/20 text-white hover:bg-white/10 hover:border-white/30"
+                onClick={() => navigate('/cpp-launcher')}
+              >
+                CPP Launcher
+              </Button>
+            </div>
           </div>
 
           {isLoading ? (

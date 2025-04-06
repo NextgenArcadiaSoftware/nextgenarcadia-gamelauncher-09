@@ -1,4 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Keyboard, Timer, Play, X, Activity, Settings, Eye, EyeOff, Server } from 'lucide-react';
@@ -33,8 +35,8 @@ const CppLauncher: React.FC = () => {
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const [showTimer, setShowTimer] = useState(false);
   const [timerDuration, setTimerDuration] = useState(300); // 5 minutes default
-  const [showControlPanel, setShowControlPanel] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Check server connectivity on component mount
   useEffect(() => {
@@ -214,9 +216,18 @@ const CppLauncher: React.FC = () => {
   return (
     <div className="container mx-auto p-4 bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] min-h-screen text-white">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-[#9b87f5] to-[#D6BCFA] bg-clip-text text-transparent">
-          VR Game Control Center
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-[#9b87f5] to-[#D6BCFA] bg-clip-text text-transparent">
+            VR Game Control Center
+          </h1>
+          <Button 
+            variant="outline" 
+            className="border-[#7E69AB]/50 text-[#D6BCFA] hover:bg-[#33274F]/50"
+            onClick={() => navigate('/game-flow')}
+          >
+            Try New Game Flow
+          </Button>
+        </div>
         
         <Card className="bg-[#222232] border-[#33274F] text-white shadow-lg mb-8">
           <CardHeader>
@@ -267,11 +278,10 @@ const CppLauncher: React.FC = () => {
         {serverStatus === 'disconnected' && (
           <Card className="bg-red-900/20 border-red-700 text-white mb-8 animate-pulse">
             <CardContent className="p-4 flex items-center">
-              <Server className="h-5 w-5 mr-3 text-red-400" />
               <div>
                 <h3 className="text-lg font-semibold text-red-300">Server Connection Issue</h3>
                 <p className="text-sm text-red-200/80">
-                  Unable to connect to the Python key listener. Make sure the server is running and accessible.
+                  Unable to connect to the game server. Service may be unavailable.
                 </p>
               </div>
               <Button 

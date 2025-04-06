@@ -1,0 +1,355 @@
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { Play, X, Gamepad } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { TimerDisplay } from './TimerDisplay';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+
+// Game key mappings - same as in CppLauncher
+const GAME_KEYS = {
+  "f": "Fruit Ninja",
+  "c": "Crisis VRigade 2",
+  "s": "Subside Demo",
+  "p": "Richie's Plank Experience",
+  "i": "iBCricket",
+  "a": "Arizona Sunshine",
+  "u": "Undead Citadel Demo",
+  "e": "Elven Assassin",
+  "r": "RollerCoaster Legends",
+  "v": "All-In-One Sports VR",
+  "g": "Creed Rise to Glory",
+  "w": "Beat Saber",
+  "z": "Close All Games"
+};
+
+export const GameSelectionFlow: React.FC = () => {
+  const [showRFIDScreen, setShowRFIDScreen] = useState(true);
+  const [showGameSelection, setShowGameSelection] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
+  const [activeGame, setActiveGame] = useState<string | null>(null);
+  const [timerDuration, setTimerDuration] = useState(300); // 5 minutes default
+  const [loading, setLoading] = useState(false);
+  const [rfidInput, setRfidInput] = useState('');
+  const [serverStatus, setServerStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+  
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Check server connectivity on component mount
+  useEffect(() => {
+    checkServerConnection();
+    
+    // Set up periodic health checks
+    const intervalId = setInterval(checkServerConnection, 10000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const checkServerConnection = async () => {
+    setServerStatus('checking');
+    try {
+      const res = await fetch(`${API_URL}/keypress`, {
+        method: 'HEAD',
+        signal: AbortSignal.timeout(2000) // 2 second timeout
+      });
+      
+      if (res.ok || res.status === 404) {
+        // Even a 404 means the server is running
+        setServerStatus('connected');
+        console.log("Server health check successful");
+      } else {
+        setServerStatus('disconnected');
+        console.error("Server returned error:", res.status, res.statusText);
+      }
+    } catch (error) {
+      setServerStatus('disconnected');
+      console.error('Error checking server connection:', error);
+    }
+  };
+
+  // Listen for RFID input (simulated with number keys)
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (showRFIDScreen && /^\d$/.test(event.key)) {
+        setRfidInput(prev => {
+          const newInput = prev + event.key;
+          // Check if we have a complete RFID number (10+ digits)
+          if (newInput.length >= 10) {
+            handleRFIDSuccess();
+            return '';
+          }
+          return newInput;
+        });
+      }
+    };
+    
+    window.addEventListener('keypress', handleKeyPress);
+    return () => window.removeEventListener('keypress', handleKeyPress);
+  }, [showRFIDScreen]);
+
+  const handleRFIDSuccess = () => {
+    setShowRFIDScreen(false);
+    setShowGameSelection(true);
+    toast({
+      title: "✅ RFID Card Detected",
+      description: "You can now select a game to play"
+    });
+  };
+
+  const sendKey = async (key: string) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/keypress`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ key }),
+      });
+      
+      if (res.ok) {
+        // Set the active game and show timer
+        const gameName = GAME_KEYS[key as keyof typeof GAME_KEYS];
+        setActiveGame(gameName);
+        setShowGameSelection(false);
+        setShowTimer(true);
+        
+        toast({
+          title: "Game Launched",
+          description: `Successfully launched ${gameName}`,
+        });
+      } else {
+        toast({
+          title: "Game Launch Failed",
+          description: `Error: ${res.status} ${res.statusText}`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error sending key to Python server:', error);
+      toast({
+        title: "Game Launch Failed",
+        description: `Could not connect to the server at ${API_URL}`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const closeGames = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/close`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (res.ok) {
+        // Reset active game and hide timer
+        setActiveGame(null);
+        setShowTimer(false);
+        setShowGameSelection(true);
+        
+        toast({
+          title: "Games Closed",
+          description: "Successfully closed all games",
+        });
+      } else {
+        toast({
+          title: "Close Command Failed",
+          description: `Error: ${res.status} ${res.statusText}`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error sending close command to Python server:', error);
+      toast({
+        title: "Close Command Failed",
+        description: `Could not send close command to the server at ${API_URL}`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTimerExit = () => {
+    closeGames();
+    setShowTimer(false);
+    setShowGameSelection(true);
+  };
+
+  const handleReturnToLibrary = () => {
+    navigate('/');
+  };
+
+  // RFID Authentication Screen
+  if (showRFIDScreen) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] flex flex-col items-center justify-center z-50">
+        <div className="text-center max-w-3xl mx-auto p-8">
+          <h1 className="text-4xl font-bold text-[#D6BCFA] mb-6">Welcome to VR Game Center</h1>
+          <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-white/20 bg-[#222232]/50 backdrop-blur-xl">
+            <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-3xl font-bold py-4 text-center tracking-wide">
+              TAP RFID CARD TO START
+            </div>
+            <div className="text-xl text-white/80 mb-8">
+              Please tap your RFID card on the reader to begin your VR gaming session
+            </div>
+            
+            {/* For demo purposes, add a button to simulate RFID */}
+            <Button 
+              onClick={handleRFIDSuccess}
+              className="mx-auto bg-[#6E59A5] hover:bg-[#7E69AB] text-white p-8 h-auto text-xl font-bold"
+            >
+              Simulate RFID Card Tap
+            </Button>
+            
+            <div className="mt-8">
+              <Button variant="outline" onClick={handleReturnToLibrary}>
+                Return to Library
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {serverStatus === 'disconnected' && (
+          <Card className="fixed bottom-4 left-4 bg-red-900/20 border-red-700 text-white max-w-md animate-pulse">
+            <CardContent className="p-4 flex items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-red-300">Server Connection Issue</h3>
+                <p className="text-sm text-red-200/80">
+                  Unable to connect to the game server. Service may be unavailable.
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={checkServerConnection}
+                className="ml-auto border-red-700 bg-red-900/50 text-red-300 hover:bg-red-800"
+              >
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // Game Selection Screen
+  if (showGameSelection) {
+    return (
+      <div className="container mx-auto p-4 bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] min-h-screen text-white">
+        <div className="max-w-5xl mx-auto">
+          <h1 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-[#9b87f5] to-[#D6BCFA] bg-clip-text text-transparent">
+            Select Your VR Game
+          </h1>
+          
+          <Card className="bg-[#222232] border-[#33274F] text-white shadow-lg mb-8">
+            <CardHeader>
+              <CardTitle className="text-[#D6BCFA]">VR Game Library</CardTitle>
+              <CardDescription className="text-[#9b87f5]/80">
+                Click on a game to launch in VR
+              </CardDescription>
+            </CardHeader>
+            <Separator className="bg-[#6E59A5]/30 mb-2" />
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {Object.entries(GAME_KEYS).filter(([k]) => k !== 'z').map(([key, gameName]) => (
+                  <Button 
+                    key={key}
+                    onClick={() => sendKey(key)}
+                    disabled={loading}
+                    className="flex flex-col items-center justify-center h-28 
+                             bg-gradient-to-br from-[#33274F] to-[#222232]
+                             hover:from-[#6E59A5] hover:to-[#33274F]
+                             border border-[#7E69AB]/30 shadow-md
+                             transition-all duration-300 group"
+                  >
+                    <div className="relative">
+                      <Gamepad className="h-6 w-6 mb-1 text-[#9b87f5] group-hover:opacity-0 
+                                          transition-opacity duration-300 absolute top-0 left-1/2 -translate-x-1/2" />
+                      <Play className="h-6 w-6 mb-1 text-white opacity-0 group-hover:opacity-100 
+                                     transition-opacity duration-300 absolute top-0 left-1/2 -translate-x-1/2" />
+                    </div>
+                    <div className="h-6" /> {/* Spacer for icon */}
+                    <span className="text-lg font-bold text-[#D6BCFA] group-hover:text-white">{key.toUpperCase()}</span>
+                    <span className="text-xs text-center text-[#E5DEFF]/80 group-hover:text-white/90 transition-colors">{gameName}</span>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button 
+                onClick={handleReturnToLibrary}
+                variant="outline"
+                className="border-[#7E69AB]/50 text-[#D6BCFA] hover:bg-[#33274F]/50"
+              >
+                Back to Library
+              </Button>
+              
+              <Button 
+                onClick={closeGames} 
+                variant="destructive"
+                className="bg-[#ea384c] hover:bg-[#c01933] text-white px-8"
+                disabled={loading}
+              >
+                <X className="mr-2 h-5 w-5" /> Close All Games
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+        
+        {serverStatus === 'disconnected' && (
+          <Card className="bg-red-900/20 border-red-700 text-white mb-8 animate-pulse max-w-lg mx-auto">
+            <CardContent className="p-4 flex items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-red-300">Server Connection Issue</h3>
+                <p className="text-sm text-red-200/80">
+                  Unable to connect to the game server. Service may be unavailable.
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={checkServerConnection}
+                className="ml-auto border-red-700 bg-red-900/50 text-red-300 hover:bg-red-800"
+              >
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // Timer Display
+  if (showTimer && activeGame) {
+    return (
+      <TimerDisplay 
+        timeLeft={timerDuration} 
+        activeGame={activeGame} 
+        onExit={handleTimerExit} 
+      />
+    );
+  }
+
+  // Fallback
+  return (
+    <div className="container mx-auto p-4 flex items-center justify-center min-h-screen">
+      <Button onClick={() => setShowRFIDScreen(true)}>
+        Start Game Flow
+      </Button>
+    </div>
+  );
+};
