@@ -302,7 +302,7 @@ if __name__ == "__main__":
         keyboard.on_press(on_key_event)
         
         logger.info("=== Game Launcher Server ===")
-        logger.info("Starting server on http://localhost:5001")
+        logger.info("Starting server on http://localhost:5002")
         logger.info("Key mappings:")
         for k, code in {
             'F': 'Fruit Ninja VR',
@@ -329,7 +329,7 @@ if __name__ == "__main__":
         logger.info("GET /health -> Check server health")
         
         # Run the Flask app with threaded=True for better handling of concurrent requests
-        app.run(host='localhost', port=5001, debug=True, threaded=True)
+        app.run(host='localhost', port=5002, debug=True, threaded=True)
         
     except Exception as e:
         logger.critical(f"Error starting server: {str(e)}")

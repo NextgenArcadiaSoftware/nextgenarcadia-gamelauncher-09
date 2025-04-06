@@ -70,8 +70,8 @@ function initExternalButtonListener() {
     });
   });
   
-  server.listen(5005, () => {
-    console.log('External button listener server running on port 5005');
+  server.listen(5002, () => {
+    console.log('External button listener server running on port 5002');
   });
 }
 
@@ -153,7 +153,7 @@ function initWebhookEndpoint() {
             
             // For C++ App, connect to local C++ server
             if (payload.game === 'C++ App') {
-              fetch('http://localhost:5001/launch', {
+              fetch('http://localhost:5002/launch', {
                 method: 'POST',
                 headers: { 
                   'Content-Type': 'application/json; charset=utf-8',
@@ -186,7 +186,7 @@ function initWebhookEndpoint() {
             
             // For C++ App, connect to local C++ server
             if (payload.game === 'C++ App') {
-              fetch('http://localhost:5001/close', {
+              fetch('http://localhost:5002/close', {
                 method: 'POST',
                 headers: { 
                   'Content-Type': 'application/json; charset=utf-8',
@@ -207,7 +207,7 @@ function initWebhookEndpoint() {
               });
             } else {
               // Try to send close command to C++ server (legacy support)
-              fetch('http://localhost:5001/close', {
+              fetch('http://localhost:5002/close', {
                 method: 'POST',
                 headers: { 
                   'Content-Type': 'application/json; charset=utf-8',
@@ -273,7 +273,7 @@ ipcMain.on('simulate-keypress', async (event, key) => {
   console.log('Received key press in main process:', key);
 
   try {
-    const serverUrl = 'http://localhost:5001';
+    const serverUrl = 'http://localhost:5002';
     const endpoint = key.toLowerCase() === 'x' ? 'close' : 'keypress';
     
     // Simplified payload for C++ server
@@ -385,7 +385,7 @@ ipcMain.on('end-game', async (event) => {
   console.log('Received end-game command in main process');
 
   try {
-    const response = await fetch('http://localhost:5001/close', {
+    const response = await fetch('http://localhost:5002/close', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',

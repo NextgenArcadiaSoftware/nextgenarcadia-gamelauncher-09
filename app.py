@@ -1,3 +1,4 @@
+
 import sys
 import codecs
 from flask import Flask, request, jsonify
@@ -259,7 +260,7 @@ if __name__ == '__main__':
     logger.info("\n=== Game Launcher Server ===")
     logger.info("Server Configuration:")
     logger.info("- Debug level logging enabled")
-    logger.info("- Server running on: http://localhost:5001")
+    logger.info("- Server running on: http://localhost:5002")  // Updated port
     logger.info("\nEndpoints:")
     logger.info("- POST /keypress - Send a key press")
     logger.info("- POST /close - Close the current game")
@@ -267,4 +268,4 @@ if __name__ == '__main__':
     logger.info("- POST /stop - Stop the current game")
     logger.info("\nStarting server...")
     
-    app.run(host='localhost', port=5001, debug=True, threaded=True)
+    app.run(host='localhost', port=5002, debug=True, threaded=True)  // Updated port
