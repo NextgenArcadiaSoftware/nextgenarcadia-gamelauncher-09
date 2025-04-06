@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Keyboard } from 'lucide-react';
 
 // Using the Python server port now
@@ -27,6 +27,7 @@ const CppLauncher: React.FC = () => {
   const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [serverStatus, setServerStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+  const { toast } = useToast();
 
   // Check server connectivity on component mount
   useEffect(() => {
