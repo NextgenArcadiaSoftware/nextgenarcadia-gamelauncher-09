@@ -1,3 +1,4 @@
+
 import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { exec } from 'child_process';
@@ -70,8 +71,8 @@ function initExternalButtonListener() {
     });
   });
   
-  server.listen(5002, () => {
-    console.log('External button listener server running on port 5002');
+  server.listen(5005, () => {
+    console.log('External button listener server running on port 5005');
   });
 }
 
@@ -273,15 +274,16 @@ ipcMain.on('simulate-keypress', async (event, key) => {
   console.log('Received key press in main process:', key);
 
   try {
+    // Use the Python server URL now
     const serverUrl = 'http://localhost:5002';
     const endpoint = key.toLowerCase() === 'x' ? 'close' : 'keypress';
     
-    // Simplified payload for C++ server
+    // Simplified payload for Python server
     const payload = key.toLowerCase() === 'x' ? 
       {} : 
       { key: key.toLowerCase() };
     
-    console.log(`Sending to C++ server: ${endpoint}`, payload);
+    console.log(`Sending to Python server: ${endpoint}`, payload);
     
     const response = await fetch(`${serverUrl}/${endpoint}`, {
       method: 'POST',
@@ -293,7 +295,7 @@ ipcMain.on('simulate-keypress', async (event, key) => {
       signal: AbortSignal.timeout(5000)
     });
 
-    console.log('C++ server status:', response.status);
+    console.log('Python server status:', response.status);
     
     // Special handling for 204 No Content responses
     if (response.status === 204) {
@@ -322,7 +324,7 @@ ipcMain.on('simulate-keypress', async (event, key) => {
       new TextDecoder('utf-8').decode(new TextEncoder().encode(text))
     );
     
-    console.log('C++ server response:', text);
+    console.log('Python server response:', text);
     
     // Forward the response to renderer
     if (mainWindow) {
@@ -333,7 +335,7 @@ ipcMain.on('simulate-keypress', async (event, key) => {
       });
     }
   } catch (error) {
-    console.error('Error sending key press to C++ server:', error);
+    console.error('Error sending key press to Python server:', error);
     
     // Send a generic error event to renderer
     if (mainWindow) {

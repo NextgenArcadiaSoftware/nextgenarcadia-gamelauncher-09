@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
@@ -34,9 +33,13 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   }, []);
 
   const checkServerConnectivity = () => {
-    fetch('http://localhost:5001/health', {
+    fetch('http://localhost:5002/close', {
+      method: 'POST',
       signal: AbortSignal.timeout(2000),
-      headers: { 'Accept-Charset': 'UTF-8' }
+      headers: { 
+        'Accept-Charset': 'UTF-8',
+        'Content-Type': 'application/json'
+      }
     })
       .then(response => {
         if (response.ok || response.status === 204) {
@@ -45,7 +48,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         } else {
           // Handle 404 status which might still mean server is running but endpoint not available
           if (response.status === 404) {
-            console.log("Server running but health endpoint is missing");
+            console.log("Server running but endpoint is missing");
             setConnectionError(false);
             setReconnectAttempts(0);
           } else {
@@ -61,18 +64,18 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   const handleKeyClick = (key: string) => {
     console.log(`Timer Keyboard - Key pressed: ${key}`);
     
-    // Use port 5001 for the C++ server
-    const serverUrl = 'http://localhost:5001'; 
+    // Use port 5002 for the Python server
+    const serverUrl = 'http://localhost:5002'; 
     
     // For X key, use the close endpoint instead of keypress
     const endpoint = key === 'X' ? 'close' : 'keypress';
     
-    // Simplified payload for C++ server
+    // Payload for Python server
     const payload = key === 'X' 
-      ? {} // C++ server doesn't need any payload for close
+      ? {} // Python server doesn't need any payload for close
       : { key: key.toLowerCase() };
     
-    console.log(`Sending to C++ server:`, payload);
+    console.log(`Sending to Python server:`, payload);
     
     fetch(`${serverUrl}/${endpoint}`, {
       method: "POST",
@@ -104,7 +107,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       return response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
     })
     .then(text => {
-      console.log('C++ server response:', text);
+      console.log('Python server response:', text);
       
       // Set the response message
       setLastResponse(text);
@@ -160,7 +163,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       document.dispatchEvent(event);
     })
     .catch(error => {
-      console.error('Error sending keypress to C++ server:', error);
+      console.error('Error sending keypress to Python server:', error);
       setConnectionError(true);
       
       // Increment reconnect attempts
@@ -169,7 +172,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       toast({
         variant: "destructive",
         title: "Connection Error",
-        description: "Could not connect to the C++ server"
+        description: "Could not connect to the Python server"
       });
       
       // Try fallback methods through Electron
@@ -195,7 +198,7 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         <Alert variant="destructive" className="mb-4">
           <AlertTitle>Connection Error</AlertTitle>
           <AlertDescription>
-            Unable to connect to the C++ server. {reconnectAttempts > 0 && `Attempted ${reconnectAttempts} reconnects.`}
+            Unable to connect to the Python server. {reconnectAttempts > 0 && `Attempted ${reconnectAttempts} reconnects.`}
             <button 
               className="ml-2 text-white underline" 
               onClick={() => checkServerConnectivity()}

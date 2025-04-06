@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { RFIDCountdown } from '@/components/RFIDCountdown';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ export default function SportsLaunch() {
   const [serverResponse, setServerResponse] = useState<string | null>(null);
   const [requestStatus, setRequestStatus] = useState<string | null>(null);
 
-  // Set up global key event listener for both the X key and C++ program
+  // Set up global key event listener for both the X key and Python program
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       console.log(`Global keydown detected: ${e.key}`);
@@ -22,8 +21,8 @@ export default function SportsLaunch() {
         console.log('X key detected, ending game');
         setRequestStatus('Sending close command to server...');
         
-        // Send close command to C++ server
-        fetch("http://localhost:5001/close", {
+        // Send close command to Python server
+        fetch("http://localhost:5002/close", {
           method: "POST",
           headers: { 
             "Content-Type": "application/json; charset=utf-8",

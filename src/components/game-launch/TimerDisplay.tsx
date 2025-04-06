@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '../ui/button';
 import { X } from 'lucide-react';
@@ -184,8 +183,8 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         description: "Exiting game session..."
       });
       
-      // Send close command to C++ server
-      fetch("http://localhost:5001/close", {
+      // Send close command to Python server
+      fetch("http://localhost:5002/close", {
         method: "POST",
         headers: { "Content-Type": "application/json" }
       })

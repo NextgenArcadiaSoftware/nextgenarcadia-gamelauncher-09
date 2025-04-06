@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Delete, CornerDownLeft } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
@@ -37,9 +36,13 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
   }, []);
 
   const checkServerConnectivity = () => {
-    fetch('http://localhost:5001/health', {
+    fetch('http://localhost:5002/close', {
+      method: 'POST',
       signal: AbortSignal.timeout(2000),
-      headers: { 'Accept-Charset': 'UTF-8' }
+      headers: { 
+        'Accept-Charset': 'UTF-8',
+        'Content-Type': 'application/json'
+      }
     })
       .then(response => {
         if (response.ok || response.status === 204) {
@@ -73,10 +76,10 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
       {} : 
       { key: keyToSend };
     
-    console.log(`Sending to C++ server:`, payload);
+    console.log(`Sending to Python server:`, payload);
     
-    // Use port 5001 for the C++ server
-    const serverUrl = 'http://localhost:5001';
+    // Use port 5002 for the Python server
+    const serverUrl = 'http://localhost:5002';
     
     fetch(`${serverUrl}/${endpoint}`, {
       method: "POST",
@@ -108,7 +111,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
       return response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
     })
     .then(text => {
-      console.log('C++ server response:', text);
+      console.log('Python server response:', text);
       
       // Set the response message
       setLastResponse(text);
@@ -169,7 +172,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
       }
     })
     .catch(error => {
-      console.error('Error sending keypress to C++ server:', error);
+      console.error('Error sending keypress to Python server:', error);
       setConnectionError(true);
       
       // Increment reconnect attempts
@@ -178,7 +181,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
       toast({
         variant: "destructive",
         title: "Connection Error",
-        description: "Could not connect to the C++ server"
+        description: "Could not connect to the Python server"
       });
       
       // Try electron method as fallback
@@ -204,7 +207,7 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
         <Alert variant="destructive" className="mb-4">
           <AlertTitle>Connection Error</AlertTitle>
           <AlertDescription>
-            Unable to connect to the C++ server. {reconnectAttempts > 0 && `Attempted ${reconnectAttempts} reconnects.`}
+            Unable to connect to the Python server. {reconnectAttempts > 0 && `Attempted ${reconnectAttempts} reconnects.`}
             <button 
               className="ml-2 text-white underline" 
               onClick={() => checkServerConnectivity()}
