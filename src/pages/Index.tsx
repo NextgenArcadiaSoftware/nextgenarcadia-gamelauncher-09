@@ -13,19 +13,19 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
 const GAME_TRIGGERS: Record<string, string> = {
-  "Elven Assassin": "start_elven",
-  "Fruit Ninja VR": "start_ninja",
-  "Crisis Brigade 2 Reloaded": "start_crisis",
-  "All-In-One Sports VR": "start_sports",
-  "Richies Plank Experience": "start_plank",
-  "iB Cricket": "start_cricket",
-  "Undead Citadel": "start_citadel",
-  "Arizona Sunshine": "start_arizona",
-  "Subside": "start_subside",
-  "Propagation VR": "start_prop",
-  "Creed: Rise to Glory Championship Edition": "start_creed",
-  "Beat Saber": "start_beat",
-  "RollerCoaster Legends": "start_roller"
+  "Elven Assassin": "e",
+  "Fruit Ninja VR": "f",
+  "Crisis Brigade 2 Reloaded": "c",
+  "All-In-One Sports VR": "v",
+  "Richies Plank Experience": "p",
+  "iB Cricket": "i",
+  "Undead Citadel": "u",
+  "Arizona Sunshine II": "a",
+  "Subside": "s",
+  "Propagation VR": "g",
+  "Creed: Rise to Glory Championship Edition": "g",
+  "Beat Saber": "w",
+  "RollerCoaster Legends": "r"
 };
 
 const ROLLERCOASTER_LEGENDS = {
@@ -192,9 +192,12 @@ const Index = () => {
   const [canPlayGames, setCanPlayGames] = useState(false);
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [rfidStage, setRfidStage] = useState<'initial' | 'authenticated' | 'game-selected'>('initial');
+  const [selectedGameForLaunch, setSelectedGameForLaunch] = useState<Game | null>(null);
   const { toast } = useToast();
   const categories = ["All", "Action", "FPS", "Horror", "Sports", "Simulation", "Adventure", "Rhythm"];
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
   useEffect(() => {
     fetchGames();
@@ -205,7 +208,6 @@ const Index = () => {
     console.log('Starting game fetch from Supabase...');
     
     try {
-      // Test connection first
       const { data: testData, error: testError } = await supabase
         .from('games')
         .select('count');
@@ -217,7 +219,6 @@ const Index = () => {
       
       console.log('Supabase connection test successful, fetching games...');
       
-      // Fetch actual games data
       const { data, error } = await supabase
         .from('games')
         .select('*')
@@ -233,7 +234,6 @@ const Index = () => {
       if (data && data.length > 0) {
         console.log(`Successfully fetched ${data.length} games`);
         
-        // Ensure all game objects have required properties
         const typedGames = data.map(game => ({
           ...game,
           id: game.id || crypto.randomUUID(),
@@ -263,14 +263,12 @@ const Index = () => {
   
   const addDefaultGames = async () => {
     try {
-      // Use your existing default game constants
       const defaultGames = [ALL_IN_ONE_SPORTS, FRUIT_NINJA, RICHIES_PLANK, ELVEN_ASSASSIN, 
         UNDEAD_CITADEL, ARIZONA_SUNSHINE, IB_CRICKET, PROPAGATION, SUBSIDE, 
         CRISIS_BRIGADE, CREED, BEAT_SABER, ROLLERCOASTER_LEGENDS] as Game[];
       
       console.log(`Adding ${defaultGames.length} default games to database`);
       
-      // Add each default game to the database
       for (const game of defaultGames) {
         const { error } = await supabase
           .from('games')
@@ -300,7 +298,6 @@ const Index = () => {
       });
     } catch (error) {
       console.error('Error adding default games:', error);
-      // If all else fails, just set the default games in state without DB insert
       const defaultGames = [ALL_IN_ONE_SPORTS, FRUIT_NINJA, RICHIES_PLANK, ELVEN_ASSASSIN, 
         UNDEAD_CITADEL, ARIZONA_SUNSHINE, IB_CRICKET, PROPAGATION, SUBSIDE, 
         CRISIS_BRIGADE, CREED, BEAT_SABER, ROLLERCOASTER_LEGENDS] as Game[];
@@ -338,11 +335,57 @@ const Index = () => {
 
   const handlePlayGame = async (title: string, executablePath: string) => {
     if (!canPlayGames) {
+      setShowRFIDCountdown(true);
       return;
     }
+
     try {
-      setActiveGame(title);
-      console.log('Game started:', title, 'Path:', executablePath);
+      const gameToLaunch = games.find(game => game.title === title);
+      
+      if (gameToLaunch) {
+        setSelectedGameForLaunch(gameToLaunch);
+        setRfidStage('game-selected');
+        setActiveGame(title);
+        
+        const launchKey = GAME_TRIGGERS[title];
+        
+        if (launchKey) {
+          console.log(`Launching game with key: ${launchKey} for game: ${title}`);
+          
+          try {
+            const res = await fetch(`${API_URL}/keypress`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ key: launchKey }),
+            });
+            
+            if (res.ok) {
+              toast({
+                title: "Game Launched",
+                description: `Successfully launched ${title}`,
+              });
+            } else {
+              toast({
+                title: "Game Launch Failed",
+                description: `Error: ${res.status} ${res.statusText}`,
+                variant: "destructive",
+              });
+            }
+          } catch (error) {
+            console.error('Error sending key to Python server:', error);
+            toast({
+              title: "Game Launch Failed",
+              description: `Could not connect to the server at ${API_URL}`,
+              variant: "destructive",
+            });
+          }
+        } else {
+          console.log(`No launch key mapping found for game: ${title}`);
+          console.log('Game started:', title, 'Path:', executablePath);
+        }
+      }
     } catch (error) {
       console.error('Error starting game:', error);
       toast({
@@ -353,10 +396,36 @@ const Index = () => {
     }
   };
 
-  const handleExitSession = () => {
+  const handleExitSession = async () => {
+    try {
+      const res = await fetch(`${API_URL}/close`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (res.ok) {
+        toast({
+          title: "Games Closed",
+          description: "Successfully closed all games",
+        });
+      } else {
+        toast({
+          title: "Close Command Failed",
+          description: `Error: ${res.status} ${res.statusText}`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error sending close command to Python server:', error);
+    }
+    
     setActiveGame(null);
     setShowRFIDCountdown(false);
     setCanPlayGames(false);
+    setRfidStage('initial');
+    setSelectedGameForLaunch(null);
   };
 
   useEffect(() => {
@@ -365,20 +434,19 @@ const Index = () => {
       console.log('RFID simulation triggered');
       setShowRFIDCountdown(true);
       setCanPlayGames(true);
+      setRfidStage('authenticated');
       toast({
         title: "RFID Card Detected",
         description: "Starting session..."
       });
     };
+    
     const handleKeyPress = (event: KeyboardEvent) => {
       if (/^\d$/.test(event.key)) {
         handleRFIDSimulation();
       }
-      if (event.key.toLowerCase() === 'f' && window.electron) {
-        console.log('F key pressed, sending to Python backend');
-        window.electron.ipcRenderer.send('simulate-keypress', 'f');
-      }
     };
+    
     window.addEventListener('keypress', handleKeyPress);
     return () => {
       console.log('Removing RFID key press listener');
@@ -390,55 +458,66 @@ const Index = () => {
   console.log('Filtered games:', filteredGames);
   console.log('Selected category:', selectedCategory);
 
-  return <div className="min-h-screen animate-gradient" style={{
-    background: 'linear-gradient(225deg, #F97316 0%, #D946EF 50%, #8B5CF6 100%)',
-    backgroundSize: '400% 400%'
-  }}>
-    {showRFIDCountdown ? <RFIDCountdown onExit={handleExitSession} activeGame={activeGame} /> : <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
-        <div className="flex flex-col space-y-8">
-          <div className="glass p-4 flex justify-between items-center rounded-3xl transition-all duration-300">
-            <Header />
-            <div className="flex space-x-2">
-              <Button 
-                variant="outline" 
-                className="border-white/20 text-white hover:bg-white/10 hover:border-white/30"
-                onClick={() => navigate('/game-flow')}
-              >
-                New Game Flow
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-white/20 text-white hover:bg-white/10 hover:border-white/30"
-                onClick={() => navigate('/cpp-launcher')}
-              >
-                CPP Launcher
-              </Button>
+  return (
+    <div className="min-h-screen animate-gradient" style={{
+      background: 'linear-gradient(225deg, #F97316 0%, #D946EF 50%, #8B5CF6 100%)',
+      backgroundSize: '400% 400%'
+    }}>
+      {showRFIDCountdown ? (
+        <RFIDCountdown 
+          onExit={handleExitSession} 
+          activeGame={activeGame} 
+          cppLauncherMode={true}
+          cppLauncherKey={selectedGameForLaunch ? GAME_TRIGGERS[selectedGameForLaunch.title] : undefined}
+        />
+      ) : (
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
+          <div className="flex flex-col space-y-8">
+            <div className="glass p-4 flex justify-between items-center rounded-3xl transition-all duration-300">
+              <Header />
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  className="border-white/20 text-white hover:bg-white/10 hover:border-white/30"
+                  onClick={() => navigate('/game-flow')}
+                >
+                  New Game Flow
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-white/20 text-white hover:bg-white/10 hover:border-white/30"
+                  onClick={() => navigate('/cpp-launcher')}
+                >
+                  CPP Launcher
+                </Button>
+              </div>
             </div>
+
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-white border-r-transparent"></div>
+                <p className="mt-2 text-white">Loading games...</p>
+              </div>
+            ) : (
+              <>
+                <div className="transform hover:scale-[1.02] transition-transform duration-300">
+                  <GameShowcase games={games.slice(0, 3)} onPlayGame={handlePlayGame} canPlayGames={true} />
+                </div>
+
+                <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
+                  <h2 className="text-2xl font-bold text-white next-gen-title">VR Games</h2>
+                  <CategoryBar categories={categories} selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
+                  <GameGrid games={filteredGames} onPlayGame={handlePlayGame} canPlayGames={true} />
+                </div>
+              </>
+            )}
           </div>
-
-          {isLoading ? (
-            <div className="text-center py-12">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-white border-r-transparent"></div>
-              <p className="mt-2 text-white">Loading games...</p>
-            </div>
-          ) : (
-            <>
-              <div className="transform hover:scale-[1.02] transition-transform duration-300">
-                <GameShowcase games={games.slice(0, 3)} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
-              </div>
-
-              <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
-                <h2 className="text-2xl font-bold text-white next-gen-title">VR Games</h2>
-                <CategoryBar categories={categories} selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
-                <GameGrid games={filteredGames} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
-              </div>
-            </>
-          )}
         </div>
-      </div>}
+      )}
 
-    {showOwnerDashboard && <OwnerDashboard onClose={() => setShowOwnerDashboard(false)} onAddGame={handleAddGame} />}
-  </div>;
+      {showOwnerDashboard && <OwnerDashboard onClose={() => setShowOwnerDashboard(false)} onAddGame={handleAddGame} />}
+    </div>
+  );
 };
 
 export default Index;

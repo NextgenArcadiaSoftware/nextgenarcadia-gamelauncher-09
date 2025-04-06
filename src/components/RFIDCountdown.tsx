@@ -10,15 +10,25 @@ interface RFIDCountdownProps {
   activeGame?: string | null;
   trailer?: string;  
   steamUrl?: string; // Support for direct Steam URLs
+  cppLauncherMode?: boolean; // New prop to indicate CPP launcher mode
+  cppLauncherKey?: string; // Key to send to CPP launcher
 }
 
-export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCountdownProps) {
+export function RFIDCountdown({ 
+  onExit, 
+  activeGame, 
+  trailer, 
+  steamUrl, 
+  cppLauncherMode = false,
+  cppLauncherKey
+}: RFIDCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [showRating, setShowRating] = useState(false);
   const [showGameScreen, setShowGameScreen] = useState(true);
   const [lastServerStatus, setLastServerStatus] = useState<number | null>(null);
   const { toast } = useToast();
-
+  
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
   const isElectronAvailable = Boolean(window.electron);
 
   useEffect(() => {
@@ -105,7 +115,52 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
 
   useEffect(() => {
     if (!showGameScreen && timeLeft !== null) {
-      if (steamUrl && isElectronAvailable) {
+      if (cppLauncherMode && cppLauncherKey) {
+        console.log(`Launching game with CPP launcher key: ${cppLauncherKey} for game: ${activeGame}`);
+        
+        fetch(`${API_URL}/keypress`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json; charset=utf-8",
+            "Accept-Charset": "UTF-8"
+          },
+          body: JSON.stringify({ key: cppLauncherKey }),
+          signal: AbortSignal.timeout(3000)
+        })
+        .then(response => {
+          console.log(`Server responded with status: ${response.status}`);
+          setLastServerStatus(response.status);
+          
+          if (response.status === 204 || response.ok) {
+            toast({
+              title: "Game Launching",
+              description: `Launching ${activeGame}...`,
+            });
+            return response.status === 204 ? 
+              `Successfully launched ${activeGame}` : 
+              response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
+          } else {
+            throw new Error(`HTTP error: ${response.status}`);
+          }
+        })
+        .then(data => {
+          console.log('Game launch response:', data);
+        })
+        .catch(error => {
+          console.error('Error launching game:', error);
+          toast({
+            variant: "destructive",
+            title: "Launch Error",
+            description: "Failed to connect to game launcher service"
+          });
+          
+          if (isElectronAvailable) {
+            console.log("Falling back to Electron keypress simulation");
+            window.electron.ipcRenderer.send('simulate-keypress', cppLauncherKey);
+          }
+        });
+      }
+      else if (steamUrl && isElectronAvailable) {
         console.log(`Launching Steam game with URL: ${steamUrl}`);
         window.electron.ipcRenderer.send('launch-steam-game', steamUrl);
       } 
@@ -183,7 +238,7 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
         });
       }
     }
-  }, [showGameScreen, timeLeft, targetWord, steamUrl, toast, isElectronAvailable, activeGame]);
+  }, [showGameScreen, timeLeft, targetWord, steamUrl, toast, isElectronAvailable, activeGame, cppLauncherMode, cppLauncherKey, API_URL]);
 
   useEffect(() => {
     if (isElectronAvailable) {
@@ -209,7 +264,39 @@ export function RFIDCountdown({ onExit, activeGame, trailer, steamUrl }: RFIDCou
   }, [toast, isElectronAvailable]);
 
   const handleRatingSubmit = async (rating: number) => {
-    if (isElectronAvailable) {
+    if (cppLauncherMode) {
+      try {
+        fetch(`${API_URL}/close`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json; charset=utf-8",
+            "Accept-Charset": "UTF-8"
+          },
+          signal: AbortSignal.timeout(3000)
+        })
+        .then(response => {
+          console.log(`Server responded with status: ${response.status}`);
+          if (response.status === 204 || response.ok) {
+            toast({
+              title: "Game Session Ended",
+              description: "Closing all active games",
+              variant: "default"
+            });
+          } else {
+            throw new Error(`Server error: ${response.status}`);
+          }
+        })
+        .catch(error => {
+          console.error('Error closing games:', error);
+          if (isElectronAvailable) {
+            window.electron.ipcRenderer.send('end-game');
+          }
+        });
+      } catch (error) {
+        console.error('Error in stop command:', error);
+      }
+    }
+    else if (isElectronAvailable) {
       try {
         fetch("http://localhost:5001/close", {
           method: "POST",
