@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,6 @@ export default function CppLauncher() {
 
   useEffect(() => {
     return () => {
-      // Cleanup ongoing requests on unmount
       controller?.abort();
     };
   }, [controller]);
@@ -99,7 +97,13 @@ export default function CppLauncher() {
       fallback={<div className="text-red-500 p-4">Launcher component crashed</div>}
       onError={(error) => console.error('Component error:', error)}
     >
-      <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-900 to-black p-8">
+      <div className="relative min-h-screen flex flex-col items-center justify-center 
+        animate-gradient bg-gradient-to-r from-orange-500 via-red-500 to-purple-600" 
+        style={{
+          backgroundSize: '400% 400%',
+          animation: 'gradient-shift 15s ease infinite'
+        }}
+      >
         <Button 
           variant="outline" 
           size="lg"

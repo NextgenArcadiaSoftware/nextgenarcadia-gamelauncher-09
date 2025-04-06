@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -79,13 +78,19 @@ export default {
         'slide-to-left': {
           '0%': { transform: 'translateX(0)' },
           '100%': { transform: 'translateX(-100%)' }
+        },
+        'gradient-shift': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' }
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'slide-from-left': 'slide-from-left 0.3s ease-out',
-        'slide-to-left': 'slide-to-left 0.3s ease-out'
+        'slide-to-left': 'slide-to-left 0.3s ease-out',
+        'gradient': 'gradient-shift 15s ease infinite'
       }
     }
   },
