@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { RFIDCountdown } from "@/components/RFIDCountdown";
 import { Header } from "@/components/Header";
@@ -391,35 +391,35 @@ const Index = () => {
     background: 'linear-gradient(225deg, #F97316 0%, #D946EF 50%, #8B5CF6 100%)',
     backgroundSize: '400% 400%'
   }}>
-      {showRFIDCountdown ? <RFIDCountdown onExit={handleExitSession} activeGame={activeGame} /> : <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
-          <div className="flex flex-col space-y-8">
-            <div className="glass p-4 flex justify-between items-center rounded-3xl transition-all duration-300">
-              <Header />
-            </div>
-
-            {isLoading ? (
-              <div className="text-center py-12">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-white border-r-transparent"></div>
-                <p className="mt-2 text-white">Loading games...</p>
-              </div>
-            ) : (
-              <>
-                <div className="transform hover:scale-[1.02] transition-transform duration-300">
-                  <GameShowcase games={games.slice(0, 3)} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
-                </div>
-
-                <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
-                  <h2 className="text-2xl font-bold text-white next-gen-title">VR Games</h2>
-                  <CategoryBar categories={categories} selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
-                  <GameGrid games={filteredGames} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
-                </div>
-              </>
-            )}
+    {showRFIDCountdown ? <RFIDCountdown onExit={handleExitSession} activeGame={activeGame} /> : <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
+        <div className="flex flex-col space-y-8">
+          <div className="glass p-4 flex justify-between items-center rounded-3xl transition-all duration-300">
+            <Header />
           </div>
-        </div>}
 
-      {showOwnerDashboard && <OwnerDashboard onClose={() => setShowOwnerDashboard(false)} onAddGame={handleAddGame} />}
-    </div>;
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-white border-r-transparent"></div>
+              <p className="mt-2 text-white">Loading games...</p>
+            </div>
+          ) : (
+            <>
+              <div className="transform hover:scale-[1.02] transition-transform duration-300">
+                <GameShowcase games={games.slice(0, 3)} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
+              </div>
+
+              <div className="glass p-8 rounded-3xl space-y-6 backdrop-blur-xl border border-white/20 shadow-xl">
+                <h2 className="text-2xl font-bold text-white next-gen-title">VR Games</h2>
+                <CategoryBar categories={categories} selectedCategory={selectedCategory} onCategorySelect={setSelectedCategory} />
+                <GameGrid games={filteredGames} onPlayGame={handlePlayGame} canPlayGames={canPlayGames} />
+              </div>
+            </>
+          )}
+        </div>
+      </div>}
+
+    {showOwnerDashboard && <OwnerDashboard onClose={() => setShowOwnerDashboard(false)} onAddGame={handleAddGame} />}
+  </div>;
 };
 
 export default Index;
