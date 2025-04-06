@@ -1,9 +1,9 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { Button } from '../ui/button';
-import { X } from 'lucide-react';
+import { X, StopCircle } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { TimerKeyboard } from './TimerKeyboard';
 
 interface TimerDisplayProps {
   timeLeft: number;
@@ -14,7 +14,6 @@ interface TimerDisplayProps {
 export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: TimerDisplayProps) {
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [sessionCompleted, setSessionCompleted] = useState(false);
-  const [showKeyboard, setShowKeyboard] = useState(true);
   const sessionCompletionRef = useRef(false);
   const sessionCreatedRef = useRef(false);
   const { toast } = useToast();
@@ -174,43 +173,37 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleKeyPress = (key: string) => {
-    console.log(`Key pressed from on-screen keyboard: ${key}`);
+  const handleCloseGames = () => {
+    console.log('Close games button clicked');
     
-    if (key === 'X') {
+    // Send close command to Python server
+    fetch("http://localhost:5002/close", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Close games response:', data);
       toast({
-        title: "Exit Key Pressed",
-        description: "Exiting game session..."
+        title: "Games Closed",
+        description: "All active games have been closed",
+        variant: "destructive"
       });
-      
-      // Send close command to Python server
-      fetch("http://localhost:5002/close", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(response => response.json())
-      .then(data => console.log('Close games response:', data))
-      .catch(error => console.error('Error closing games:', error));
-      
-      // Exit after short delay
-      setTimeout(() => onExit(), 1000);
-    } else if (isElectronAvailable) {
-      window.electron.ipcRenderer.send('simulate-keypress', key.toLowerCase());
-      toast({
-        title: "Key Pressed",
-        description: `Sending ${key} key to the game`
-      });
-    } else {
-      toast({
-        variant: "default",
-        title: "Browser Preview Mode",
-        description: `Keypress simulation - Electron APIs unavailable in browser`
-      });
-    }
+    })
+    .catch(error => {
+      console.error('Error closing games:', error);
+      // Try electron method as fallback
+      if (isElectronAvailable) {
+        window.electron.ipcRenderer.send('end-game');
+      }
+    });
+    
+    // Exit after short delay
+    setTimeout(() => onExit(), 1000);
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-[#F97316] via-[#ea384c] to-[#FEC6A1] flex flex-col items-center justify-center z-50 animate-fade-in">
+    <div className="fixed inset-0 bg-gradient-to-br from-[#1A1F2C] via-[#2A2F3C] to-[#33274F] flex flex-col items-center justify-center z-50 animate-fade-in">
       <Button 
         variant="ghost" 
         className="absolute top-4 right-4 text-white hover:bg-white/20"
@@ -220,7 +213,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         Exit
       </Button>
       
-      <div className="text-9xl font-mono mb-8 text-white animate-pulse tracking-widest">
+      <div className="text-9xl font-mono mb-8 text-[#D6BCFA] animate-pulse tracking-widest">
         {formatTime(timeLeft)}
       </div>
       
@@ -229,13 +222,21 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
       </div>
       
       {activeGame && (
-        <div className="text-xl text-white/80 mb-6 animate-fade-in">
-          Currently Playing: {activeGame}
+        <div className="text-xl text-white/80 mb-12 animate-fade-in">
+          Currently Playing: <span className="text-[#9b87f5] font-semibold">{activeGame}</span>
         </div>
       )}
 
-      <div className="fixed bottom-4 left-0 right-0 flex justify-center animate-fade-in-up">
-        <TimerKeyboard onKeyPress={handleKeyPress} />
+      <div className="fixed bottom-12 left-0 right-0 flex justify-center animate-fade-in-up">
+        <Button 
+          variant="destructive"
+          size="lg"
+          className="bg-[#ea384c] hover:bg-[#c01933] text-white px-12 py-6 h-auto text-xl font-semibold rounded-xl shadow-lg shadow-red-900/20 flex items-center gap-3 transition-transform hover:scale-105 active:scale-95"
+          onClick={handleCloseGames}
+        >
+          <StopCircle className="h-6 w-6" />
+          Close All Games
+        </Button>
       </div>
     </div>
   );
