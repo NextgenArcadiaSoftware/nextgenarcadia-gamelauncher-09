@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Keyboard, Timer, Play, X, Activity, Settings } from 'lucide-react';
+import { Keyboard, Timer, Play, X, Activity, Settings, Eye, EyeOff, Server } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { TimerDisplay } from '@/components/game-launch/TimerDisplay';
@@ -34,6 +34,7 @@ const CppLauncher: React.FC = () => {
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const [showTimer, setShowTimer] = useState(false);
   const [timerDuration, setTimerDuration] = useState(300); // 5 minutes default
+  const [showControlPanel, setShowControlPanel] = useState(false);
   const { toast } = useToast();
 
   // Check server connectivity on component mount
@@ -238,83 +239,97 @@ const CppLauncher: React.FC = () => {
           >
             <Activity className="mr-1 h-4 w-4" /> Refresh Status
           </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowControlPanel(!showControlPanel)}
+            className="border-[#7E69AB] text-[#D6BCFA] hover:bg-[#33274F] hover:text-white"
+          >
+            {showControlPanel ? (
+              <><EyeOff className="mr-1 h-4 w-4" /> Hide Panel</>
+            ) : (
+              <><Eye className="mr-1 h-4 w-4" /> Show Panel</>
+            )}
+          </Button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-[#222232] border-[#33274F] text-white shadow-lg hover:shadow-[#6E59A5]/20 transition-all duration-300">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#D6BCFA]">System Control</CardTitle>
-              <CardDescription className="text-[#9b87f5]/80">Test connectivity and manage games</CardDescription>
-            </CardHeader>
-            <Separator className="bg-[#6E59A5]/30 my-1" />
-            <CardContent className="pt-4 space-y-4">
-              <div className="grid grid-cols-1 gap-4">
-                <Button 
-                  onClick={handleTestConnection} 
-                  disabled={loading}
-                  variant="outline"
-                  className="bg-[#33274F] border-[#7E69AB] hover:bg-[#6E59A5] group"
-                >
-                  <Settings className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
-                  {loading ? 'Testing Connection...' : 'Test Connection'}
-                </Button>
-                
-                <Button 
-                  onClick={closeGames} 
-                  disabled={loading}
-                  variant="destructive"
-                  className="bg-[#ea384c] hover:bg-[#c01933] text-white"
-                >
-                  <X className="mr-2 h-5 w-5" />
-                  {loading ? 'Closing Games...' : 'Close All Games'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-[#222232] border-[#33274F] text-white shadow-lg">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-[#D6BCFA]">Server Details</CardTitle>
-              <CardDescription className="text-[#9b87f5]/80">Connection information</CardDescription>
-            </CardHeader>
-            <Separator className="bg-[#6E59A5]/30 my-1" />
-            <CardContent className="pt-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[#E5DEFF]/70">Server Address:</span>
-                  <code className="bg-[#33274F] px-2 py-1 rounded text-[#9b87f5]">{API_URL}</code>
+        {showControlPanel && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 animate-accordion-down">
+            <Card className="bg-[#222232] border-[#33274F] text-white shadow-lg hover:shadow-[#6E59A5]/20 transition-all duration-300">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-[#D6BCFA]">System Control</CardTitle>
+                <CardDescription className="text-[#9b87f5]/80">Test connectivity and manage games</CardDescription>
+              </CardHeader>
+              <Separator className="bg-[#6E59A5]/30 my-1" />
+              <CardContent className="pt-4 space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                  <Button 
+                    onClick={handleTestConnection} 
+                    disabled={loading}
+                    variant="outline"
+                    className="bg-[#33274F] border-[#7E69AB] hover:bg-[#6E59A5] group"
+                  >
+                    <Settings className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
+                    {loading ? 'Testing Connection...' : 'Test Connection'}
+                  </Button>
+                  
+                  <Button 
+                    onClick={closeGames} 
+                    disabled={loading}
+                    variant="destructive"
+                    className="bg-[#ea384c] hover:bg-[#c01933] text-white"
+                  >
+                    <X className="mr-2 h-5 w-5" />
+                    {loading ? 'Closing Games...' : 'Close All Games'}
+                  </Button>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#E5DEFF]/70">Status:</span>
-                  <span className={`${
-                    serverStatus === 'connected' ? 'text-green-400' : 
-                    serverStatus === 'disconnected' ? 'text-red-400' : 'text-yellow-400'
-                  }`}>
-                    {serverStatus === 'connected' ? 'Online' : 
-                     serverStatus === 'disconnected' ? 'Offline' : 'Checking...'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[#E5DEFF]/70">Game Timer:</span>
-                  <div className="flex items-center">
-                    <Timer className="h-4 w-4 mr-1 text-[#9b87f5]" />
-                    <span>{Math.floor(timerDuration / 60)} Minutes</span>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-[#222232] border-[#33274F] text-white shadow-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-[#D6BCFA]">Server Details</CardTitle>
+                <CardDescription className="text-[#9b87f5]/80">Connection information</CardDescription>
+              </CardHeader>
+              <Separator className="bg-[#6E59A5]/30 my-1" />
+              <CardContent className="pt-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#E5DEFF]/70">Server Address:</span>
+                    <code className="bg-[#33274F] px-2 py-1 rounded text-[#9b87f5]">{API_URL}</code>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#E5DEFF]/70">Status:</span>
+                    <span className={`${
+                      serverStatus === 'connected' ? 'text-green-400' : 
+                      serverStatus === 'disconnected' ? 'text-red-400' : 'text-yellow-400'
+                    }`}>
+                      {serverStatus === 'connected' ? 'Online' : 
+                       serverStatus === 'disconnected' ? 'Offline' : 'Checking...'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#E5DEFF]/70">Game Timer:</span>
+                    <div className="flex items-center">
+                      <Timer className="h-4 w-4 mr-1 text-[#9b87f5]" />
+                      <span>{Math.floor(timerDuration / 60)} Minutes</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter className="pt-0">
-              {response && (
-                <div className="w-full mt-2 p-2 bg-[#1A1F2C] rounded-md border border-[#33274F] overflow-hidden">
-                  <p className="text-xs text-[#9b87f5] mb-1">Server Response:</p>
-                  <pre className="text-xs whitespace-pre-wrap overflow-auto text-green-400 max-h-20">
-                    {response}
-                  </pre>
-                </div>
-              )}
-            </CardFooter>
-          </Card>
-        </div>
+              </CardContent>
+              <CardFooter className="pt-0">
+                {response && (
+                  <div className="w-full mt-2 p-2 bg-[#1A1F2C] rounded-md border border-[#33274F] overflow-hidden">
+                    <p className="text-xs text-[#9b87f5] mb-1">Server Response:</p>
+                    <pre className="text-xs whitespace-pre-wrap overflow-auto text-green-400 max-h-20">
+                      {response}
+                    </pre>
+                  </div>
+                )}
+              </CardFooter>
+            </Card>
+          </div>
+        )}
         
         <Card className="bg-[#222232] border-[#33274F] text-white shadow-lg mb-8">
           <CardHeader>
@@ -350,7 +365,39 @@ const CppLauncher: React.FC = () => {
               ))}
             </div>
           </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button 
+              onClick={closeGames} 
+              variant="destructive"
+              className="bg-[#ea384c] hover:bg-[#c01933] text-white px-8"
+              disabled={loading}
+            >
+              <X className="mr-2 h-5 w-5" /> Close All Games
+            </Button>
+          </CardFooter>
         </Card>
+
+        {serverStatus === 'disconnected' && (
+          <Card className="bg-red-900/20 border-red-700 text-white mb-8 animate-pulse">
+            <CardContent className="p-4 flex items-center">
+              <Server className="h-5 w-5 mr-3 text-red-400" />
+              <div>
+                <h3 className="text-lg font-semibold text-red-300">Server Connection Issue</h3>
+                <p className="text-sm text-red-200/80">
+                  Unable to connect to the Python key listener. Make sure the server is running and accessible.
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={checkServerConnection}
+                className="ml-auto border-red-700 bg-red-900/50 text-red-300 hover:bg-red-800"
+              >
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
