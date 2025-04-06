@@ -378,7 +378,7 @@ export function RFIDCountdown({
 
   if (timeLeft === null) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen w-screen">
         <div className="text-xl">Loading timer settings...</div>
       </div>
     );

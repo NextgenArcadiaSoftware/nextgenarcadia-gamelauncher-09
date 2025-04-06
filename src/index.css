@@ -3,93 +3,110 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 220 20% 4%;
-    --foreground: 0 0% 98%;
-    --card: 220 20% 8%;
-    --card-foreground: 0 0% 98%;
-    --popover: 220 20% 4%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 210 100% 50%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 220 20% 8%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 220 20% 8%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 220 20% 8%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 20% 8%;
-    --input: 220 20% 8%;
-    --ring: 210 100% 50%;
-    --radius: 1.5rem;
-  }
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 0, 0, 0;
+  --background-end-rgb: 0, 0, 0;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+/* Make sure the app is always full screen */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      rgb(var(--background-start-rgb)),
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Fix for mobile display */
+@media (max-width: 640px) {
   body {
-    @apply text-foreground antialiased overflow-x-hidden font-sans;
-    background: #0F0F0F;
-    background-image: 
-      linear-gradient(rgba(0, 0, 0, 0.7) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.7) 1px, transparent 1px);
-    background-size: 24px 24px;
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
-@layer utilities {
-  .glass {
-    @apply bg-black/40 backdrop-blur-xl border border-white/5 rounded-3xl;
-    box-shadow: 
-      0 8px 32px -8px rgba(0, 0, 0, 0.3),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-  }
-  
-  .game-card {
-    @apply relative overflow-hidden rounded-[2rem] transition-all duration-500 hover:scale-105 hover:-rotate-2;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 
-      0 8px 32px -8px rgba(0, 0, 0, 0.5),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
+/* Nintendo Switch-like card styling */
+.nintendo-card {
+  background: white;
+  border-radius: 2rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+}
 
-  .next-gen-title {
-    @apply font-display font-bold text-white tracking-tight;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+.nintendo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animated gradient background */
+.animate-gradient {
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
   }
-
-  .nintendo-card {
-    @apply relative overflow-hidden rounded-[2rem] transition-all duration-500 
-           hover:scale-105 hover:-rotate-2 cursor-pointer;
-    box-shadow: 
-      0 20px 40px -12px rgba(0, 0, 0, 0.5),
-      0 8px 16px -8px rgba(0, 0, 0, 0.2);
+  50% {
+    background-position: 100% 50%;
   }
-
-  .nintendo-card-gradient {
-    background: linear-gradient(135deg, #FF4B91 0%, #FF0F7B 100%);
-  }
-
-  .nintendo-card.fortnite { background: linear-gradient(135deg, #9747FF 0%, #7000FF 100%); }
-  .nintendo-card.kirby { background: linear-gradient(135deg, #00D1FF 0%, #00A3FF 100%); }
-  .nintendo-card.pokemon { background: linear-gradient(135deg, #00FFB2 0%, #00CC8E 100%); }
-  .nintendo-card.splatoon { background: linear-gradient(135deg, #4B91FF 0%, #0F7BFF 100%); }
-
-  @keyframes gradient-shift {
-    0% { background-position: 0% 50% }
-    50% { background-position: 100% 50% }
-    100% { background-position: 0% 50% }
-  }
-
-  .animate-gradient {
-    animation: gradient-shift 15s ease infinite;
-    background-size: 400% 400%;
+  100% {
+    background-position: 0% 50%;
   }
 }
 
+/* Fade in animation */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Title styling */
+.next-gen-title {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.05em;
+}
+
+/* Full-screen modal */
+.full-screen-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  height: 100dvh;
+  width: 100vw;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}

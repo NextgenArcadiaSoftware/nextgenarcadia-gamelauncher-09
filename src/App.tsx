@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from './components/ui/toaster';
@@ -33,6 +32,22 @@ function App() {
         <Route path="/library" element={<Library />} />
         <Route path="/cpp-launcher" element={<CppLauncher />} />
         <Route path="/game-flow" element={<GameSelectionFlow />} />
+        
+        <Route path="/fruitninjalaunch" element={<FruitNinjaLaunch />} />
+        <Route path="/elvenassassinlaunch" element={<ElvenAssassinLaunch />} />
+        <Route path="/crisisbrigadelaunch" element={<CrisBrigadeLaunch />} />
+        <Route path="/planklaunch" element={<PlankLaunch />} />
+        <Route path="/cricketlaunch" element={<CricketLaunch />} />
+        <Route path="/arizonalaunch" element={<ArizonaSunshineLaunch />} />
+        <Route path="/undeadcitadellaunch" element={<UndeadCitadelLaunch />} />
+        <Route path="/propagationlaunch" element={<PropagationLaunch />} />
+        <Route path="/subsidelaunch" element={<SubsideLaunch />} />
+        <Route path="/sportslaunch" element={<SportsLaunch />} />
+        <Route path="/creedlaunch" element={<CreedLaunch />} />
+        <Route path="/beatlaunch" element={<BeatSaberLaunch />} />
+        <Route path="/rollerlaunch" element={<RollerCoasterLaunch />} />
+        <Route path="/unknown-game" element={<UnknownGameLaunch />} />
+        
         <Route path="/games/fruit-ninja" element={<FruitNinjaLaunch />} />
         <Route path="/games/elven-assassin" element={<ElvenAssassinLaunch />} />
         <Route path="/games/crisis-brigade" element={<CrisBrigadeLaunch />} />
@@ -46,7 +61,7 @@ function App() {
         <Route path="/games/creed" element={<CreedLaunch />} />
         <Route path="/games/beat-saber" element={<BeatSaberLaunch />} />
         <Route path="/games/rollercoaster" element={<RollerCoasterLaunch />} />
-        <Route path="/unknown-game" element={<UnknownGameLaunch />} />
+        
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />

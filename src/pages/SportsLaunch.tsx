@@ -120,6 +120,8 @@ export default function SportsLaunch() {
         onExit={() => navigate('/')} 
         activeGame="All-in-One Sports VR"
         trailer="https://www.youtube.com/watch?v=uXDM7LgRSWc"
+        cppLauncherMode={true}
+        cppLauncherKey="v"
       />
     </div>
   );
