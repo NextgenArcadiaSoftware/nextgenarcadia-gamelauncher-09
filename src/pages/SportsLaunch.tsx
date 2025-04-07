@@ -11,11 +11,27 @@ export default function SportsLaunch() {
   const { toast } = useToast();
   const [serverResponse, setServerResponse] = useState<string | null>(null);
   const [requestStatus, setRequestStatus] = useState<string | null>(null);
+  const [rfidDetected, setRfidDetected] = useState(false);
 
   // Set up global key event listener for both the X key and Python program
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       console.log(`Global keydown detected: ${e.key}`);
+      
+      // RFID simulation with number keys (10+ digits)
+      if (/^\d$/.test(e.key) && !rfidDetected) {
+        setTimeout(() => {
+          setRfidDetected(true);
+          toast({
+            title: "RFID Detected",
+            description: "Redirecting to game launcher...",
+          });
+          
+          // Navigate to CppLauncher after short delay
+          setTimeout(() => navigate('/cpp-launcher'), 1500);
+        }, 1000);
+        return;
+      }
       
       // Special handling for X key to end the game
       if (e.key.toLowerCase() === 'x') {
@@ -95,7 +111,17 @@ export default function SportsLaunch() {
       // Clean up
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
-  }, [navigate, toast]);
+  }, [navigate, toast, rfidDetected]);
+  
+  // Simulating RFID detection for easy testing
+  const simulateRFID = () => {
+    setRfidDetected(true);
+    toast({
+      title: "RFID Detected",
+      description: "Redirecting to game launcher...",
+    });
+    setTimeout(() => navigate('/cpp-launcher'), 1500);
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -115,6 +141,16 @@ export default function SportsLaunch() {
           {serverResponse && <div>{serverResponse}</div>}
         </div>
       )}
+      
+      {/* Test button for RFID simulation */}
+      <Button
+        variant="default"
+        size="lg"
+        className="fixed top-8 right-8 z-50 bg-purple-600 hover:bg-purple-700"
+        onClick={simulateRFID}
+      >
+        Simulate RFID Scan
+      </Button>
       
       <RFIDCountdown 
         onExit={() => navigate('/')} 

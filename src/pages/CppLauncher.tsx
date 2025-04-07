@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Keyboard, Timer, Play, X, Activity, Settings, Eye, EyeOff, Server } fro
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { TimerDisplay } from '@/components/game-launch/TimerDisplay';
+import { RatingScreen } from '@/components/game-launch/RatingScreen';
 import placeholderImage from '@/assets/placeholder.svg';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
@@ -71,6 +73,7 @@ const CppLauncher: React.FC = () => {
   const [serverStatus, setServerStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const [showTimer, setShowTimer] = useState(false);
+  const [showRating, setShowRating] = useState(false);
   const [timerDuration, setTimerDuration] = useState(60); // Changed from 300 (5 min) to 60 (1 min)
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -230,10 +233,38 @@ const CppLauncher: React.FC = () => {
   };
 
   const handleTimerExit = () => {
-    closeGames();
+    // Show rating screen instead of immediately closing games
+    setShowRating(true);
     setShowTimer(false);
   };
 
+  const handleRatingSubmit = async (rating: number) => {
+    // Close games after rating
+    await closeGames();
+    
+    // Show toast with rating
+    toast({
+      title: "Thank You!",
+      description: `You rated ${activeGame} ${rating} stars.`,
+    });
+    
+    // Navigate to home page
+    setTimeout(() => {
+      navigate('/');
+    }, 1500);
+  };
+
+  // Show rating screen
+  if (showRating && activeGame) {
+    return (
+      <RatingScreen 
+        activeGame={activeGame} 
+        onSubmit={handleRatingSubmit} 
+      />
+    );
+  }
+
+  // Show timer display
   if (showTimer && activeGame) {
     return (
       <TimerDisplay 
@@ -244,6 +275,7 @@ const CppLauncher: React.FC = () => {
     );
   }
 
+  // Main launcher UI
   return (
     <div className="container mx-auto p-4 bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] min-h-screen text-white">
       <div className="max-w-5xl mx-auto">
