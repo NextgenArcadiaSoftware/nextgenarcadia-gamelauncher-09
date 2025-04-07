@@ -7,25 +7,65 @@ import { Keyboard, Timer, Play, X, Activity, Settings, Eye, EyeOff, Server } fro
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { TimerDisplay } from '@/components/game-launch/TimerDisplay';
+import placeholderImage from '@/assets/placeholder.svg';
 
 // Using the Python server port now
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
-// Game key mappings
+// Game key mappings with images
 const GAME_KEYS = {
-  "f": "Fruit Ninja",
-  "c": "Crisis VRigade 2",
-  "s": "Subside Demo",
-  "p": "Richie's Plank Experience",
-  "i": "iBCricket",
-  "a": "Arizona Sunshine",
-  "u": "Undead Citadel Demo",
-  "e": "Elven Assassin",
-  "r": "RollerCoaster Legends",
-  "v": "All-In-One Sports VR",
-  "g": "Creed Rise to Glory",
-  "w": "Beat Saber",
-  "z": "Close All Games"
+  "f": {
+    name: "Fruit Ninja",
+    image: "/lovable-uploads/9b088570-531a-47cf-b176-28bb534ba66f.png"
+  },
+  "c": {
+    name: "Crisis VRigade 2",
+    image: "/lovable-uploads/bb8b5b5b-bf33-4e0c-b9af-a05408636bce.png"
+  },
+  "s": {
+    name: "Subside Demo",
+    image: "/lovable-uploads/be53debf-e66a-4b71-8445-6a4694a2d95e.png"
+  },
+  "p": {
+    name: "Richie's Plank Experience",
+    image: "/lovable-uploads/cf7a9406-76de-470d-971d-ebb18c291622.png"
+  },
+  "i": {
+    name: "iBCricket",
+    image: "/lovable-uploads/f8c126a3-87f1-4ea8-b8d8-76597554d0be.png"
+  },
+  "a": {
+    name: "Arizona Sunshine",
+    image: "/lovable-uploads/4e2b1ea9-0729-4f84-b8c4-974e08cd8c30.png"
+  },
+  "u": {
+    name: "Undead Citadel Demo",
+    image: "/lovable-uploads/cac2759b-8463-4e08-b1ea-aeb608ac84a9.png"
+  },
+  "e": {
+    name: "Elven Assassin",
+    image: "/lovable-uploads/b2c65729-f024-40c7-9c6e-dc2b75f1c789.png"
+  },
+  "r": {
+    name: "RollerCoaster Legends",
+    image: "/lovable-uploads/ad0b4a73-7182-4cd0-a370-e527f21a9f87.png"
+  },
+  "v": {
+    name: "All-In-One Sports VR",
+    image: "/lovable-uploads/f12eb427-db97-42db-975b-2ccadfb41224.png"
+  },
+  "g": {
+    name: "Creed Rise to Glory",
+    image: "/lovable-uploads/af1a36b9-7e7b-4f03-814d-ea2c073181e0.png"
+  },
+  "w": {
+    name: "Beat Saber",
+    image: "/lovable-uploads/2f7ba916-4fc9-4136-b3cc-9f1e2ba0be94.png"
+  },
+  "z": {
+    name: "Close All Games",
+    image: ""
+  }
 };
 
 const CppLauncher: React.FC = () => {
@@ -125,7 +165,7 @@ const CppLauncher: React.FC = () => {
         setResponse(JSON.stringify(data, null, 2));
         
         // Set the active game and show timer
-        const gameName = GAME_KEYS[key as keyof typeof GAME_KEYS];
+        const gameName = GAME_KEYS[key as keyof typeof GAME_KEYS].name;
         setActiveGame(gameName);
         setShowTimer(true);
         
@@ -239,26 +279,37 @@ const CppLauncher: React.FC = () => {
           <Separator className="bg-[#6E59A5]/30 mb-2" />
           <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {Object.entries(GAME_KEYS).filter(([k]) => k !== 'z').map(([key, gameName]) => (
+              {Object.entries(GAME_KEYS).filter(([k]) => k !== 'z').map(([key, game]) => (
                 <Button 
                   key={key}
                   onClick={() => sendKey(key)}
                   disabled={loading}
-                  className="flex flex-col items-center justify-center h-28 
-                           bg-gradient-to-br from-[#33274F] to-[#222232]
-                           hover:from-[#6E59A5] hover:to-[#33274F]
+                  className="flex flex-col items-center justify-center h-40 p-0 overflow-hidden
+                           bg-[#222232] hover:bg-[#33274F]
                            border border-[#7E69AB]/30 shadow-md
-                           transition-all duration-300 group"
+                           transition-all duration-300 group relative rounded-xl"
                 >
-                  <div className="relative">
-                    <Keyboard className="h-6 w-6 mb-1 text-[#9b87f5] group-hover:opacity-0 
-                                        transition-opacity duration-300 absolute top-0 left-1/2 -translate-x-1/2" />
-                    <Play className="h-6 w-6 mb-1 text-white opacity-0 group-hover:opacity-100 
-                                   transition-opacity duration-300 absolute top-0 left-1/2 -translate-x-1/2" />
+                  <div className="absolute inset-0 w-full h-full">
+                    <img 
+                      src={game.image || placeholderImage} 
+                      alt={game.name}
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = placeholderImage;
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#222232] via-[#222232]/60 to-transparent" />
                   </div>
-                  <div className="h-6" /> {/* Spacer for icon */}
-                  <span className="text-lg font-bold text-[#D6BCFA] group-hover:text-white">{key.toUpperCase()}</span>
-                  <span className="text-xs text-center text-[#E5DEFF]/80 group-hover:text-white/90 transition-colors">{gameName}</span>
+                  
+                  <div className="relative z-10 flex flex-col items-center justify-center h-full w-full p-2">
+                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-[#7E69AB] mb-2 group-hover:bg-[#9b87f5] transition-colors">
+                      <Keyboard className="h-5 w-5 text-white group-hover:hidden" />
+                      <Play className="h-5 w-5 text-white hidden group-hover:block" />
+                    </div>
+                    <span className="text-lg font-bold text-[#D6BCFA] group-hover:text-white">{key.toUpperCase()}</span>
+                    <span className="text-xs text-center text-[#E5DEFF]/80 group-hover:text-white/90 transition-colors mt-1">{game.name}</span>
+                  </div>
                 </Button>
               ))}
             </div>
