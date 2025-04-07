@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import placeholderImage from '@/assets/placeholder.svg';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
-// Game key mappings with images - updated with the same images used in GameCard
+// Game key mappings with images - updated with the exact same images as GameCard in Index
 const GAME_KEYS = {
   "f": {
     name: "Fruit Ninja",
