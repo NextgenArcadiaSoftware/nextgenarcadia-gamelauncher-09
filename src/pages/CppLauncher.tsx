@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,10 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { TimerDisplay } from '@/components/game-launch/TimerDisplay';
 import placeholderImage from '@/assets/placeholder.svg';
 
-// Using the Python server port now
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
-// Game key mappings with images - updated with the exact same images used in GameCard in Index
 const GAME_KEYS = {
   "f": {
     name: "Fruit Ninja",
@@ -74,15 +71,13 @@ const CppLauncher: React.FC = () => {
   const [serverStatus, setServerStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const [showTimer, setShowTimer] = useState(false);
-  const [timerDuration, setTimerDuration] = useState(300); // 5 minutes default
+  const [timerDuration, setTimerDuration] = useState(60); // Changed from 300 (5 min) to 60 (1 min)
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Check server connectivity on component mount
   useEffect(() => {
     checkServerConnection();
     
-    // Set up periodic health checks
     const intervalId = setInterval(checkServerConnection, 10000);
     
     return () => clearInterval(intervalId);
@@ -91,14 +86,12 @@ const CppLauncher: React.FC = () => {
   const checkServerConnection = async () => {
     setServerStatus('checking');
     try {
-      // Use a HEAD request instead of POST to /close
       const res = await fetch(`${API_URL}/keypress`, {
         method: 'HEAD',
-        signal: AbortSignal.timeout(2000) // 2 second timeout
+        signal: AbortSignal.timeout(2000)
       });
       
       if (res.ok || res.status === 404) {
-        // Even a 404 means the server is running
         setServerStatus('connected');
         console.log("Server health check successful");
       } else {
@@ -164,7 +157,6 @@ const CppLauncher: React.FC = () => {
         const data = await res.json();
         setResponse(JSON.stringify(data, null, 2));
         
-        // Set the active game and show timer
         const gameName = GAME_KEYS[key as keyof typeof GAME_KEYS].name;
         setActiveGame(gameName);
         setShowTimer(true);
@@ -209,7 +201,6 @@ const CppLauncher: React.FC = () => {
         const data = await res.json();
         setResponse(JSON.stringify(data, null, 2));
         
-        // Reset active game and hide timer
         setActiveGame(null);
         setShowTimer(false);
         
