@@ -12,7 +12,7 @@ import placeholderImage from '@/assets/placeholder.svg';
 // Using the Python server port now
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
-// Game key mappings with images
+// Game key mappings with images - updated with the same images used in GameCard
 const GAME_KEYS = {
   "f": {
     name: "Fruit Ninja",
