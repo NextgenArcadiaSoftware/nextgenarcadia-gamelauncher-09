@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
-import { Library as LibraryIcon, ArrowLeft, Trash2, Search, Pencil, Plus } from "lucide-react";
+import { Library as LibraryIcon, ArrowLeft, Trash2, Search, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
 import {
@@ -193,7 +192,6 @@ const Library = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto p-8">
         <div className="flex flex-col space-y-6">
-          {/* Header */}
           <div className="flex justify-between items-center glass p-6 rounded-2xl">
             <div className="flex items-center gap-4">
               <Link to="/">
@@ -222,7 +220,6 @@ const Library = () => {
             </div>
           </div>
 
-          {/* Game List */}
           <div className="space-y-4">
             {filteredGames.map((game) => (
               <div
