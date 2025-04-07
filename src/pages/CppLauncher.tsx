@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Separator } from '@/components/ui/separator';
 import { TimerDisplay } from '@/components/game-launch/TimerDisplay';
 import { RatingScreen } from '@/components/game-launch/RatingScreen';
-import placeholderImage from '@/assets/placeholder.svg';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
@@ -280,12 +278,12 @@ const CppLauncher: React.FC = () => {
     <div className="container mx-auto p-4 bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] min-h-screen text-white">
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-[#9b87f5] to-[#D6BCFA] bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-[#9b87f5] to-[#D6BCFA] bg-clip-text text-transparent">
             VR Game Control Center
           </h1>
           <Button 
             variant="outline" 
-            className="border-[#7E69AB]/50 text-[#D6BCFA] hover:bg-[#33274F]/50"
+            className="border-[#7E69AB]/50 text-[#D6BCFA] hover:bg-[#33274F]/50 text-lg"
             onClick={() => navigate('/game-flow')}
           >
             Try New Game Flow
@@ -294,8 +292,8 @@ const CppLauncher: React.FC = () => {
         
         <Card className="bg-[#222232] border-[#33274F] text-white shadow-lg mb-8">
           <CardHeader>
-            <CardTitle className="text-[#D6BCFA]">VR Game Library</CardTitle>
-            <CardDescription className="text-[#9b87f5]/80">
+            <CardTitle className="text-[#D6BCFA] text-2xl">VR Game Library</CardTitle>
+            <CardDescription className="text-[#9b87f5]/80 text-base">
               Select a game to launch in VR
             </CardDescription>
           </CardHeader>
@@ -307,31 +305,18 @@ const CppLauncher: React.FC = () => {
                   key={key}
                   onClick={() => sendKey(key)}
                   disabled={loading}
-                  className="flex flex-col items-center justify-center h-40 p-0 overflow-hidden
-                           bg-[#222232] hover:bg-[#33274F]
-                           border border-[#7E69AB]/30 shadow-md
-                           transition-all duration-300 group relative rounded-xl"
+                  className="flex flex-col items-center justify-center h-40 p-0 
+                             bg-[#222232] hover:bg-[#33274F]
+                             border border-[#7E69AB]/30 shadow-md
+                             transition-all duration-300 group relative rounded-xl"
                 >
-                  <div className="absolute inset-0 w-full h-full">
-                    <img 
-                      src={game.image || placeholderImage} 
-                      alt={game.name}
-                      className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = placeholderImage;
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#222232] via-[#222232]/60 to-transparent" />
-                  </div>
-                  
                   <div className="relative z-10 flex flex-col items-center justify-center h-full w-full p-2">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-[#7E69AB] mb-2 group-hover:bg-[#9b87f5] transition-colors">
-                      <Keyboard className="h-5 w-5 text-white group-hover:hidden" />
-                      <Play className="h-5 w-5 text-white hidden group-hover:block" />
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#7E69AB] mb-2 group-hover:bg-[#9b87f5] transition-colors">
+                      <Keyboard className="h-8 w-8 text-white group-hover:hidden" />
+                      <Play className="h-8 w-8 text-white hidden group-hover:block" />
                     </div>
-                    <span className="text-lg font-bold text-[#D6BCFA] group-hover:text-white">{key.toUpperCase()}</span>
-                    <span className="text-xs text-center text-[#E5DEFF]/80 group-hover:text-white/90 transition-colors mt-1">{game.name}</span>
+                    <span className="text-2xl font-bold text-[#D6BCFA] group-hover:text-white">{key.toUpperCase()}</span>
+                    <span className="text-sm text-center text-[#E5DEFF]/80 group-hover:text-white/90 transition-colors mt-1">{game.name}</span>
                   </div>
                 </Button>
               ))}
@@ -341,10 +326,10 @@ const CppLauncher: React.FC = () => {
             <Button 
               onClick={closeGames} 
               variant="destructive"
-              className="bg-[#ea384c] hover:bg-[#c01933] text-white px-8"
+              className="bg-[#ea384c] hover:bg-[#c01933] text-white px-8 text-lg"
               disabled={loading}
             >
-              <X className="mr-2 h-5 w-5" /> Close All Games
+              <X className="mr-2 h-6 w-6" /> Close All Games
             </Button>
           </CardFooter>
         </Card>
@@ -353,8 +338,8 @@ const CppLauncher: React.FC = () => {
           <Card className="bg-red-900/20 border-red-700 text-white mb-8 animate-pulse">
             <CardContent className="p-4 flex items-center">
               <div>
-                <h3 className="text-lg font-semibold text-red-300">Server Connection Issue</h3>
-                <p className="text-sm text-red-200/80">
+                <h3 className="text-xl font-semibold text-red-300">Server Connection Issue</h3>
+                <p className="text-base text-red-200/80">
                   Unable to connect to the game server. Service may be unavailable.
                 </p>
               </div>
@@ -362,7 +347,7 @@ const CppLauncher: React.FC = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={checkServerConnection}
-                className="ml-auto border-red-700 bg-red-900/50 text-red-300 hover:bg-red-800"
+                className="ml-auto border-red-700 bg-red-900/50 text-red-300 hover:bg-red-800 text-base"
               >
                 Retry
               </Button>
