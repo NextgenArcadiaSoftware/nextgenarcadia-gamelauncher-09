@@ -30,12 +30,32 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
     thumbnail: "",
     trailer: "",
     executable_path: "",
+    launch_code: "", // Added launch_code field
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddGame(formData);
+    
+    // Simple validation
+    if (!formData.title || !formData.description || !formData.genre || !formData.release_date) {
+      toast({
+        variant: "destructive",
+        title: "Missing information",
+        description: "Please fill in all required fields"
+      });
+      return;
+    }
+    
+    // If no thumbnail is provided, use a placeholder
+    const gameData = {
+      ...formData,
+      thumbnail: formData.thumbnail || "/placeholder.svg"
+    };
+    
+    onAddGame(gameData);
     setOpen(false);
+    
+    // Reset form
     setFormData({
       title: "",
       description: "",
@@ -44,6 +64,12 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
       thumbnail: "",
       trailer: "",
       executable_path: "",
+      launch_code: "",
+    });
+    
+    toast({
+      title: "Game added",
+      description: `${formData.title} has been added to your library.`
     });
   };
 
@@ -55,7 +81,7 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
           Add Game
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] glass border-white/10">
         <DialogHeader>
           <DialogTitle>Add New Game</DialogTitle>
         </DialogHeader>
@@ -69,6 +95,7 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
                 setFormData({ ...formData, title: e.target.value })
               }
               required
+              className="bg-white/10 border-white/20"
             />
           </div>
           <div className="space-y-2">
@@ -80,6 +107,7 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
                 setFormData({ ...formData, description: e.target.value })
               }
               required
+              className="bg-white/10 border-white/20 min-h-[100px]"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -92,6 +120,7 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
                   setFormData({ ...formData, genre: e.target.value })
                 }
                 required
+                className="bg-white/10 border-white/20"
               />
             </div>
             <div className="space-y-2">
@@ -104,6 +133,7 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
                   setFormData({ ...formData, release_date: e.target.value })
                 }
                 required
+                className="bg-white/10 border-white/20"
               />
             </div>
           </div>
@@ -116,8 +146,10 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
               onChange={(e) =>
                 setFormData({ ...formData, thumbnail: e.target.value })
               }
-              required
+              placeholder="/placeholder.svg"
+              className="bg-white/10 border-white/20"
             />
+            <p className="text-xs text-gray-400">Leave empty to use default placeholder</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="trailer">Trailer URL (Optional)</Label>
@@ -128,6 +160,8 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
               onChange={(e) =>
                 setFormData({ ...formData, trailer: e.target.value })
               }
+              placeholder="https://www.youtube.com/watch?v=..."
+              className="bg-white/10 border-white/20"
             />
           </div>
           <div className="space-y-2">
@@ -140,10 +174,24 @@ export function AddGameDialog({ onAddGame }: AddGameDialogProps) {
               onChange={(e) =>
                 setFormData({ ...formData, executable_path: e.target.value })
               }
-              required
+              className="bg-white/10 border-white/20"
             />
           </div>
-          <Button type="submit" className="w-full">
+          <div className="space-y-2">
+            <Label htmlFor="launch_code">Launch Code (Optional)</Label>
+            <Input
+              id="launch_code"
+              type="text"
+              placeholder="GAME"
+              value={formData.launch_code}
+              onChange={(e) =>
+                setFormData({ ...formData, launch_code: e.target.value })
+              }
+              className="bg-white/10 border-white/20"
+            />
+            <p className="text-xs text-gray-400">Short code for launching the game (e.g., NINJA for Fruit Ninja)</p>
+          </div>
+          <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
             Add Game
           </Button>
         </form>

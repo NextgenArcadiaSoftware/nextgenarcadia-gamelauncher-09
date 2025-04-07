@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
-import { Library as LibraryIcon, ArrowLeft, Trash2, Search, Pencil } from "lucide-react";
+import { Library as LibraryIcon, ArrowLeft, Trash2, Search, Pencil, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Game } from "@/types/game";
 import {
@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AddGameDialog } from "@/components/AddGameDialog";
 
 const Library = () => {
   const [games, setGames] = useState<Game[]>([]);
@@ -54,6 +55,35 @@ const Library = () => {
         variant: "destructive",
         title: "Error",
         description: "Failed to fetch games",
+      });
+    }
+  };
+
+  const handleAddGame = async (newGame: Omit<Game, "id" | "status" | "created_at" | "updated_at">) => {
+    try {
+      const { data, error } = await supabase
+        .from('games')
+        .insert([{
+          ...newGame,
+          status: 'enabled' as const
+        }])
+        .select();
+
+      if (error) throw error;
+
+      if (data && data[0]) {
+        setGames(prevGames => [data[0] as Game, ...prevGames]);
+        toast({
+          title: "Game Added",
+          description: "The game has been added to your library"
+        });
+      }
+    } catch (error) {
+      console.error('Error adding game:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add game"
       });
     }
   };
@@ -176,15 +206,19 @@ const Library = () => {
                 <h1 className="text-xl font-bold">Game Library</h1>
               </div>
             </div>
-            <div className="relative w-64">
-              <Input
-                type="search"
-                placeholder="Search games..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded-xl pl-10 bg-white/10 border-white/10 focus:border-white/20"
-              />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+            <div className="flex items-center gap-4">
+              <div className="relative w-64">
+                <Input
+                  type="search"
+                  placeholder="Search games..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="rounded-xl pl-10 bg-white/10 border-white/10 focus:border-white/20"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+              </div>
+              
+              <AddGameDialog onAddGame={handleAddGame} />
             </div>
           </div>
 
