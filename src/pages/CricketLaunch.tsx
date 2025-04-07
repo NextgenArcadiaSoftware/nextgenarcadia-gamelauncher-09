@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import { useRFIDDetection } from '@/hooks/useRFIDDetection';
 
 export default function CricketLaunch() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { rfidDetected, simulateRFID } = useRFIDDetection();
 
   // Set up key event listener for X key to end game
   useEffect(() => {
@@ -74,6 +76,17 @@ export default function CricketLaunch() {
         <ArrowLeft className="h-6 w-6" />
         Back to Games
       </Button>
+      
+      {/* Test button for RFID simulation */}
+      <Button
+        variant="default"
+        size="lg"
+        className="fixed top-8 right-8 z-50 bg-purple-600 hover:bg-purple-700"
+        onClick={simulateRFID}
+      >
+        Simulate RFID Scan
+      </Button>
+      
       <RFIDCountdown 
         onExit={() => navigate('/')} 
         activeGame="iB Cricket"
