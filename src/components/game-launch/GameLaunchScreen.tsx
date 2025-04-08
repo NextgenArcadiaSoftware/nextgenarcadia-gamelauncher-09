@@ -5,6 +5,7 @@ import { VirtualKeyboard } from './VirtualKeyboard';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 interface GameLaunchScreenProps {
   game: {
@@ -86,11 +87,6 @@ export function GameLaunchScreen({
 
   const simulateKeyPress = (key: string) => {
     try {
-      const button = document.getElementById('myButton');
-      if (button) {
-        button.click();
-      }
-
       if (key.toLowerCase() === currentLaunchKey && showLaunchScreen) {
         handleGameStart();
       }
@@ -109,13 +105,20 @@ export function GameLaunchScreen({
     }
   };
 
-  const handleKeyPress = (key: string) => {
-    simulateKeyPress(key);
+  // Animation variants for smoother transitions
+  const fadeIn = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.5 } }
   };
 
   if (!showLaunchScreen) {
     return (
-      <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+      <motion.div 
+        className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50"
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80" />
           <div className="absolute inset-0 mix-blend-overlay opacity-30">
@@ -123,7 +126,12 @@ export function GameLaunchScreen({
           </div>
         </div>
 
-        <div className="relative z-10 max-w-4xl w-full mx-auto p-8">
+        <motion.div 
+          className="relative z-10 max-w-4xl w-full mx-auto p-8"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
           <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-white/20">
             <div className="text-center">
               <h1 className="text-6xl font-bold text-white mb-4 font-display" style={{
@@ -151,13 +159,18 @@ export function GameLaunchScreen({
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50">
+    <motion.div 
+      className="fixed inset-0 bg-black flex flex-col items-center justify-center z-50"
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+    >
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-purple-900 opacity-80" />
         <div className="absolute inset-0 mix-blend-overlay opacity-30">
@@ -165,7 +178,12 @@ export function GameLaunchScreen({
         </div>
       </div>
 
-      <div className="relative z-10 max-w-4xl w-full mx-auto p-8">
+      <motion.div 
+        className="relative z-10 max-w-4xl w-full mx-auto p-8"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
         <div className="glass p-8 rounded-3xl space-y-8 relative overflow-hidden border border-white/20">
           <div className="text-center">
             <h1 className="text-6xl font-bold text-white mb-4 font-display" style={{
@@ -190,24 +208,24 @@ export function GameLaunchScreen({
             <div className="animate-[pulse_2s_ease-in-out_infinite] text-white text-2xl font-bold">
               Press {currentLaunchKey.toUpperCase()} When Ready
             </div>
-            <button 
-              onClick={() => simulateKeyPress(currentLaunchKey)} 
-              className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transform transition-all duration-200 hover:scale-105 active:scale-95 border-4 border-white/20"
+            <motion.button 
+              onClick={() => simulateKeyPress(currentLaunchKey)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-32 h-32 text-6xl font-bold text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transition-all duration-200 border-4 border-white/20"
             >
               {currentLaunchKey.toUpperCase()}
-            </button>
+            </motion.button>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 flex justify-center">
             <VirtualKeyboard
-              onKeyPress={handleKeyPress}
-              onBackspace={() => {}}
-              onEnter={() => {}}
-              inputWord=""
+              onKeyPress={simulateKeyPress}
+              gameKey={currentLaunchKey}
             />
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -1,33 +1,33 @@
+
 import React, { useEffect, useState } from 'react';
-import { Delete, CornerDownLeft } from 'lucide-react';
 import { useToast } from '../ui/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
+import { Button } from '../ui/button';
 
 interface VirtualKeyboardProps {
   onKeyPress: (key: string) => void;
-  onBackspace: () => void;
-  onEnter: () => void;
-  inputWord: string;
+  onBackspace?: () => void;
+  onEnter?: () => void;
+  inputWord?: string;
+  gameKey?: string;
 }
 
-export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }: VirtualKeyboardProps) {
+export function VirtualKeyboard({ 
+  onKeyPress, 
+  onBackspace, 
+  onEnter, 
+  inputWord,
+  gameKey
+}: VirtualKeyboardProps) {
   const { toast } = useToast();
   const [connectionError, setConnectionError] = useState(false);
   const [lastResponse, setLastResponse] = useState<string | null>(null);
   const [lastStatus, setLastStatus] = useState<number | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
-  const rows = [
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-    ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-  ];
 
-  // Check server connectivity on mount
   useEffect(() => {
     checkServerConnectivity();
     
-    // Set up periodic connectivity checks
     const intervalId = setInterval(checkServerConnectivity, 10000);
     
     return () => {
@@ -45,18 +45,11 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
       }
     })
       .then(response => {
-        if (response.ok || response.status === 204) {
+        if (response.ok || response.status === 204 || response.status === 404) {
           setConnectionError(false);
           setReconnectAttempts(0);
         } else {
-          // Handle 404 status which might still mean server is running but endpoint not available
-          if (response.status === 404) {
-            console.log("Server running but health endpoint is missing");
-            setConnectionError(false);
-            setReconnectAttempts(0);
-          } else {
-            throw new Error(`Server returned: ${response.status}`);
-          }
+          throw new Error(`Server returned: ${response.status}`);
         }
       })
       .catch(() => {
@@ -123,36 +116,27 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
           description: "Closing all active games...",
           variant: "destructive"
         });
-      } else if (key === 'F') { // Fruit Ninja
-        toast({
-          title: "Game Launched",
-          description: "Launching Fruit Ninja VR...",
-          variant: "default"
-        });
-      } else if (key === 'E') { // Elven Assassin
-        toast({
-          title: "Game Launched",
-          description: "Launching Elven Assassin...",
-          variant: "default"
-        });
-      } else if (key === 'C') { // Crisis Brigade
-        toast({
-          title: "Game Launched",
-          description: "Launching Crisis Brigade 2...",
-          variant: "default"
-        });
-      } else if (key === 'V') { // All-in-One Sports
-        toast({
-          title: "Game Launched",
-          description: "Launching All-in-One Sports VR...",
-          variant: "default"
-        });
       } else {
-        toast({
-          title: "Command Sent",
-          description: `Key ${key} command processed`,
-          variant: "default"
-        });
+        const gameNames: Record<string, string> = {
+          'f': "Fruit Ninja VR",
+          'e': "Elven Assassin",
+          'c': "Crisis Brigade 2",
+          'v': "All-in-One Sports VR"
+        };
+        
+        if (gameNames[keyToSend]) {
+          toast({
+            title: "Game Launched",
+            description: `Launching ${gameNames[keyToSend]}...`,
+            variant: "default"
+          });
+        } else {
+          toast({
+            title: "Command Sent",
+            description: `Key ${key} command processed`,
+            variant: "default"
+          });
+        }
       }
       
       // Create and dispatch a real DOM keyboard event
@@ -228,55 +212,26 @@ export function VirtualKeyboard({ onKeyPress, onBackspace, onEnter, inputWord }:
         </Alert>
       )}
       
-      <div className="grid gap-2">
-        {rows.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex justify-center gap-1">
-            {row.map((key) => (
-              <button
-                key={key}
-                onClick={() => handleKeyClick(key)}
-                className={`w-12 h-12 rounded-lg ${
-                  key === 'X' 
-                    ? 'bg-red-600 text-white animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.7)]' 
-                    : 'bg-white/10 hover:bg-white/20 text-white'
-                } 
-                font-bold text-lg transition-colors 
-                duration-200 flex items-center justify-center
-                border ${key === 'X' ? 'border-red-500' : 'border-white/10'} backdrop-blur-sm
-                active:scale-95 transform`}
-                data-key={key.toLowerCase()}
-              >
-                {key}
-              </button>
-            ))}
-          </div>
-        ))}
-        <div className="flex justify-center gap-1 mt-2">
-          <button
-            onClick={onBackspace}
-            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 
-                     text-white transition-colors duration-200
-                     border border-white/10 backdrop-blur-sm"
+      <div className="flex justify-center gap-4">
+        {gameKey && (
+          <Button
+            onClick={() => handleKeyClick(gameKey)}
+            className="w-24 h-24 rounded-2xl bg-blue-600 text-white text-2xl font-bold
+                     shadow-[0_0_15px_rgba(59,130,246,0.7)] border border-blue-500/50
+                     hover:bg-blue-700 transition-all duration-300"
           >
-            <Delete className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => handleKeyClick(' ')}
-            className="px-16 py-2 rounded-lg bg-white/10 hover:bg-white/20 
-                     text-white transition-colors duration-200
-                     border border-white/10 backdrop-blur-sm"
-          >
-            Space
-          </button>
-          <button
-            onClick={onEnter}
-            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 
-                     text-white transition-colors duration-200
-                     border border-white/10 backdrop-blur-sm"
-          >
-            <CornerDownLeft className="w-5 h-5" />
-          </button>
-        </div>
+            {gameKey.toUpperCase()}
+          </Button>
+        )}
+        
+        <Button
+          onClick={() => handleKeyClick('X')}
+          className="w-24 h-24 rounded-2xl bg-red-600 text-white text-2xl font-bold
+                   shadow-[0_0_15px_rgba(220,38,38,0.7)] border border-red-500/50
+                   hover:bg-red-700 transition-all duration-300"
+        >
+          X
+        </Button>
       </div>
     </div>
   );
