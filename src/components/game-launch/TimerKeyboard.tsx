@@ -5,6 +5,7 @@ import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 import { Button } from '../ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 interface TimerKeyboardProps {
   onKeyPress: (key: string) => void;
@@ -12,6 +13,7 @@ interface TimerKeyboardProps {
 
 export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [connectionError, setConnectionError] = useState(false);
   const [lastResponse, setLastResponse] = useState<string | null>(null);
   const [lastStatus, setLastStatus] = useState<number | null>(null);
@@ -227,6 +229,11 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         if (sessionCreated) {
           markSessionComplete(key);
         }
+        
+        // Navigate to home after closing games
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
       } else {
         const gameNames: Record<string, string> = {
           'F': "Fruit Ninja VR",
@@ -282,6 +289,11 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         if (key === 'X') {
           console.log("Sending end-game command via Electron");
           window.electron.ipcRenderer.send('end-game');
+          
+          // Navigate to home after attempting to close games
+          setTimeout(() => {
+            navigate('/');
+          }, 1500);
         }
       }
     });
