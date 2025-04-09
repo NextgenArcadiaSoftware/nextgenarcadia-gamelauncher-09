@@ -171,7 +171,7 @@ export default function SportsLaunch() {
           .from('game_sessions')
           .insert({
             game_id: gameData.id,
-            duration: Math.ceil(timerDuration / 60), // Convert seconds to minutes
+            duration: String(Math.ceil(timerDuration / 60)), // Convert seconds to minutes and then to string
             completed: true,
             ended_at: new Date().toISOString()
           });

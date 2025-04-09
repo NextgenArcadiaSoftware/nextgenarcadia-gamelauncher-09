@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,6 @@ import placeholderImage from '@/assets/placeholder.svg';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
-// Game key mappings with images - updated with the exact same images as GameCard in Index
 const GAME_KEYS = {
   "f": {
     name: "Fruit Ninja",
@@ -83,11 +81,9 @@ export const GameSelectionFlow: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch global timer settings and check server connectivity on component mount
   useEffect(() => {
     const fetchTimerSettings = async () => {
       try {
-        // Fetch the timer settings from the settings table
         const { data, error } = await supabase
           .from('settings')
           .select('timer_duration')
@@ -100,7 +96,6 @@ export const GameSelectionFlow: React.FC = () => {
         }
         
         if (data && data.timer_duration) {
-          // Convert from minutes to seconds
           const durationInSeconds = data.timer_duration * 60;
           console.log(`Using timer duration from settings: ${data.timer_duration} minutes (${durationInSeconds} seconds)`);
           setTimerDuration(durationInSeconds);
@@ -113,7 +108,6 @@ export const GameSelectionFlow: React.FC = () => {
     fetchTimerSettings();
     checkServerConnection();
     
-    // Set up periodic health checks
     const intervalId = setInterval(checkServerConnection, 10000);
     
     return () => clearInterval(intervalId);
@@ -124,11 +118,10 @@ export const GameSelectionFlow: React.FC = () => {
     try {
       const res = await fetch(`${API_URL}/keypress`, {
         method: 'HEAD',
-        signal: AbortSignal.timeout(2000) // 2 second timeout
+        signal: AbortSignal.timeout(2000)
       });
       
       if (res.ok || res.status === 404) {
-        // Even a 404 means the server is running
         setServerStatus('connected');
         console.log("Server health check successful");
       } else {
@@ -141,13 +134,11 @@ export const GameSelectionFlow: React.FC = () => {
     }
   };
 
-  // Listen for RFID input (simulated with number keys)
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (showRFIDScreen && /^\d$/.test(event.key)) {
         setRfidInput(prev => {
           const newInput = prev + event.key;
-          // Check if we have a complete RFID number (10+ digits)
           if (newInput.length >= 10) {
             handleRFIDSuccess();
             return '';
@@ -182,13 +173,11 @@ export const GameSelectionFlow: React.FC = () => {
       });
       
       if (res.ok) {
-        // Set the active game and show timer
         const gameName = GAME_KEYS[key as keyof typeof GAME_KEYS].name;
         setActiveGame(gameName);
         setShowGameSelection(false);
         setShowTimer(true);
         
-        // Create a game session in Supabase
         await createGameSession(gameName);
         
         toast({
@@ -214,10 +203,8 @@ export const GameSelectionFlow: React.FC = () => {
     }
   };
 
-  // Create a game session in Supabase
   const createGameSession = async (gameName: string) => {
     try {
-      // Get game ID first
       const { data: gameData } = await supabase
         .from('games')
         .select('id')
@@ -227,12 +214,11 @@ export const GameSelectionFlow: React.FC = () => {
       if (gameData) {
         console.log('Creating new session for game:', gameName);
         
-        // Create a new session
         const { error } = await supabase
           .from('game_sessions')
           .insert({
             game_id: gameData.id,
-            duration: Math.ceil(timerDuration / 60), // Convert seconds to minutes
+            duration: String(Math.ceil(timerDuration / 60)),
             completed: false
           });
         
@@ -247,12 +233,10 @@ export const GameSelectionFlow: React.FC = () => {
     }
   };
 
-  // Mark the current session as complete in Supabase
   const markSessionComplete = async () => {
     if (!activeGame) return;
     
     try {
-      // Get game ID first
       const { data: gameData } = await supabase
         .from('games')
         .select('id')
@@ -261,7 +245,6 @@ export const GameSelectionFlow: React.FC = () => {
 
       if (gameData) {
         console.log('Marking session complete for game:', activeGame);
-        // Update the latest session for this game as completed
         const { error } = await supabase
           .from('game_sessions')
           .update({ 
@@ -295,12 +278,10 @@ export const GameSelectionFlow: React.FC = () => {
       });
       
       if (res.ok) {
-        // Mark the session as complete if there is an active game
         if (activeGame) {
           await markSessionComplete();
         }
         
-        // Reset UI state
         setShowTimer(false);
         setShowRating(true);
         
@@ -337,7 +318,6 @@ export const GameSelectionFlow: React.FC = () => {
       description: `You rated ${activeGame} ${rating} stars.`,
     });
     
-    // Reset state and return to game selection
     setActiveGame(null);
     setShowRating(false);
     setShowGameSelection(true);
@@ -347,7 +327,6 @@ export const GameSelectionFlow: React.FC = () => {
     navigate('/');
   };
 
-  // Show rating screen if enabled
   if (showRating && activeGame) {
     return (
       <RatingScreen
@@ -357,7 +336,6 @@ export const GameSelectionFlow: React.FC = () => {
     );
   }
 
-  // RFID Authentication Screen
   if (showRFIDScreen) {
     return (
       <div className="fixed inset-0 bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] flex flex-col items-center justify-center z-50">
@@ -371,7 +349,6 @@ export const GameSelectionFlow: React.FC = () => {
               Please tap your RFID card on the reader to begin your VR gaming session
             </div>
             
-            {/* For demo purposes, add a button to simulate RFID */}
             <Button 
               onClick={handleRFIDSuccess}
               className="mx-auto bg-[#6E59A5] hover:bg-[#7E69AB] text-white p-8 h-auto text-xl font-bold"
@@ -411,7 +388,6 @@ export const GameSelectionFlow: React.FC = () => {
     );
   }
 
-  // Game Selection Screen
   if (showGameSelection) {
     return (
       <div className="container mx-auto p-4 bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] min-h-screen text-white">
@@ -510,7 +486,6 @@ export const GameSelectionFlow: React.FC = () => {
     );
   }
 
-  // Timer Display
   if (showTimer && activeGame) {
     return (
       <TimerDisplay 
@@ -521,7 +496,6 @@ export const GameSelectionFlow: React.FC = () => {
     );
   }
 
-  // Fallback
   return (
     <div className="container mx-auto p-4 flex items-center justify-center min-h-screen">
       <Button onClick={() => setShowRFIDScreen(true)}>
