@@ -79,44 +79,45 @@ const CppLauncher: React.FC = () => {
 
   const createGameSession = async (gameName: string) => {
     try {
-      // Check if an active, uncompleted session already exists for this game
-      const { data: existingSessions } = await supabase
-        .from('game_sessions')
-        .select('*')
-        .eq('game_id', (await supabase.from('games').select('id').eq('title', gameName).single()).data?.id)
-        .is('completed', false)
-        .limit(1);
-
-      // If an active session exists, do not create another
-      if (existingSessions && existingSessions.length > 0) {
-        console.log('Active session already exists for this game');
-        return;
-      }
-
       const { data: gameData } = await supabase
         .from('games')
         .select('id')
         .eq('title', gameName)
         .single();
 
-      if (gameData) {
-        console.log('Creating new session for game:', gameName);
-        
-        const durationInMinutes = Math.ceil(timerDuration / 60);
-        
-        const { error } = await supabase
-          .from('game_sessions')
-          .insert({
-            game_id: gameData.id,
-            duration: durationInMinutes,
-            completed: false
-          });
-        
-        if (error) {
-          console.error('Error creating game session:', error);
-        } else {
-          console.log('Game session created successfully');
-        }
+      if (!gameData) {
+        console.error('Game not found:', gameName);
+        return;
+      }
+
+      const { data: existingSessions } = await supabase
+        .from('game_sessions')
+        .select('*')
+        .eq('game_id', gameData.id)
+        .is('completed', false)
+        .limit(1);
+
+      if (existingSessions && existingSessions.length > 0) {
+        console.log('Active session already exists for this game');
+        return;
+      }
+
+      console.log('Creating new session for game:', gameName);
+      
+      const durationInMinutes = Math.ceil(timerDuration / 60);
+      
+      const { error } = await supabase
+        .from('game_sessions')
+        .insert({
+          game_id: gameData.id,
+          duration: durationInMinutes,
+          completed: false
+        });
+      
+      if (error) {
+        console.error('Error creating game session:', error);
+      } else {
+        console.log('Game session created successfully');
       }
     } catch (error) {
       console.error('Error creating game session:', error);
@@ -126,7 +127,6 @@ const CppLauncher: React.FC = () => {
   useEffect(() => {
     const fetchTimerSettings = async () => {
       try {
-        // Fetch the timer settings from the settings table
         const { data, error } = await supabase
           .from('settings')
           .select('timer_duration')
@@ -139,7 +139,6 @@ const CppLauncher: React.FC = () => {
         }
         
         if (data && data.timer_duration) {
-          // Convert from minutes to seconds
           const durationInSeconds = data.timer_duration * 60;
           console.log(`Using timer duration from settings: ${data.timer_duration} minutes (${durationInSeconds} seconds)`);
           setTimerDuration(durationInSeconds);
@@ -304,28 +303,23 @@ const CppLauncher: React.FC = () => {
   };
 
   const handleTimerExit = () => {
-    // Show rating screen instead of immediately closing games
     setShowRating(true);
     setShowTimer(false);
   };
 
   const handleRatingSubmit = async (rating: number) => {
-    // Close games after rating
     await closeGames();
     
-    // Show toast with rating
     toast({
       title: "Thank You!",
       description: `You rated ${activeGame} ${rating} stars.`,
     });
     
-    // Navigate to home page
     setTimeout(() => {
       navigate('/');
     }, 1500);
   };
 
-  // Show rating screen
   if (showRating && activeGame) {
     return (
       <RatingScreen 
@@ -335,7 +329,6 @@ const CppLauncher: React.FC = () => {
     );
   }
 
-  // Show timer display
   if (showTimer && activeGame) {
     return (
       <TimerDisplay 
@@ -346,7 +339,6 @@ const CppLauncher: React.FC = () => {
     );
   }
 
-  // Main launcher UI
   return (
     <div className="container mx-auto p-4 bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] min-h-screen text-white">
       <div className="max-w-5xl mx-auto">

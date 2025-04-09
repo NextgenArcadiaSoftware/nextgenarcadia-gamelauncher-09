@@ -155,11 +155,23 @@ export default function SportsLaunch() {
   // Function to record the game session in Supabase
   const recordGameSession = async () => {
     try {
+      // Get game ID first
+      const { data: gameData } = await supabase
+        .from('games')
+        .select('id')
+        .eq('title', activeGame)
+        .single();
+
+      if (!gameData) {
+        console.error('Game not found:', activeGame);
+        return;
+      }
+
       // Check if an active, uncompleted session already exists for this game
       const { data: existingSessions } = await supabase
         .from('game_sessions')
         .select('*')
-        .eq('game_id', (await supabase.from('games').select('id').eq('title', activeGame).single()).data?.id)
+        .eq('game_id', gameData.id)
         .is('completed', false)
         .limit(1);
 
@@ -169,34 +181,24 @@ export default function SportsLaunch() {
         return;
       }
 
-      // Get game ID first
-      const { data: gameData } = await supabase
-        .from('games')
-        .select('id')
-        .eq('title', activeGame)
-        .single();
-
-      if (gameData) {
-        console.log('Creating session record for game:', activeGame);
-        
-        // Convert timer duration from seconds to minutes
-        const durationInMinutes = Math.ceil(timerDuration / 60);
-        
-        // Create a new session and mark it as completed immediately
-        const { error } = await supabase
-          .from('game_sessions')
-          .insert({
-            game_id: gameData.id,
-            duration: durationInMinutes,
-            completed: false,
-            ended_at: new Date().toISOString()
-          });
-        
-        if (error) {
-          console.error('Error creating game session:', error);
-        } else {
-          console.log('Game session created successfully');
-        }
+      console.log('Creating session record for game:', activeGame);
+      
+      // Convert timer duration from seconds to minutes
+      const durationInMinutes = Math.ceil(timerDuration / 60);
+      
+      // Create a new session and mark it as not completed initially
+      const { error } = await supabase
+        .from('game_sessions')
+        .insert({
+          game_id: gameData.id,
+          duration: durationInMinutes,
+          completed: false
+        });
+      
+      if (error) {
+        console.error('Error creating game session:', error);
+      } else {
+        console.log('Game session created successfully');
       }
     } catch (error) {
       console.error('Error recording game session:', error);
