@@ -17,6 +17,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
   const sessionCompletionRef = useRef(false);
   const sessionCreatedRef = useRef(false);
   const { toast } = useToast();
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
   // Check if Electron is available
   const isElectronAvailable = Boolean(window.electron);
@@ -148,7 +149,10 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         // Update the latest session for this game as completed
         const { data, error } = await supabase
           .from('game_sessions')
-          .update({ completed: true })
+          .update({ 
+            completed: true,
+            ended_at: new Date().toISOString()
+          })
           .eq('game_id', gameData.id)
           .is('completed', false)
           .order('created_at', { ascending: false })
@@ -177,7 +181,7 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
     console.log('Close games button clicked');
     
     // Send close command to Python server
-    fetch("http://localhost:5002/close", {
+    fetch(`${API_URL}/close`, {
       method: "POST",
       headers: { "Content-Type": "application/json" }
     })
@@ -197,6 +201,12 @@ export function TimerDisplay({ timeLeft: initialTime, activeGame, onExit }: Time
         window.electron.ipcRenderer.send('end-game');
       }
     });
+    
+    // Mark session as completed if not already done
+    if (activeGame && !sessionCompletionRef.current && sessionCreatedRef.current) {
+      sessionCompletionRef.current = true;
+      markSessionComplete();
+    }
     
     // Exit after short delay
     setTimeout(() => onExit(), 1000);

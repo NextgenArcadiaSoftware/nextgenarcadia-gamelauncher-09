@@ -136,6 +136,7 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
     topGames: { title: string; count: number; percentage: number }[];
   }[]>([]);
   const { toast } = useToast();
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
   useEffect(() => {
     fetchGames();
@@ -462,6 +463,7 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
   const handleTimerUpdate = async (value: number[]) => {
     setTimerDuration(value[0]);
     
+    // Update timer in Supabase
     const { error } = await supabase
       .from('settings')
       .update({ timer_duration: value[0] })
@@ -474,6 +476,27 @@ export function OwnerDashboard({ onClose, onAddGame }: OwnerDashboardProps) {
         description: "Failed to update timer duration"
       });
       return;
+    }
+
+    // Also update timer in CPP launcher via API
+    try {
+      const response = await fetch(`${API_URL}/update-timer`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json; charset=utf-8",
+          "Accept-Charset": "UTF-8" 
+        },
+        body: JSON.stringify({ duration: value[0] }),
+        signal: AbortSignal.timeout(3000)
+      });
+      
+      if (!response.ok) {
+        console.warn('CPP launcher timer update may not have succeeded', response.status);
+      }
+    } catch (error) {
+      console.error('Error updating CPP launcher timer:', error);
+      // Even if CPP launcher update fails, we don't want to show an error
+      // since the DB update succeeded and that's what matters most
     }
 
     toast({

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, useRef } from 'react';
 import { useToast } from './ui/use-toast';
 import { TimerDisplay } from './game-launch/TimerDisplay';
 import { RatingScreen } from './game-launch/RatingScreen';
@@ -26,6 +27,7 @@ export function RFIDCountdown({
   const [showRating, setShowRating] = useState(false);
   const [showGameScreen, setShowGameScreen] = useState(true);
   const [lastServerStatus, setLastServerStatus] = useState<number | null>(null);
+  const sessionRecorded = useRef(false);
   const { toast } = useToast();
   
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
@@ -91,6 +93,48 @@ export function RFIDCountdown({
       supabase.removeChannel(channel);
     };
   }, [toast]);
+
+  // Record game session when starting the game
+  useEffect(() => {
+    const recordGameSession = async () => {
+      if (!activeGame || sessionRecorded.current || showGameScreen) return;
+      
+      try {
+        // Get game ID first
+        const { data: gameData } = await supabase
+          .from('games')
+          .select('id')
+          .eq('title', activeGame)
+          .single();
+
+        if (gameData) {
+          console.log('Creating new session for game:', activeGame);
+          sessionRecorded.current = true;
+          
+          // Create a new session
+          const { error } = await supabase
+            .from('game_sessions')
+            .insert({
+              game_id: gameData.id,
+              duration: Math.ceil((timeLeft || 300) / 60), // Convert seconds to minutes
+              completed: false
+            });
+          
+          if (error) {
+            console.error('Error creating game session:', error);
+          } else {
+            console.log('Game session created successfully');
+          }
+        }
+      } catch (error) {
+        console.error('Error creating game session:', error);
+      }
+    };
+
+    if (!showGameScreen && !sessionRecorded.current) {
+      recordGameSession();
+    }
+  }, [activeGame, timeLeft, showGameScreen]);
 
   const getGameCode = (gameTitle: string | null | undefined): string => {
     if (!gameTitle) return "XXX";
@@ -329,6 +373,7 @@ export function RFIDCountdown({
     
     if (activeGame) {
       try {
+        // Mark session as completed
         const { data: gameData } = await supabase
           .from('games')
           .select('id')
@@ -336,6 +381,19 @@ export function RFIDCountdown({
           .single();
 
         if (gameData) {
+          // Update the latest session for this game as completed
+          await supabase
+            .from('game_sessions')
+            .update({ 
+              completed: true,
+              ended_at: new Date().toISOString()
+            })
+            .eq('game_id', gameData.id)
+            .is('completed', false)
+            .order('started_at', { ascending: false })
+            .limit(1);
+            
+          // Add rating
           await supabase
             .from('game_ratings')
             .insert({
@@ -344,7 +402,7 @@ export function RFIDCountdown({
             });
         }
       } catch (error) {
-        console.error('Error recording game rating:', error);
+        console.error('Error completing game session and recording rating:', error);
       }
     }
     
