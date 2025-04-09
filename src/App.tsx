@@ -27,8 +27,6 @@ import { Screensaver } from './components/Screensaver';
 import { GameSelectionFlow } from './components/game-launch/GameSelectionFlow';
 
 const inactivityTimeout = import.meta.env.VITE_SCREENSAVER_TIMEOUT ? parseInt(import.meta.env.VITE_SCREENSAVER_TIMEOUT) : 30000;
-const screensaverImageUrl = import.meta.env.VITE_SCREENSAVER_IMAGE_URL || '/screensaver.jpg';
-const screensaverVideoUrl = import.meta.env.VITE_SCREENSAVER_VIDEO_URL || '';
 
 function App() {
   const [showScreensaver, setShowScreensaver] = useState(false);
