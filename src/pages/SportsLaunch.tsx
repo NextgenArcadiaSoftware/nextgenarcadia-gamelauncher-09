@@ -5,16 +5,18 @@ import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { RatingScreen } from '@/components/game-launch/RatingScreen';
+import { useRFIDDetection } from '@/hooks/useRFIDDetection';
 
 export default function SportsLaunch() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [serverResponse, setServerResponse] = useState<string | null>(null);
   const [requestStatus, setRequestStatus] = useState<string | null>(null);
-  const [rfidDetected, setRfidDetected] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [gameEnding, setGameEnding] = useState(false);
+  const [rfidDetected, setRfidDetected] = useState(false);
   const activeGame = "All-in-One Sports VR";
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
   // Set up global key event listener for both the X key and Python program
   useEffect(() => {
@@ -27,11 +29,11 @@ export default function SportsLaunch() {
           setRfidDetected(true);
           toast({
             title: "RFID Detected",
-            description: "Launching game directly...",
+            description: "Redirecting to CPP launcher...",
           });
           
-          // Directly send the launch key to the CPP launcher
-          launchGame();
+          // Navigate to CPP launcher after RFID detection
+          setTimeout(() => navigate('/cpp-launcher'), 1500);
         }, 1000);
         return;
       }
@@ -59,7 +61,7 @@ export default function SportsLaunch() {
     setGameEnding(true);
     
     // Send close command to Python server
-    fetch("http://localhost:5002/close", {
+    fetch(`${API_URL}/close`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json; charset=utf-8",
@@ -114,54 +116,16 @@ export default function SportsLaunch() {
     });
   };
   
-  // Function to launch game directly via CPP launcher
-  const launchGame = () => {
-    console.log(`Launching All-in-One Sports VR with CPP launcher key: v`);
-    
-    fetch("http://localhost:5002/keypress", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json; charset=utf-8",
-        "Accept-Charset": "UTF-8" 
-      },
-      body: JSON.stringify({ key: "v" }),
-      signal: AbortSignal.timeout(3000)
-    })
-    .then(response => {
-      console.log(`Server responded with status: ${response.status}`);
-      
-      if (response.status === 204 || response.ok) {
-        toast({
-          title: "Game Launching",
-          description: `Launching ${activeGame}...`,
-        });
-      } else {
-        throw new Error(`HTTP error: ${response.status}`);
-      }
-    })
-    .catch(error => {
-      console.error('Error launching game:', error);
-      toast({
-        variant: "destructive",
-        title: "Launch Error",
-        description: "Failed to connect to game launcher service"
-      });
-      
-      if (window.electron) {
-        console.log("Falling back to Electron keypress simulation");
-        window.electron.ipcRenderer.send('simulate-keypress', "v");
-      }
-    });
-  };
-  
   // Simulating RFID detection for easy testing
   const simulateRFID = () => {
     setRfidDetected(true);
     toast({
       title: "RFID Detected",
-      description: "Launching game directly...",
+      description: "Redirecting to CPP launcher...",
     });
-    launchGame();
+    
+    // Navigate to CPP launcher after RFID detection
+    setTimeout(() => navigate('/cpp-launcher'), 1500);
   };
   
   // Handle rating submission and return to home
@@ -206,7 +170,7 @@ export default function SportsLaunch() {
         className="fixed top-8 right-8 z-50 bg-purple-600 hover:bg-purple-700"
         onClick={simulateRFID}
       >
-        Launch Game
+        Simulate RFID Scan
       </Button>
       
       <div className="container mx-auto h-screen flex flex-col items-center justify-center text-white">
@@ -222,7 +186,7 @@ export default function SportsLaunch() {
             className="bg-green-600 hover:bg-green-700 text-xl px-8 py-6"
             onClick={simulateRFID}
           >
-            Launch Game
+            Scan RFID to Play
           </Button>
           
           <Button 
