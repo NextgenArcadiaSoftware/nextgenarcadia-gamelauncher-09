@@ -206,6 +206,20 @@ export const GameSelectionFlow: React.FC = () => {
 
   const createGameSession = async (gameName: string) => {
     try {
+      // Check if an active, uncompleted session already exists for this game
+      const { data: existingSessions } = await supabase
+        .from('game_sessions')
+        .select('*')
+        .eq('game_id', (await supabase.from('games').select('id').eq('title', gameName).single()).data?.id)
+        .is('completed', false)
+        .limit(1);
+
+      // If an active session exists, do not create another
+      if (existingSessions && existingSessions.length > 0) {
+        console.log('Active session already exists for this game');
+        return;
+      }
+
       const { data: gameData } = await supabase
         .from('games')
         .select('id')
@@ -215,14 +229,13 @@ export const GameSelectionFlow: React.FC = () => {
       if (gameData) {
         console.log('Creating new session for game:', gameName);
         
-        // Convert duration from number to string before inserting
         const durationInMinutes = Math.ceil(timerDuration / 60);
         
         const { error } = await supabase
           .from('game_sessions')
           .insert({
             game_id: gameData.id,
-            duration: durationInMinutes, // Use number directly for duration, which expects a number
+            duration: durationInMinutes,
             completed: false
           });
         

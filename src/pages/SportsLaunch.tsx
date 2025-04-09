@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
@@ -156,6 +155,20 @@ export default function SportsLaunch() {
   // Function to record the game session in Supabase
   const recordGameSession = async () => {
     try {
+      // Check if an active, uncompleted session already exists for this game
+      const { data: existingSessions } = await supabase
+        .from('game_sessions')
+        .select('*')
+        .eq('game_id', (await supabase.from('games').select('id').eq('title', activeGame).single()).data?.id)
+        .is('completed', false)
+        .limit(1);
+
+      // If an active session exists, do not create another
+      if (existingSessions && existingSessions.length > 0) {
+        console.log('Active session already exists for this game');
+        return;
+      }
+
       // Get game ID first
       const { data: gameData } = await supabase
         .from('games')
@@ -166,7 +179,7 @@ export default function SportsLaunch() {
       if (gameData) {
         console.log('Creating session record for game:', activeGame);
         
-        // Convert timer duration from seconds to minutes as a number
+        // Convert timer duration from seconds to minutes
         const durationInMinutes = Math.ceil(timerDuration / 60);
         
         // Create a new session and mark it as completed immediately
@@ -174,15 +187,15 @@ export default function SportsLaunch() {
           .from('game_sessions')
           .insert({
             game_id: gameData.id,
-            duration: durationInMinutes, // Use number directly, which is what the database expects
-            completed: true,
+            duration: durationInMinutes,
+            completed: false,
             ended_at: new Date().toISOString()
           });
         
         if (error) {
           console.error('Error creating game session:', error);
         } else {
-          console.log('Game session created and marked as completed successfully');
+          console.log('Game session created successfully');
         }
       }
     } catch (error) {
