@@ -2,7 +2,11 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export function Screensaver() {
+interface ScreensaverProps {
+  onClose: () => void;
+}
+
+export function Screensaver({ onClose }: ScreensaverProps) {
   const [isVisible, setIsVisible] = useState(false);
   let timeoutId: NodeJS.Timeout;
 
@@ -27,6 +31,11 @@ export function Screensaver() {
     };
   }, []);
 
+  const handleClick = () => {
+    setIsVisible(false);
+    onClose();
+  };
+
   return (
     <AnimatePresence>
       {isVisible && (
@@ -36,7 +45,7 @@ export function Screensaver() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
           className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
-          onClick={() => setIsVisible(false)}
+          onClick={handleClick}
         >
           {/* Multi-layered animated gradients */}
           <div 
