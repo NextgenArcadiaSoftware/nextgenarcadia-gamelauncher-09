@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Separator } from '@/components/ui/separator';
 import { TimerDisplay } from '@/components/game-launch/TimerDisplay';
 import { RatingScreen } from '@/components/game-launch/RatingScreen';
+import { supabase } from '@/integrations/supabase/client';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
@@ -72,11 +74,38 @@ const CppLauncher: React.FC = () => {
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const [showTimer, setShowTimer] = useState(false);
   const [showRating, setShowRating] = useState(false);
-  const [timerDuration, setTimerDuration] = useState(60); // Changed from 300 (5 min) to 60 (1 min)
+  const [timerDuration, setTimerDuration] = useState(300); // Default 5 minutes, will be overridden by settings
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Fetch global timer settings on component mount
   useEffect(() => {
+    const fetchTimerSettings = async () => {
+      try {
+        // Fetch the timer settings from the settings table
+        const { data, error } = await supabase
+          .from('settings')
+          .select('timer_duration')
+          .eq('id', 1)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching timer settings:', error);
+          return;
+        }
+        
+        if (data && data.timer_duration) {
+          // Convert from minutes to seconds
+          const durationInSeconds = data.timer_duration * 60;
+          console.log(`Using timer duration from settings: ${data.timer_duration} minutes (${durationInSeconds} seconds)`);
+          setTimerDuration(durationInSeconds);
+        }
+      } catch (error) {
+        console.error('Error fetching timer settings:', error);
+      }
+    };
+    
+    fetchTimerSettings();
     checkServerConnection();
     
     const intervalId = setInterval(checkServerConnection, 10000);
@@ -310,6 +339,19 @@ const CppLauncher: React.FC = () => {
                              border border-[#7E69AB]/30 shadow-md
                              transition-all duration-300 group relative rounded-xl"
                 >
+                  <div className="absolute inset-0 w-full h-full">
+                    <img 
+                      src={game.image || "/placeholder.svg"} 
+                      alt={game.name}
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.svg";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#222232] via-[#222232]/60 to-transparent" />
+                  </div>
+                  
                   <div className="relative z-10 flex flex-col items-center justify-center h-full w-full p-2">
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#7E69AB] mb-2 group-hover:bg-[#9b87f5] transition-colors">
                       <Keyboard className="h-8 w-8 text-white group-hover:hidden" />

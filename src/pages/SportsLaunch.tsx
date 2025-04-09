@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { RatingScreen } from '@/components/game-launch/RatingScreen';
 import { useRFIDDetection } from '@/hooks/useRFIDDetection';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function SportsLaunch() {
   const navigate = useNavigate();
@@ -15,8 +16,39 @@ export default function SportsLaunch() {
   const [showRating, setShowRating] = useState(false);
   const [gameEnding, setGameEnding] = useState(false);
   const [rfidDetected, setRfidDetected] = useState(false);
+  const [timerDuration, setTimerDuration] = useState(300); // Default 5 minutes
   const activeGame = "All-in-One Sports VR";
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+
+  // Fetch global timer settings on component mount
+  useEffect(() => {
+    const fetchTimerSettings = async () => {
+      try {
+        // Fetch the timer settings from the settings table
+        const { data, error } = await supabase
+          .from('settings')
+          .select('timer_duration')
+          .eq('id', 1)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching timer settings:', error);
+          return;
+        }
+        
+        if (data && data.timer_duration) {
+          // Convert from minutes to seconds
+          const durationInSeconds = data.timer_duration * 60;
+          console.log(`Using timer duration from settings: ${data.timer_duration} minutes (${durationInSeconds} seconds)`);
+          setTimerDuration(durationInSeconds);
+        }
+      } catch (error) {
+        console.error('Error fetching timer settings:', error);
+      }
+    };
+    
+    fetchTimerSettings();
+  }, []);
 
   // Set up global key event listener for both the X key and Python program
   useEffect(() => {
@@ -92,8 +124,11 @@ export default function SportsLaunch() {
       console.log('Close game response:', text);
       setServerResponse(text);
       
-      // Show rating screen instead of immediate navigation
-      setShowRating(true);
+      // Record the game session in Supabase before showing rating screen
+      recordGameSession().then(() => {
+        // Show rating screen instead of immediate navigation
+        setShowRating(true);
+      });
     })
     .catch(error => {
       console.error('Error closing game:', error);
@@ -110,10 +145,46 @@ export default function SportsLaunch() {
           variant: "destructive"
         });
         
-        // Show rating screen even on error
-        setShowRating(true);
+        // Record the game session and show rating screen even on error
+        recordGameSession().then(() => {
+          setShowRating(true);
+        });
       }
     });
+  };
+  
+  // Function to record the game session in Supabase
+  const recordGameSession = async () => {
+    try {
+      // Get game ID first
+      const { data: gameData } = await supabase
+        .from('games')
+        .select('id')
+        .eq('title', activeGame)
+        .single();
+
+      if (gameData) {
+        console.log('Creating session record for game:', activeGame);
+        
+        // Create a new session and mark it as completed immediately
+        const { error } = await supabase
+          .from('game_sessions')
+          .insert({
+            game_id: gameData.id,
+            duration: Math.ceil(timerDuration / 60), // Convert seconds to minutes
+            completed: true,
+            ended_at: new Date().toISOString()
+          });
+        
+        if (error) {
+          console.error('Error creating game session:', error);
+        } else {
+          console.log('Game session created and marked as completed successfully');
+        }
+      }
+    } catch (error) {
+      console.error('Error recording game session:', error);
+    }
   };
   
   // Simulating RFID detection for easy testing

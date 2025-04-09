@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,8 @@ import { Play, X, Gamepad } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { TimerDisplay } from './TimerDisplay';
+import { RatingScreen } from './RatingScreen';
+import { supabase } from '@/integrations/supabase/client';
 import placeholderImage from '@/assets/placeholder.svg';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
@@ -71,16 +74,43 @@ export const GameSelectionFlow: React.FC = () => {
   const [showGameSelection, setShowGameSelection] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
   const [activeGame, setActiveGame] = useState<string | null>(null);
-  const [timerDuration, setTimerDuration] = useState(300); // 5 minutes default
+  const [timerDuration, setTimerDuration] = useState(300); // Default 5 minutes
   const [loading, setLoading] = useState(false);
   const [rfidInput, setRfidInput] = useState('');
   const [serverStatus, setServerStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+  const [showRating, setShowRating] = useState(false);
   
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Check server connectivity on component mount
+  // Fetch global timer settings and check server connectivity on component mount
   useEffect(() => {
+    const fetchTimerSettings = async () => {
+      try {
+        // Fetch the timer settings from the settings table
+        const { data, error } = await supabase
+          .from('settings')
+          .select('timer_duration')
+          .eq('id', 1)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching timer settings:', error);
+          return;
+        }
+        
+        if (data && data.timer_duration) {
+          // Convert from minutes to seconds
+          const durationInSeconds = data.timer_duration * 60;
+          console.log(`Using timer duration from settings: ${data.timer_duration} minutes (${durationInSeconds} seconds)`);
+          setTimerDuration(durationInSeconds);
+        }
+      } catch (error) {
+        console.error('Error fetching timer settings:', error);
+      }
+    };
+    
+    fetchTimerSettings();
     checkServerConnection();
     
     // Set up periodic health checks
@@ -158,6 +188,9 @@ export const GameSelectionFlow: React.FC = () => {
         setShowGameSelection(false);
         setShowTimer(true);
         
+        // Create a game session in Supabase
+        await createGameSession(gameName);
+        
         toast({
           title: "Game Launched",
           description: `Successfully launched ${gameName}`,
@@ -181,6 +214,76 @@ export const GameSelectionFlow: React.FC = () => {
     }
   };
 
+  // Create a game session in Supabase
+  const createGameSession = async (gameName: string) => {
+    try {
+      // Get game ID first
+      const { data: gameData } = await supabase
+        .from('games')
+        .select('id')
+        .eq('title', gameName)
+        .single();
+
+      if (gameData) {
+        console.log('Creating new session for game:', gameName);
+        
+        // Create a new session
+        const { error } = await supabase
+          .from('game_sessions')
+          .insert({
+            game_id: gameData.id,
+            duration: Math.ceil(timerDuration / 60), // Convert seconds to minutes
+            completed: false
+          });
+        
+        if (error) {
+          console.error('Error creating game session:', error);
+        } else {
+          console.log('Game session created successfully');
+        }
+      }
+    } catch (error) {
+      console.error('Error creating game session:', error);
+    }
+  };
+
+  // Mark the current session as complete in Supabase
+  const markSessionComplete = async () => {
+    if (!activeGame) return;
+    
+    try {
+      // Get game ID first
+      const { data: gameData } = await supabase
+        .from('games')
+        .select('id')
+        .eq('title', activeGame)
+        .single();
+
+      if (gameData) {
+        console.log('Marking session complete for game:', activeGame);
+        // Update the latest session for this game as completed
+        const { error } = await supabase
+          .from('game_sessions')
+          .update({ 
+            completed: true,
+            ended_at: new Date().toISOString()
+          })
+          .eq('game_id', gameData.id)
+          .is('completed', false)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (error) {
+          console.error('Error marking session as completed:', error);
+        } else {
+          console.log('Session marked as completed successfully');
+        }
+      }
+    } catch (error) {
+      console.error('Error marking session as completed:', error);
+    }
+  };
+
   const closeGames = async () => {
     setLoading(true);
     try {
@@ -192,10 +295,14 @@ export const GameSelectionFlow: React.FC = () => {
       });
       
       if (res.ok) {
-        // Reset active game and hide timer
-        setActiveGame(null);
+        // Mark the session as complete if there is an active game
+        if (activeGame) {
+          await markSessionComplete();
+        }
+        
+        // Reset UI state
         setShowTimer(false);
-        setShowGameSelection(true);
+        setShowRating(true);
         
         toast({
           title: "Games Closed",
@@ -222,13 +329,33 @@ export const GameSelectionFlow: React.FC = () => {
 
   const handleTimerExit = () => {
     closeGames();
-    setShowTimer(false);
+  };
+
+  const handleRatingSubmit = (rating: number) => {
+    toast({
+      title: "Thank You!",
+      description: `You rated ${activeGame} ${rating} stars.`,
+    });
+    
+    // Reset state and return to game selection
+    setActiveGame(null);
+    setShowRating(false);
     setShowGameSelection(true);
   };
 
   const handleReturnToLibrary = () => {
     navigate('/');
   };
+
+  // Show rating screen if enabled
+  if (showRating && activeGame) {
+    return (
+      <RatingScreen
+        activeGame={activeGame}
+        onSubmit={handleRatingSubmit}
+      />
+    );
+  }
 
   // RFID Authentication Screen
   if (showRFIDScreen) {
