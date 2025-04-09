@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -63,6 +64,14 @@ const GAME_KEYS = {
   "l": {
     name: "RollerCoaster Legends",
     image: "/lovable-uploads/ad0b4a73-7182-4cd0-a370-e527f21a9f87.png"
+  },
+  "y": {
+    name: "CYBRID",
+    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1636850/capsule_616x353.jpg?t=1742365820"
+  },
+  "x": {
+    name: "CRICVRX",
+    image: "/lovable-uploads/f8c126a3-87f1-4ea8-b8d8-76597554d0be.png"
   },
   "z": {
     name: "Close All Games",

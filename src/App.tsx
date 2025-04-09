@@ -20,6 +20,8 @@ import NotFound from './pages/NotFound';
 import UnknownGameLaunch from './pages/UnknownGameLaunch';
 import BeatSaberLaunch from './pages/BeatSaberLaunch';
 import RollerCoasterLaunch from './pages/RollerCoasterLaunch';
+import CybridLaunch from './pages/CybridLaunch';
+import CricVrxLaunch from './pages/CricVrxLaunch';
 
 import './App.css';
 import { Toaster } from './components/ui/toaster';
@@ -91,6 +93,8 @@ function App() {
         <Route path="/creedlaunch" element={<CreedLaunch />} />
         <Route path="/beatlaunch" element={<BeatSaberLaunch />} />
         <Route path="/rollerlaunch" element={<RollerCoasterLaunch />} />
+        <Route path="/cybridlaunch" element={<CybridLaunch />} />
+        <Route path="/cricvrxlaunch" element={<CricVrxLaunch />} />
         <Route path="/unknowngamelaunch/:id" element={<UnknownGameLaunch />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

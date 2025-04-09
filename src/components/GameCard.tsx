@@ -119,7 +119,9 @@ export function GameCard({
       "Propagation VR": "/propagationlaunch",
       "Creed: Rise to Glory Championship Edition": "/creedlaunch",
       "Beat Saber": "/beatlaunch",
-      "RollerCoaster Legends": "/rollerlaunch"
+      "RollerCoaster Legends": "/rollerlaunch",
+      "CYBRID": "/cybridlaunch",
+      "CRICVRX": "/cricvrxlaunch"
     };
 
     const route = launchScreenRoutes[title];

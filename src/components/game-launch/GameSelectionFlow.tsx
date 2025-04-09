@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,14 @@ const GAME_KEYS = {
   "w": {
     name: "Beat Saber",
     image: "/lovable-uploads/2f7ba916-4fc9-4136-b3cc-9f1e2ba0be94.png"
+  },
+  "y": {
+    name: "CYBRID",
+    image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1636850/capsule_616x353.jpg?t=1742365820"
+  },
+  "x": {
+    name: "CRICVRX",
+    image: "/lovable-uploads/f8c126a3-87f1-4ea8-b8d8-76597554d0be.png"
   },
   "z": {
     name: "Close All Games",
