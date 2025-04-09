@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -130,7 +131,7 @@ const CppLauncher: React.FC = () => {
         const { data, error } = await supabase
           .from('settings')
           .select('timer_duration')
-          .eq('id', 1)
+          .eq('id', 'global')
           .single();
         
         if (error) {

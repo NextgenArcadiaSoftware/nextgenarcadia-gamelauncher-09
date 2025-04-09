@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
@@ -27,7 +28,7 @@ export default function SportsLaunch() {
         const { data, error } = await supabase
           .from('settings')
           .select('timer_duration')
-          .eq('id', 1)
+          .eq('id', 'global')
           .single();
         
         if (error) {
