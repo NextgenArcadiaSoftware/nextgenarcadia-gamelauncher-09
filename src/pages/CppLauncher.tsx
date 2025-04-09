@@ -69,7 +69,7 @@ const GAME_KEYS = {
     name: "CYBRID",
     image: "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1636850/capsule_616x353.jpg?t=1742365820"
   },
-  "x": {
+  "q": {
     name: "CRICVRX",
     image: "/lovable-uploads/f8c126a3-87f1-4ea8-b8d8-76597554d0be.png"
   },

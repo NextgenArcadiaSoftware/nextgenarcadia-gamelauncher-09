@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
@@ -52,7 +51,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
     if (sessionCreated) return;
     
     try {
-      // Define game names mapping
       const gameNames: Record<string, string> = {
         'F': "Fruit Ninja VR",
         'E': "Elven Assassin",
@@ -65,7 +63,9 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         'R': "RollerCoaster Legends",
         'I': "iB Cricket",
         'U': "Undead Citadel",
-        'S': "Subside"
+        'S': "Subside",
+        'Y': "CYBRID",
+        'Q': "CRICVRX"
       };
       
       const gameTitle = gameNames[gameKey] || null;
@@ -77,7 +77,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       
       console.log('Creating session for game:', gameTitle);
       
-      // Look up the game ID based on the title
       const { data: gameData, error: gameError } = await supabase
         .from('games')
         .select('id')
@@ -90,12 +89,11 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       }
       
       if (gameData) {
-        // Create a new session
         const { error } = await supabase
           .from('game_sessions')
           .insert({
             game_id: gameData.id,
-            duration: 5, // Default duration in minutes
+            duration: 5,
             started_at: new Date().toISOString(),
             completed: false
           });
@@ -106,7 +104,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
           console.log('Game session created successfully for:', gameTitle);
           setSessionCreated(true);
           
-          // Reset session created flag after 10 minutes
           setTimeout(() => {
             setSessionCreated(false);
           }, 10 * 60 * 1000);
@@ -133,14 +130,15 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
         'R': "RollerCoaster Legends",
         'I': "iB Cricket",
         'U': "Undead Citadel",
-        'S': "Subside"
+        'S': "Subside",
+        'Y': "CYBRID",
+        'Q': "CRICVRX"
       };
       
       const gameTitle = gameNames[gameKey] || null;
       
       if (!gameTitle) return;
       
-      // Look up the game ID based on the title
       const { data: gameData } = await supabase
         .from('games')
         .select('id')
@@ -150,7 +148,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
       if (gameData) {
         console.log('Marking session complete for game:', gameTitle);
         
-        // Update the latest session for this game as completed
         const { error } = await supabase
           .from('game_sessions')
           .update({ 
@@ -225,12 +222,10 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
           variant: "destructive"
         });
         
-        // If closing games, mark any active sessions as complete
         if (sessionCreated) {
           markSessionComplete(key);
         }
         
-        // Navigate to home after closing games
         setTimeout(() => {
           navigate('/');
         }, 1500);
@@ -239,7 +234,9 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
           'F': "Fruit Ninja VR",
           'E': "Elven Assassin",
           'C': "Crisis Brigade 2",
-          'V': "All-in-One Sports VR"
+          'V': "All-in-One Sports VR",
+          'Y': "CYBRID",
+          'Q': "CRICVRX"
         };
         
         if (gameNames[key]) {
@@ -249,7 +246,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
             variant: "default"
           });
           
-          // Create a new game session when launching a game
           createGameSession(key);
         } else {
           toast({
@@ -290,7 +286,6 @@ export function TimerKeyboard({ onKeyPress }: TimerKeyboardProps) {
           console.log("Sending end-game command via Electron");
           window.electron.ipcRenderer.send('end-game');
           
-          // Navigate to home after attempting to close games
           setTimeout(() => {
             navigate('/');
           }, 1500);

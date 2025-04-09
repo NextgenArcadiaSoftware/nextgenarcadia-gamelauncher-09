@@ -50,13 +50,13 @@ const CricVrxLaunch: React.FC = () => {
   const launchGame = async () => {
     setLoading(true);
     try {
-      // CRICVRX uses the 'x' key
+      // CRICVRX uses the 'q' key
       const res = await fetch(`${API_URL}/keypress`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ key: 'x' }),
+        body: JSON.stringify({ key: 'q' }),
       });
       
       if (res.ok) {
@@ -228,17 +228,17 @@ const CricVrxLaunch: React.FC = () => {
             />
             
             <p className="text-xl text-white/80 mb-6">
-              Experience the thrill of cricket in Virtual Reality with CRICVRX. Perfect your batting technique, bowl against virtual opponents, and enjoy an immersive cricket experience like never before.
+              Experience the thrill of cricket in virtual reality with CRICVRX. Step onto the field, bat in hand, and face bowlers from around the world in this immersive cricket simulation.
             </p>
             
             <div className="flex gap-4 justify-center">
-              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-green-500/30 backdrop-blur-sm border border-green-500/30">
+              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-blue-500/30 backdrop-blur-sm border border-blue-500/30">
                 Virtual Reality
               </span>
-              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-yellow-500/30 backdrop-blur-sm border border-yellow-500/30">
+              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-green-500/30 backdrop-blur-sm border border-green-500/30">
                 Sports
               </span>
-              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-blue-500/30 backdrop-blur-sm border border-blue-500/30">
+              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-yellow-500/30 backdrop-blur-sm border border-yellow-500/30">
                 Cricket
               </span>
             </div>
