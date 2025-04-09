@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -214,11 +215,14 @@ export const GameSelectionFlow: React.FC = () => {
       if (gameData) {
         console.log('Creating new session for game:', gameName);
         
+        // Convert duration from number to string before inserting
+        const durationInMinutes = Math.ceil(timerDuration / 60);
+        
         const { error } = await supabase
           .from('game_sessions')
           .insert({
             game_id: gameData.id,
-            duration: String(Math.ceil(timerDuration / 60)),
+            duration: durationInMinutes, // Use number directly for duration, which expects a number
             completed: false
           });
         

@@ -166,12 +166,15 @@ export default function SportsLaunch() {
       if (gameData) {
         console.log('Creating session record for game:', activeGame);
         
+        // Convert timer duration from seconds to minutes as a number
+        const durationInMinutes = Math.ceil(timerDuration / 60);
+        
         // Create a new session and mark it as completed immediately
         const { error } = await supabase
           .from('game_sessions')
           .insert({
             game_id: gameData.id,
-            duration: String(Math.ceil(timerDuration / 60)), // Convert seconds to minutes and then to string
+            duration: durationInMinutes, // Use number directly, which is what the database expects
             completed: true,
             ended_at: new Date().toISOString()
           });
