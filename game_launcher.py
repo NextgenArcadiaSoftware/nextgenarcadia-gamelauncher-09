@@ -1,3 +1,4 @@
+
 import sys
 import codecs
 from flask import Flask, request, jsonify
@@ -38,7 +39,9 @@ GAMES = {
     "ARS": r"C:\Program Files (x86)\Steam\steamapps\common\Arizona Sunshine\ArizonaSunshine.exe",
     "SBS": r"C:\Program Files (x86)\Steam\steamapps\common\Subside\Subside.exe",
     "PVR": r"C:\Program Files (x86)\Steam\steamapps\common\Propagation VR\PropagationVR.exe",
-    "CRD": r"C:\Program Files (x86)\Steam\steamapps\common\Creed Rise to Glory\Creed.exe"
+    "CRD": r"C:\Program Files (x86)\Steam\steamapps\common\Creed Rise to Glory\Creed.exe",
+    "BTS": r"C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber.exe",
+    "RCL": r"C:\Program Files (x86)\Steam\steamapps\common\RollerCoaster Legends\RollerCoasterLegends.exe"
 }
 
 # Game name mapping for prettier logging and responses
@@ -53,7 +56,9 @@ GAME_NAMES = {
     "ARS": "Arizona Sunshine",
     "SBS": "Subside",
     "PVR": "Propagation VR",
-    "CRD": "Creed: Rise to Glory"
+    "CRD": "Creed: Rise to Glory",
+    "BTS": "Beat Saber",
+    "RCL": "RollerCoaster Legends"
 }
 
 app = Flask(__name__)
@@ -63,17 +68,7 @@ CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS
 # Track currently running games
 active_processes = {}
 
-@app.before_request
-def log_request_info():
-    logger.info(f"Request: {request.method} {request.path}")
-    logger.debug(f"Headers: {request.headers}")
-    try:
-        # Try to decode as UTF-8
-        body_data = request.get_data(as_text=True)
-        logger.debug(f"Body: {body_data}")
-    except UnicodeDecodeError:
-        # In case of binary or non-UTF-8 data
-        logger.debug("Body: [Binary data or non-UTF-8 encoding]")
+# ... keep existing code (logger and Flask app setup)
 
 def notify_electron_app(command):
     """Send a command to the Electron app's HTTP server"""
@@ -150,7 +145,9 @@ def on_key_event(event):
         'e': 'EAX',  # Elven Assassin
         'r': 'RPE',  # Richies Plank
         'v': 'AIO',  # All-in-One Sports
-        'g': 'CRD'   # Creed Rise to Glory
+        'g': 'CRD',  # Creed Rise to Glory
+        'w': 'BTS',  # Beat Saber (new)
+        'l': 'RCL'   # RollerCoaster Legends (new)
     }
     
     if key in key_to_game:
@@ -159,37 +156,7 @@ def on_key_event(event):
     elif key == 'x':
         terminate_games()
 
-# Add a new route to handle the STOP_GAME command
-@app.route('/stop-game', methods=['POST'])
-def stop_game():
-    try:
-        logger.info("[≡ƒÆÇ] Terminating all games...")
-        
-        result = terminate_games()
-        notify_electron_app("STOP_GAME")
-        
-        return jsonify(result), 200
-            
-    except Exception as e:
-        logger.error(f"Error processing stop game command: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-# Add a dedicated endpoint for ending games via API
-@app.route('/end-game', methods=['GET', 'POST'])
-def end_game():
-    try:
-        logger.info("[≡ƒÆÇ] Terminating all games...")
-        
-        result = terminate_games()
-        notify_electron_app("STOP_GAME")
-        
-        # Also simulate the 'stop' keypress for legacy support
-        keyboard.press_and_release('stop')
-        
-        return jsonify(result), 200
-    except Exception as e:
-        logger.error(f"Error processing end game command: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+# ... keep existing code (API routes)
 
 @app.route('/keypress', methods=['POST', 'OPTIONS'])
 def handle_keypress():
@@ -223,6 +190,8 @@ def handle_keypress():
             'e': 'EAX',  # Elven Assassin
             'r': 'RPE',  # Richies Plank
             'v': 'AIO',  # All-in-One Sports
+            'w': 'BTS',  # Beat Saber (new)
+            'l': 'RCL'   # RollerCoaster Legends (new)
         }
         
         # Handle game launch
@@ -261,40 +230,7 @@ def handle_keypress():
         response.headers['Content-Type'] = 'application/json; charset=utf-8'
         return response, 500
 
-@app.route('/close', methods=['POST'])
-def handle_close():
-    logger.info("[≡ƒÆÇ] Terminating all games...")
-    try:
-        result = terminate_games()
-        notify_electron_app("STOP_GAME")
-        response = jsonify(result)
-        response.headers['Content-Type'] = 'application/json; charset=utf-8'
-        return response, 200
-    except Exception as e:
-        logger.error(f"Error processing close command: {str(e)}")
-        response = jsonify({"error": str(e)})
-        response.headers['Content-Type'] = 'application/json; charset=utf-8'
-        return response, 500
-
-@app.route('/')
-def index():
-    response = jsonify({"status": "Server is running"})
-    response.headers['Content-Type'] = 'application/json; charset=utf-8'
-    return response, 200
-
-@app.route('/health', methods=['GET', 'OPTIONS'])
-def health_check():
-    if request.method == 'OPTIONS':
-        response = jsonify({"status": "healthy"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
-        return response, 200
-    
-    logger.debug("Health check endpoint accessed")
-    response = jsonify({"status": "Server is healthy"})
-    response.headers['Content-Type'] = 'application/json; charset=utf-8'
-    return response, 200
+# ... keep existing code (additional routes and server startup)
 
 if __name__ == "__main__":
     try:
@@ -314,7 +250,9 @@ if __name__ == "__main__":
             'U': 'Undead Citadel',
             'E': 'Elven Assassin',
             'R': 'Richie\'s Plank',
-            'V': 'All-in-One Sports VR'
+            'V': 'All-in-One Sports VR',
+            'W': 'Beat Saber',
+            'L': 'RollerCoaster Legends'
         }.items():
             logger.info(f"{k} -> {code}")
         

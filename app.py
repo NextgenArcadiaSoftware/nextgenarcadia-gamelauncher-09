@@ -1,4 +1,3 @@
-
 import sys
 import codecs
 from flask import Flask, request, jsonify
@@ -38,7 +37,9 @@ GAMES = {
     "UDC": r"C:\Program Files (x86)\Steam\steamapps\common\Undead Citadel\UndeadCitadel.exe",
     "ARS": r"C:\Program Files (x86)\Steam\steamapps\common\Arizona Sunshine\ArizonaSunshine.exe",
     "SBS": r"C:\Program Files (x86)\Steam\steamapps\common\Subside\Subside.exe",
-    "PVR": r"C:\Program Files (x86)\Steam\steamapps\common\Propagation VR\PropagationVR.exe"
+    "PVR": r"C:\Program Files (x86)\Steam\steamapps\common\Propagation VR\PropagationVR.exe",
+    "BTS": r"C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber.exe",
+    "RCL": r"C:\Program Files (x86)\Steam\steamapps\common\RollerCoaster Legends\RollerCoasterLegends.exe"
 }
 
 # Game name mapping for prettier logging and responses
@@ -52,7 +53,9 @@ GAME_NAMES = {
     "UDC": "Undead Citadel",
     "ARS": "Arizona Sunshine",
     "SBS": "Subside",
-    "PVR": "Propagation VR"
+    "PVR": "Propagation VR",
+    "BTS": "Beat Saber",
+    "RCL": "RollerCoaster Legends"
 }
 
 # Track currently running games
@@ -170,6 +173,8 @@ def handle_keypress():
             'e': 'EAX',  # Elven Assassin
             'r': 'RPE',  # Richies Plank
             'v': 'AIO',  # All-in-One Sports
+            'w': 'BTS',  # Beat Saber (new)
+            'l': 'RCL',  # RollerCoaster Legends (new)
         }
         
         # Handle game launch
@@ -260,7 +265,7 @@ if __name__ == '__main__':
     logger.info("\n=== Game Launcher Server ===")
     logger.info("Server Configuration:")
     logger.info("- Debug level logging enabled")
-    logger.info("- Server running on: http://localhost:5002")  // Updated port
+    logger.info("- Server running on: http://localhost:5002")
     logger.info("\nEndpoints:")
     logger.info("- POST /keypress - Send a key press")
     logger.info("- POST /close - Close the current game")
@@ -268,4 +273,4 @@ if __name__ == '__main__':
     logger.info("- POST /stop - Stop the current game")
     logger.info("\nStarting server...")
     
-    app.run(host='localhost', port=5002, debug=True, threaded=True)  // Updated port
+    app.run(host='localhost', port=5002, debug=True, threaded=True)

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -60,6 +59,10 @@ const GAME_KEYS = {
   "w": {
     name: "Beat Saber",
     image: "/lovable-uploads/2f7ba916-4fc9-4136-b3cc-9f1e2ba0be94.png"
+  },
+  "l": {
+    name: "RollerCoaster Legends",
+    image: "/lovable-uploads/ad0b4a73-7182-4cd0-a370-e527f21a9f87.png"
   },
   "z": {
     name: "Close All Games",
