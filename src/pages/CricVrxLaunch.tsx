@@ -15,6 +15,7 @@ const CricVrxLaunch: React.FC = () => {
   const [showRating, setShowRating] = useState(false);
   const [timerDuration, setTimerDuration] = useState(300); // Default 5 minutes
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -60,7 +61,12 @@ const CricVrxLaunch: React.FC = () => {
       });
       
       if (res.ok) {
-        await createGameSession(gameName);
+        const id = await createGameSession(gameName);
+        if (id) {
+          setSessionId(id);
+          console.log(`Created game session with ID: ${id}`);
+        }
+        
         setShowTimer(true);
         
         toast({
@@ -86,7 +92,7 @@ const CricVrxLaunch: React.FC = () => {
     }
   };
 
-  const createGameSession = async (gameName: string) => {
+  const createGameSession = async (gameName: string): Promise<string | null> => {
     try {
       const { data: gameData } = await supabase
         .from('games')
@@ -96,9 +102,10 @@ const CricVrxLaunch: React.FC = () => {
 
       if (!gameData) {
         console.error('Game not found:', gameName);
-        return;
+        return null;
       }
 
+      // Check for any active sessions for this game
       const { data: existingSessions } = await supabase
         .from('game_sessions')
         .select('*')
@@ -107,29 +114,34 @@ const CricVrxLaunch: React.FC = () => {
         .limit(1);
 
       if (existingSessions && existingSessions.length > 0) {
-        console.log('Active session already exists for this game');
-        return;
+        console.log('Active session already exists for this game, ID:', existingSessions[0].id);
+        return existingSessions[0].id;
       }
 
       console.log('Creating new session for game:', gameName);
       
       const durationInMinutes = Math.ceil(timerDuration / 60);
       
-      const { error } = await supabase
+      const { data: newSession, error } = await supabase
         .from('game_sessions')
         .insert({
           game_id: gameData.id,
           duration: durationInMinutes,
           completed: false
-        });
+        })
+        .select('id')
+        .single();
       
       if (error) {
         console.error('Error creating game session:', error);
+        return null;
       } else {
-        console.log('Game session created successfully');
+        console.log('Game session created successfully, ID:', newSession.id);
+        return newSession.id;
       }
     } catch (error) {
       console.error('Error creating game session:', error);
+      return null;
     }
   };
 
@@ -145,6 +157,12 @@ const CricVrxLaunch: React.FC = () => {
       
       if (res.ok) {
         setShowTimer(false);
+        
+        // Mark session as completed
+        if (sessionId) {
+          await completeGameSession(sessionId);
+        }
+        
         setShowRating(true);
         
         toast({
@@ -170,11 +188,74 @@ const CricVrxLaunch: React.FC = () => {
     }
   };
 
+  const completeGameSession = async (id: string) => {
+    try {
+      console.log('Marking session as completed:', id);
+      const { error } = await supabase
+        .from('game_sessions')
+        .update({
+          completed: true,
+          ended_at: new Date().toISOString()
+        })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error completing game session:', error);
+      } else {
+        console.log('Session marked as completed successfully');
+      }
+    } catch (error) {
+      console.error('Error marking session as completed:', error);
+    }
+  };
+
   const handleTimerExit = () => {
     closeGame();
   };
 
-  const handleRatingSubmit = (rating: number) => {
+  const handleRatingSubmit = async (rating: number) => {
+    // Record the rating
+    try {
+      if (sessionId) {
+        // Get the game ID for this session
+        const { data: sessionData } = await supabase
+          .from('game_sessions')
+          .select('game_id')
+          .eq('id', sessionId)
+          .single();
+          
+        if (sessionData && sessionData.game_id) {
+          // Add rating for this game
+          await supabase
+            .from('game_ratings')
+            .insert({
+              game_id: sessionData.game_id,
+              rating
+            });
+          
+          console.log('Rating recorded successfully');
+        }
+      } else {
+        // Fallback to looking up game ID by name
+        const { data: gameData } = await supabase
+          .from('games')
+          .select('id')
+          .eq('title', gameName)
+          .single();
+          
+        if (gameData) {
+          await supabase
+            .from('game_ratings')
+            .insert({
+              game_id: gameData.id,
+              rating
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error recording rating:', error);
+    }
+    
     toast({
       title: "Thank You!",
       description: `You rated ${gameName} ${rating} stars.`,
