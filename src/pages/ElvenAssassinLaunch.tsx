@@ -6,17 +6,20 @@ import { Play, ArrowLeft } from 'lucide-react';
 import { TimerDisplay } from '@/components/game-launch/TimerDisplay';
 import { RatingScreen } from '@/components/game-launch/RatingScreen';
 import { supabase } from '@/integrations/supabase/client';
+import { useRFIDDetection } from '@/hooks/useRFIDDetection';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+
 const ElvenAssassinLaunch: React.FC = () => {
   const [showTimer, setShowTimer] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [timerDuration, setTimerDuration] = useState(300); // Default 5 minutes
   const [loading, setLoading] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const gameName = "Elven Assassin";
+  const { rfidDetected, simulateRFID } = useRFIDDetection();
+
   useEffect(() => {
     const fetchTimerSettings = async () => {
       try {
@@ -39,7 +42,17 @@ const ElvenAssassinLaunch: React.FC = () => {
     };
     fetchTimerSettings();
   }, []);
+
   const launchGame = async () => {
+    if (!rfidDetected) {
+      toast({
+        title: "RFID Required",
+        description: "Please tap your RFID card before launching the game",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/keypress`, {
@@ -76,6 +89,7 @@ const ElvenAssassinLaunch: React.FC = () => {
       setLoading(false);
     }
   };
+
   const createGameSession = async (gameName: string) => {
     try {
       const {
@@ -110,6 +124,7 @@ const ElvenAssassinLaunch: React.FC = () => {
       console.error('Error creating game session:', error);
     }
   };
+
   const closeGame = async () => {
     setLoading(true);
     try {
@@ -144,9 +159,11 @@ const ElvenAssassinLaunch: React.FC = () => {
       setLoading(false);
     }
   };
+
   const handleTimerExit = () => {
     closeGame();
   };
+
   const handleRatingSubmit = (rating: number) => {
     toast({
       title: "Thank You!",
@@ -154,12 +171,15 @@ const ElvenAssassinLaunch: React.FC = () => {
     });
     navigate('/');
   };
+
   if (showRating) {
     return <RatingScreen activeGame={gameName} onSubmit={handleRatingSubmit} />;
   }
+
   if (showTimer) {
     return <TimerDisplay timeLeft={timerDuration} activeGame={gameName} onExit={handleTimerExit} />;
   }
+
   return <div className="container mx-auto p-4 bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] min-h-screen text-white">
       <div className="max-w-4xl mx-auto p-6">
         <div className="flex items-center mb-8">
@@ -193,14 +213,31 @@ const ElvenAssassinLaunch: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex justify-center">
-            <Button onClick={launchGame} disabled={loading} className="text-xl font-semibold py-6 px-12 bg-gradient-to-r from-[#7E69AB] to-[#9b87f5] hover:from-[#9b87f5] hover:to-[#7E69AB] text-white h-auto">
-              <Play className="mr-2 h-6 w-6" />
-              Launch Game
-            </Button>
-          </div>
+          {!rfidDetected ? (
+            <div className="space-y-6 text-center">
+              <div className="animate-pulse text-white/80 text-xl p-4 border border-dashed border-white/30 rounded-lg bg-white/5">
+                Please tap your RFID card to activate game launching
+              </div>
+              
+              <Button 
+                onClick={simulateRFID} 
+                variant="outline" 
+                className="border-white/30 text-white/80 hover:bg-white/10"
+              >
+                Simulate RFID Card
+              </Button>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <Button onClick={launchGame} disabled={loading} className="text-xl font-semibold py-6 px-12 bg-gradient-to-r from-[#7E69AB] to-[#9b87f5] hover:from-[#9b87f5] hover:to-[#7E69AB] text-white h-auto">
+                <Play className="mr-2 h-6 w-6" />
+                Launch Game
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>;
 };
+
 export default ElvenAssassinLaunch;
