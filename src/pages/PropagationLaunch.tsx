@@ -1,41 +1,17 @@
 
-import { useNavigate } from 'react-router-dom';
-import { RFIDCountdown } from '@/components/RFIDCountdown';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useRFIDDetection } from '@/hooks/useRFIDDetection';
+import React from 'react';
+import { GameLaunchTemplate } from '@/components/game-launch/GameLaunchTemplate';
 
-export default function PropagationLaunch() {
-  const navigate = useNavigate();
-  const { rfidDetected, simulateRFID } = useRFIDDetection();
+const PropagationLaunch: React.FC = () => {
+  const gameData = {
+    name: "Propagation VR",
+    key: "g",
+    description: "Fight for survival in a post-apocalyptic world overrun by mutated creatures. Use your reflexes and aim to survive increasingly difficult waves of enemies.",
+    imagePath: "/lovable-uploads/be53debf-e66a-4b71-8445-6a4694a2d95e.png",
+    tags: ["Virtual Reality", "Horror", "Shooter"]
+  };
 
-  return (
-    <div className="relative min-h-screen">
-      <Button 
-        variant="outline" 
-        size="lg"
-        className="fixed top-8 left-8 z-50 bg-white text-black hover:bg-white/90 gap-2 text-xl font-bold shadow-lg border-2"
-        onClick={() => navigate('/')}
-      >
-        <ArrowLeft className="h-6 w-6" />
-        Back to Games
-      </Button>
-      
-      {/* Test button for RFID simulation */}
-      <Button
-        variant="default"
-        size="lg"
-        className="fixed top-8 right-8 z-50 bg-purple-600 hover:bg-purple-700"
-        onClick={simulateRFID}
-      >
-        Simulate RFID Scan
-      </Button>
-      
-      <RFIDCountdown 
-        onExit={() => navigate('/')} 
-        activeGame="Propagation VR"
-        trailer="https://www.youtube.com/watch?v=wwj_5R3eEYM"
-      />
-    </div>
-  );
-}
+  return <GameLaunchTemplate gameData={gameData} />;
+};
+
+export default PropagationLaunch;

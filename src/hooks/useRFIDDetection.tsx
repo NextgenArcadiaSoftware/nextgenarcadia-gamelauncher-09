@@ -20,11 +20,8 @@ export function useRFIDDetection() {
               setRfidDetected(true);
               toast({
                 title: "RFID Detected",
-                description: "Redirecting to game launcher...",
+                description: "You can now launch your game!",
               });
-              
-              // Navigate to game selection flow instead of directly to CPP launcher
-              setTimeout(() => navigate('/game-flow'), 1500);
             }, 500);
             return '';
           }
@@ -42,9 +39,8 @@ export function useRFIDDetection() {
     setRfidDetected(true);
     toast({
       title: "RFID Detected",
-      description: "Redirecting to game launcher...",
+      description: "You can now launch your game!",
     });
-    setTimeout(() => navigate('/game-flow'), 1500);
   };
 
   return { rfidDetected, simulateRFID };

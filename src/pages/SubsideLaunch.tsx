@@ -1,41 +1,17 @@
 
-import { useNavigate } from 'react-router-dom';
-import { RFIDCountdown } from '@/components/RFIDCountdown';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useRFIDDetection } from '@/hooks/useRFIDDetection';
+import React from 'react';
+import { GameLaunchTemplate } from '@/components/game-launch/GameLaunchTemplate';
 
-export default function SubsideLaunch() {
-  const navigate = useNavigate();
-  const { rfidDetected, simulateRFID } = useRFIDDetection();
+const SubsideLaunch: React.FC = () => {
+  const gameData = {
+    name: "Subside",
+    key: "s",
+    description: "Dive into a surreal underwater world where reality shifts and bends around you. Solve puzzles and uncover the mysteries of the deep in this atmospheric experience.",
+    imagePath: "/lovable-uploads/be53debf-e66a-4b71-8445-6a4694a2d95e.png",
+    tags: ["Virtual Reality", "Puzzle", "Atmospheric"]
+  };
 
-  return (
-    <div className="relative min-h-screen">
-      <Button 
-        variant="default" 
-        size="lg"
-        className="fixed top-8 left-8 z-50 bg-white/80 text-black hover:bg-white gap-2 text-xl font-bold shadow-lg border-2"
-        onClick={() => navigate('/')}
-      >
-        <ArrowLeft className="h-6 w-6" />
-        Back to Games
-      </Button>
-      
-      {/* Test button for RFID simulation */}
-      <Button
-        variant="default"
-        size="lg"
-        className="fixed top-8 right-8 z-50 bg-purple-600 hover:bg-purple-700"
-        onClick={simulateRFID}
-      >
-        Simulate RFID Scan
-      </Button>
-      
-      <RFIDCountdown 
-        onExit={() => navigate('/')} 
-        activeGame="Subside"
-        trailer="https://www.youtube.com/watch?v=ZLpIGWcCuYw"
-      />
-    </div>
-  );
-}
+  return <GameLaunchTemplate gameData={gameData} />;
+};
+
+export default SubsideLaunch;

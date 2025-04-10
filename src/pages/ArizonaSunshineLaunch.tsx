@@ -1,41 +1,17 @@
 
-import { useNavigate } from 'react-router-dom';
-import { RFIDCountdown } from '@/components/RFIDCountdown';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useRFIDDetection } from '@/hooks/useRFIDDetection';
+import React from 'react';
+import { GameLaunchTemplate } from '@/components/game-launch/GameLaunchTemplate';
 
-export default function ArizonaSunshineLaunch() {
-  const navigate = useNavigate();
-  const { rfidDetected, simulateRFID } = useRFIDDetection();
+const ArizonaSunshineLaunch: React.FC = () => {
+  const gameData = {
+    name: "Arizona Sunshine II",
+    key: "a",
+    description: "Survive the zombie apocalypse in the scorching heat of Arizona. Explore, scavenge for supplies, and fight off the undead in this immersive VR adventure.",
+    imagePath: "/lovable-uploads/4e2b1ea9-0729-4f84-b8c4-974e08cd8c30.png",
+    tags: ["Virtual Reality", "Zombie", "Survival"]
+  };
 
-  return (
-    <div className="relative min-h-screen">
-      <Button 
-        variant="outline" 
-        size="lg"
-        className="fixed top-8 left-8 z-50 bg-white text-black hover:bg-white/90 gap-2 text-xl font-bold shadow-lg border-2"
-        onClick={() => navigate('/')}
-      >
-        <ArrowLeft className="h-6 w-6" />
-        Back to Games
-      </Button>
-      
-      {/* Test button for RFID simulation */}
-      <Button
-        variant="default"
-        size="lg"
-        className="fixed top-8 right-8 z-50 bg-purple-600 hover:bg-purple-700"
-        onClick={simulateRFID}
-      >
-        Simulate RFID Scan
-      </Button>
-      
-      <RFIDCountdown 
-        onExit={() => navigate('/')} 
-        activeGame="Arizona Sunshine II"
-        trailer="https://www.youtube.com/watch?v=V0IdVLowEqc"
-      />
-    </div>
-  );
-}
+  return <GameLaunchTemplate gameData={gameData} />;
+};
+
+export default ArizonaSunshineLaunch;

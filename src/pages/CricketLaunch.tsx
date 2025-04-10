@@ -1,97 +1,17 @@
 
-import { useNavigate } from 'react-router-dom';
-import { RFIDCountdown } from '@/components/RFIDCountdown';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
-import { useToast } from '@/components/ui/use-toast';
-import { useRFIDDetection } from '@/hooks/useRFIDDetection';
+import React from 'react';
+import { GameLaunchTemplate } from '@/components/game-launch/GameLaunchTemplate';
 
-export default function CricketLaunch() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { rfidDetected, simulateRFID } = useRFIDDetection();
+const CricketLaunch: React.FC = () => {
+  const gameData = {
+    name: "iB Cricket",
+    key: "i",
+    description: "Step onto the pitch in this realistic cricket simulator. Face professional bowlers, perfect your batting technique, and experience the stadium atmosphere.",
+    imagePath: "/lovable-uploads/f8c126a3-87f1-4ea8-b8d8-76597554d0be.png",
+    tags: ["Virtual Reality", "Sports", "Cricket"]
+  };
 
-  // Set up key event listener for X key to end game
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'x') {
-        console.log('X key detected, ending game');
-        toast({
-          title: "Game Ended",
-          description: "Ending current game session..."
-        });
-        
-        // Send close command to C++ server
-        fetch("http://localhost:5001/close", {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json; charset=utf-8",
-            "Accept-Charset": "UTF-8"
-          },
-          body: JSON.stringify({ 
-            command: "CLOSE_GAME",
-            gameName: "iB Cricket" 
-          })
-        })
-        .then(response => {
-          if (!response.ok && response.status !== 204) throw new Error(`HTTP error! status: ${response.status}`);
-          
-          if (response.status === 204) {
-            console.log('Close game command successful');
-            return "Game close command successful";
-          }
-          
-          return response.text().then(text => new TextDecoder('utf-8').decode(new TextEncoder().encode(text)));
-        })
-        .then(data => console.log('Close game response:', data))
-        .catch(error => {
-          console.error('Error closing game:', error);
-          // Even if the C++ server is unavailable, still navigate back
-          setTimeout(() => navigate('/'), 1000);
-        });
-        
-        // Navigate back after short delay
-        setTimeout(() => navigate('/'), 1000);
-      }
-    };
+  return <GameLaunchTemplate gameData={gameData} />;
+};
 
-    // Add global event listener
-    document.addEventListener('keydown', handleKeyDown);
-    
-    // Clean up
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [navigate, toast]);
-
-  return (
-    <div className="relative min-h-screen">
-      <Button 
-        variant="default" 
-        size="lg"
-        className="fixed top-8 left-8 z-50 bg-white/80 text-black hover:bg-white gap-2 text-xl font-bold shadow-lg border-2"
-        onClick={() => navigate('/')}
-      >
-        <ArrowLeft className="h-6 w-6" />
-        Back to Games
-      </Button>
-      
-      {/* Test button for RFID simulation */}
-      <Button
-        variant="default"
-        size="lg"
-        className="fixed top-8 right-8 z-50 bg-purple-600 hover:bg-purple-700"
-        onClick={simulateRFID}
-      >
-        Simulate RFID Scan
-      </Button>
-      
-      <RFIDCountdown 
-        onExit={() => navigate('/')} 
-        activeGame="iB Cricket"
-        trailer="https://www.youtube.com/watch?v=CJElM1v0xBw"
-      />
-    </div>
-  );
-}
+export default CricketLaunch;

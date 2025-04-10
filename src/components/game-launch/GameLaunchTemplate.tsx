@@ -4,13 +4,25 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Play, ArrowLeft } from 'lucide-react';
-import { TimerDisplay } from '@/components/game-launch/TimerDisplay';
-import { RatingScreen } from '@/components/game-launch/RatingScreen';
+import { TimerDisplay } from './TimerDisplay';
+import { RatingScreen } from './RatingScreen';
 import { supabase } from '@/integrations/supabase/client';
+
+interface GameData {
+  name: string;
+  key: string;
+  description: string;
+  imagePath: string;
+  tags: string[];
+}
+
+interface GameLaunchTemplateProps {
+  gameData: GameData;
+}
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
-const FruitNinjaLaunch: React.FC = () => {
+export const GameLaunchTemplate: React.FC<GameLaunchTemplateProps> = ({ gameData }) => {
   const [showTimer, setShowTimer] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [timerDuration, setTimerDuration] = useState(300); // Default 5 minutes
@@ -18,7 +30,30 @@ const FruitNinjaLaunch: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const gameName = "Fruit Ninja VR";
+  const getTagColorClass = (tag: string): string => {
+    const colorMap: Record<string, string> = {
+      "Virtual Reality": "bg-blue-500/30 border-blue-500/30",
+      "Sports": "bg-green-500/30 border-green-500/30",
+      "Cricket": "bg-yellow-500/30 border-yellow-500/30",
+      "Action": "bg-red-500/30 border-red-500/30",
+      "Shooter": "bg-orange-500/30 border-orange-500/30",
+      "Arcade": "bg-pink-500/30 border-pink-500/30",
+      "Fantasy": "bg-indigo-500/30 border-indigo-500/30",
+      "Medieval": "bg-amber-500/30 border-amber-500/30",
+      "Zombie": "bg-lime-500/30 border-lime-500/30",
+      "Horror": "bg-rose-500/30 border-rose-500/30",
+      "Survival": "bg-emerald-500/30 border-emerald-500/30",
+      "Puzzle": "bg-cyan-500/30 border-cyan-500/30",
+      "Atmospheric": "bg-teal-500/30 border-teal-500/30",
+      "Experience": "bg-violet-500/30 border-violet-500/30",
+      "Heights": "bg-fuchsia-500/30 border-fuchsia-500/30",
+      "Simulation": "bg-sky-500/30 border-sky-500/30",
+      "Archery": "bg-emerald-500/30 border-emerald-500/30",
+      "Cyberpunk": "bg-purple-500/30 border-purple-500/30"
+    };
+    
+    return colorMap[tag] || "bg-gray-500/30 border-gray-500/30";
+  };
   
   useEffect(() => {
     const fetchTimerSettings = async () => {
@@ -55,16 +90,16 @@ const FruitNinjaLaunch: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ key: 'f' }),
+        body: JSON.stringify({ key: gameData.key }),
       });
       
       if (res.ok) {
-        await createGameSession(gameName);
+        await createGameSession(gameData.name);
         setShowTimer(true);
         
         toast({
           title: "Game Launched",
-          description: `Successfully launched ${gameName}`,
+          description: `Successfully launched ${gameData.name}`,
         });
       } else {
         toast({
@@ -176,7 +211,7 @@ const FruitNinjaLaunch: React.FC = () => {
   const handleRatingSubmit = (rating: number) => {
     toast({
       title: "Thank You!",
-      description: `You rated ${gameName} ${rating} stars.`,
+      description: `You rated ${gameData.name} ${rating} stars.`,
     });
     
     navigate('/');
@@ -185,7 +220,7 @@ const FruitNinjaLaunch: React.FC = () => {
   if (showRating) {
     return (
       <RatingScreen
-        activeGame={gameName}
+        activeGame={gameData.name}
         onSubmit={handleRatingSubmit}
       />
     );
@@ -195,7 +230,7 @@ const FruitNinjaLaunch: React.FC = () => {
     return (
       <TimerDisplay 
         timeLeft={timerDuration} 
-        activeGame={gameName} 
+        activeGame={gameData.name} 
         onExit={handleTimerExit} 
       />
     );
@@ -214,32 +249,35 @@ const FruitNinjaLaunch: React.FC = () => {
             Back to Library
           </Button>
           <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-[#9b87f5] to-[#D6BCFA] bg-clip-text text-transparent">
-            {gameName}
+            {gameData.name}
           </h1>
         </div>
         
         <div className="glass p-8 rounded-2xl space-y-8 relative overflow-hidden border border-white/20 bg-[#222232]/50 backdrop-blur-xl">
           <div className="text-center">
             <img 
-              src="/lovable-uploads/9b088570-531a-47cf-b176-28bb534ba66f.png" 
-              alt={gameName} 
+              src={gameData.imagePath} 
+              alt={gameData.name} 
               className="rounded-xl mx-auto mb-8 max-h-[300px]"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/placeholder.svg";
+              }}
             />
             
             <p className="text-xl text-white/80 mb-6">
-              Slice your way through juicy fruit with precise sword movements in this VR adaptation of the classic mobile game. Experience the satisfaction of perfect cuts in immersive 3D.
+              {gameData.description}
             </p>
             
-            <div className="flex gap-4 justify-center">
-              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-blue-500/30 backdrop-blur-sm border border-blue-500/30">
-                Virtual Reality
-              </span>
-              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-pink-500/30 backdrop-blur-sm border border-pink-500/30">
-                Arcade
-              </span>
-              <span className="inline-block px-4 py-1 rounded-full text-sm text-white/90 bg-red-500/30 backdrop-blur-sm border border-red-500/30">
-                Action
-              </span>
+            <div className="flex gap-4 justify-center flex-wrap">
+              {gameData.tags.map((tag, index) => (
+                <span 
+                  key={index} 
+                  className={`inline-block px-4 py-1 rounded-full text-sm text-white/90 ${getTagColorClass(tag)} backdrop-blur-sm`}
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
           
@@ -258,5 +296,3 @@ const FruitNinjaLaunch: React.FC = () => {
     </div>
   );
 };
-
-export default FruitNinjaLaunch;
