@@ -23,8 +23,8 @@ export function useRFIDDetection() {
                 description: "Redirecting to game launcher...",
               });
               
-              // Navigate to CppLauncher after short delay
-              setTimeout(() => navigate('/cpp-launcher'), 1500);
+              // Navigate to game selection flow instead of directly to CPP launcher
+              setTimeout(() => navigate('/game-flow'), 1500);
             }, 500);
             return '';
           }
@@ -44,7 +44,7 @@ export function useRFIDDetection() {
       title: "RFID Detected",
       description: "Redirecting to game launcher...",
     });
-    setTimeout(() => navigate('/cpp-launcher'), 1500);
+    setTimeout(() => navigate('/game-flow'), 1500);
   };
 
   return { rfidDetected, simulateRFID };

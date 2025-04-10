@@ -96,7 +96,6 @@ export function RFIDCountdown({
     };
   }, [toast]);
 
-  // Get game descriptions based on the game title
   const getGameDescription = (gameTitle: string | null | undefined): string => {
     if (!gameTitle) return "Experience this exciting VR game!";
     
@@ -118,7 +117,6 @@ export function RFIDCountdown({
     return descriptions[gameTitle] || `Experience the excitement of ${gameTitle} in virtual reality!`;
   };
 
-  // Get game tags based on the game title
   const getGameTags = (gameTitle: string | null | undefined): string[] => {
     if (!gameTitle) return ["VR Game"];
     
@@ -140,7 +138,6 @@ export function RFIDCountdown({
     return tags[gameTitle] || ["Virtual Reality"];
   };
 
-  // Get tag color classes based on tag name
   const getTagColors = (): Record<string, string> => {
     return {
       "Virtual Reality": "bg-blue-500/30 border-blue-500/30",
@@ -163,11 +160,9 @@ export function RFIDCountdown({
     };
   };
 
-  // Get image URL for the game
   const getGameImageUrl = (gameTitle: string | null | undefined): string => {
     if (!gameTitle) return "/placeholder.svg";
     
-    // Custom image mappings
     const customImages: Record<string, string> = {
       "CYBRID": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1636850/capsule_616x353.jpg?t=1742365820",
       "CRICVRX": "/lovable-uploads/f8c126a3-87f1-4ea8-b8d8-76597554d0be.png"
@@ -177,7 +172,6 @@ export function RFIDCountdown({
       return customImages[gameTitle];
     }
     
-    // Try to find a matching image in lovable-uploads
     const formattedTitle = gameTitle.toLowerCase().replace(/\s+/g, '-');
     return `/lovable-uploads/${formattedTitle}.png`;
   };
@@ -310,9 +304,7 @@ export function RFIDCountdown({
       });
     }
     
-    // Record the session
     try {
-      // Get game ID first
       if (activeGame) {
         const { data: gameData } = await supabase
           .from('games')
@@ -324,12 +316,11 @@ export function RFIDCountdown({
           console.log('Creating new session for game:', activeGame);
           sessionRecorded.current = true;
           
-          // Create a new session
           const { error } = await supabase
             .from('game_sessions')
             .insert({
               game_id: gameData.id,
-              duration: Math.ceil((timeLeft || 300) / 60), // Convert seconds to minutes
+              duration: Math.ceil((timeLeft || 300) / 60),
               completed: false
             });
           
@@ -349,13 +340,11 @@ export function RFIDCountdown({
     setLoading(false);
   };
 
-  // Record game session when starting the game
   useEffect(() => {
     const recordGameSession = async () => {
       if (!activeGame || sessionRecorded.current || showGameScreen) return;
       
       try {
-        // Get game ID first
         const { data: gameData } = await supabase
           .from('games')
           .select('id')
@@ -366,12 +355,11 @@ export function RFIDCountdown({
           console.log('Creating new session for game:', activeGame);
           sessionRecorded.current = true;
           
-          // Create a new session
           const { error } = await supabase
             .from('game_sessions')
             .insert({
               game_id: gameData.id,
-              duration: Math.ceil((timeLeft || 300) / 60), // Convert seconds to minutes
+              duration: Math.ceil((timeLeft || 300) / 60),
               completed: false
             });
           
@@ -632,7 +620,6 @@ export function RFIDCountdown({
     
     if (activeGame) {
       try {
-        // Mark session as completed
         const { data: gameData } = await supabase
           .from('games')
           .select('id')
@@ -640,7 +627,6 @@ export function RFIDCountdown({
           .single();
 
         if (gameData) {
-          // Update the latest session for this game as completed
           await supabase
             .from('game_sessions')
             .update({ 
@@ -652,7 +638,6 @@ export function RFIDCountdown({
             .order('started_at', { ascending: false })
             .limit(1);
             
-          // Add rating
           await supabase
             .from('game_ratings')
             .insert({
