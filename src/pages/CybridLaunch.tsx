@@ -6,6 +6,7 @@ import { Play, ArrowLeft } from 'lucide-react';
 import { TimerDisplay } from '@/components/game-launch/TimerDisplay';
 import { RatingScreen } from '@/components/game-launch/RatingScreen';
 import { supabase } from '@/integrations/supabase/client';
+import { useRFIDDetection } from '@/hooks/useRFIDDetection';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 
@@ -16,6 +17,7 @@ const CybridLaunch: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { rfidDetected, simulateRFID } = useRFIDDetection();
   
   const gameName = "CYBRID";
   
@@ -47,6 +49,15 @@ const CybridLaunch: React.FC = () => {
   }, []);
 
   const launchGame = async () => {
+    if (!rfidDetected) {
+      toast({
+        title: "RFID Required",
+        description: "Please tap your RFID card before launching the game",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoading(true);
     try {
       // CYBRID uses the 'y' key
@@ -243,16 +254,32 @@ const CybridLaunch: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex justify-center">
-            <Button
-              onClick={launchGame}
-              disabled={loading}
-              className="text-xl font-semibold py-6 px-12 bg-gradient-to-r from-[#7E69AB] to-[#9b87f5] hover:from-[#9b87f5] hover:to-[#7E69AB] text-white h-auto"
-            >
-              <Play className="mr-2 h-6 w-6" />
-              Launch Game
-            </Button>
-          </div>
+          {!rfidDetected ? (
+            <div className="space-y-6 text-center">
+              <div className="animate-pulse text-white/80 text-xl p-4 border border-dashed border-white/30 rounded-lg bg-white/5">
+                Please tap your RFID card to activate game launching
+              </div>
+              
+              <Button 
+                onClick={simulateRFID} 
+                variant="outline" 
+                className="border-white/30 text-white/80 hover:bg-white/10"
+              >
+                Simulate RFID Card
+              </Button>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <Button
+                onClick={launchGame}
+                disabled={loading}
+                className="text-xl font-semibold py-6 px-12 bg-gradient-to-r from-[#7E69AB] to-[#9b87f5] hover:from-[#9b87f5] hover:to-[#7E69AB] text-white h-auto"
+              >
+                <Play className="mr-2 h-6 w-6" />
+                Launch Game
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
