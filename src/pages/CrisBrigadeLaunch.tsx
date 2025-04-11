@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 const CrisBrigadeLaunch: React.FC = () => {
   const [showTimer, setShowTimer] = useState(false);
   const [showRating, setShowRating] = useState(false);
-  const [timerDuration, setTimerDuration] = useState(300); // Default 5 minutes
+  const [timerDuration, setTimerDuration] = useState(480); // Default 8 minutes
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();

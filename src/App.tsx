@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Routes, Route, Outlet, useNavigate, useLocation } from 'react-router-dom';
 
@@ -27,6 +26,7 @@ import './App.css';
 import { Toaster } from './components/ui/toaster';
 import { Screensaver } from './components/Screensaver';
 import { GameSelectionFlow } from './components/game-launch/GameSelectionFlow';
+import { initializeTimerTo8Minutes } from './lib/update-timer-settings';
 
 const inactivityTimeout = import.meta.env.VITE_SCREENSAVER_TIMEOUT ? parseInt(import.meta.env.VITE_SCREENSAVER_TIMEOUT) : 30000;
 
@@ -49,6 +49,12 @@ function App() {
   };
 
   useEffect(() => {
+    const initSettings = async () => {
+      await initializeTimerTo8Minutes();
+    };
+    
+    initSettings();
+    
     const timer = setTimeout(() => {
       const timeSinceLastInteraction = Date.now() - lastInteraction;
       if (timeSinceLastInteraction >= inactivityTimeout && location.pathname !== '/') {
@@ -56,7 +62,9 @@ function App() {
       }
     }, inactivityTimeout);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [lastInteraction, location.pathname, navigate]);
 
   useEffect(() => {

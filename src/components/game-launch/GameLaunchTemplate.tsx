@@ -26,7 +26,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
 export const GameLaunchTemplate: React.FC<GameLaunchTemplateProps> = ({ gameData }) => {
   const [showTimer, setShowTimer] = useState(false);
   const [showRating, setShowRating] = useState(false);
-  const [timerDuration, setTimerDuration] = useState(300); // Default 5 minutes
+  const [timerDuration, setTimerDuration] = useState(480); // Default 8 minutes
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
