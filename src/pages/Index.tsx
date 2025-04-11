@@ -475,22 +475,6 @@ const Index = () => {
           <div className="flex flex-col space-y-8">
             <div className="glass p-4 flex justify-between items-center rounded-3xl transition-all duration-300">
               <Header />
-              <div className="flex space-x-2">
-                <Button 
-                  variant="outline" 
-                  className="border-white/20 text-white hover:bg-white/10 hover:border-white/30"
-                  onClick={() => navigate('/game-flow')}
-                >
-                  New Game Flow
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-white/20 text-white hover:bg-white/10 hover:border-white/30"
-                  onClick={() => navigate('/cpp-launcher')}
-                >
-                  CPP Launcher
-                </Button>
-              </div>
             </div>
 
             {isLoading ? (
