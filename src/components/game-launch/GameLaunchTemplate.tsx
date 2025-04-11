@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -266,16 +265,6 @@ export const GameLaunchTemplate: React.FC<GameLaunchTemplateProps> = ({ gameData
         
         <div className="glass p-8 rounded-2xl space-y-8 relative overflow-hidden border border-white/20 bg-[#222232]/50 backdrop-blur-xl">
           <div className="text-center">
-            <img 
-              src={gameData.imagePath} 
-              alt={gameData.name} 
-              className="rounded-xl mx-auto mb-8 max-h-[300px]"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "/placeholder.svg";
-              }}
-            />
-            
             <p className="text-xl text-white/80 mb-6">
               {gameData.description}
             </p>

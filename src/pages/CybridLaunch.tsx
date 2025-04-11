@@ -230,13 +230,7 @@ const CybridLaunch: React.FC = () => {
         </div>
         
         <div className="glass p-8 rounded-2xl space-y-8 relative overflow-hidden border border-white/20 bg-[#222232]/50 backdrop-blur-xl">
-          <div className="text-center">
-            <img 
-              src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1636850/capsule_616x353.jpg?t=1742365820" 
-              alt={gameName} 
-              className="rounded-xl mx-auto mb-8 max-h-[300px]"
-            />
-            
+          <div className="text-center">            
             <p className="text-xl text-white/80 mb-6">
               Experience a revolutionary blend of Virtual Reality and Cyberpunk themes in CYBRID. Navigate through neon-lit dystopian environments and engage in high-stakes futuristic combat.
             </p>

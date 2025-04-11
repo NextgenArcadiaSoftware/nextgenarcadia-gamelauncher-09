@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -230,13 +229,7 @@ const CrisBrigadeLaunch: React.FC = () => {
         </div>
         
         <div className="glass p-8 rounded-2xl space-y-8 relative overflow-hidden border border-white/20 bg-[#222232]/50 backdrop-blur-xl">
-          <div className="text-center">
-            <img 
-              src="/lovable-uploads/bb8b5b5b-bf33-4e0c-b9af-a05408636bce.png" 
-              alt={gameName} 
-              className="rounded-xl mx-auto mb-8 max-h-[300px]"
-            />
-            
+          <div className="text-center">            
             <p className="text-xl text-white/80 mb-6">
               Take cover! Engage in high-octane light gun action as you fight against waves of criminals. Fast-paced shooting with arcade-style gameplay.
             </p>

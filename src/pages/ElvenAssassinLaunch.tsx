@@ -193,9 +193,7 @@ const ElvenAssassinLaunch: React.FC = () => {
         </div>
         
         <div className="glass p-8 rounded-2xl space-y-8 relative overflow-hidden border border-white/20 bg-[#222232]/50 backdrop-blur-xl">
-          <div className="text-center">
-            <img alt={gameName} className="rounded-xl mx-auto mb-8 max-h-[300px]" src="/lovable-uploads/b5db6cb0-d7ef-4fdb-a613-f092fc9aeb4d.jpg" />
-            
+          <div className="text-center">            
             <p className="text-xl text-white/80 mb-6">
               Become an elite Elven Archer defending your village from hordes of orcs in this immersive VR archery game. Experience precise bow mechanics and tactical gameplay.
             </p>
